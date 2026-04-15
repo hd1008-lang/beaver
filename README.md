@@ -1,4 +1,6 @@
-# Web Project Scaffolding CLI
+<div align="center"><img width="450" height="450" alt="Image" src="https://github.com/user-attachments/assets/0f41557f-1f93-48a9-85dc-3fd3cc8a5055" /></div>
+
+# Beaver
 
 An interactive CLI tool for scaffolding modern web projects. Select your project type, configure your stack through a guided menu, and get a production-ready project generated on disk with pinned library versions.
 
