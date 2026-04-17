@@ -30,6 +30,11 @@ export const packageJsonTemplate = (cart: ReactViteCore): string => {
     devDeps['@tanstack/router-vite-plugin'] = '1.144.0';
   }
 
+  if (cart.css === 'TAILWIND') {
+    devDeps['@tailwindcss/vite'] = '4.1.3';
+    devDeps['tailwindcss'] = '4.1.3';
+  }
+
   if (cart.linter === 'BIOME') {
     devDeps['@biomejs/biome'] = '1.9.4';
   } else if (cart.linter === 'ESLINT') {

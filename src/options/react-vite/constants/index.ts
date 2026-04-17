@@ -58,6 +58,21 @@ export const REACT_MENU_QUERY: MenuOptions = {
   },
 };
 
+export const REACT_MENU_CSS: MenuOptions = {
+  notUsing: {
+    display: 'Not Using',
+    value: 'NOT_USING',
+    description: 'No CSS framework',
+    disabled: false,
+  },
+  tailwind: {
+    display: 'Tailwind CSS',
+    value: 'TAILWIND',
+    description: 'Tailwind CSS v4.1.3 (Vite plugin, zero-config)',
+    disabled: false,
+  },
+};
+
 export const REACT_MENU_LINTER: MenuOptions = {
   notUsing: {
     display: "Not Using",

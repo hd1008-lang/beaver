@@ -10,6 +10,8 @@ import { rootRouteTemplate, indexRouteTemplate } from './router';
 import { zustandStoreTemplate } from './zustand';
 import { biomeConfigTemplate, eslintConfigTemplate } from './linter';
 import { gitignoreTemplate } from './gitignore';
+import { stylesCssTemplate } from './styles';
+import { getCopilotInstructionFiles } from './copilot-instructions';
 
 export const getFsdFileMap = (cart: ReactViteCore): FileMap => {
   const hasRouter = cart.router === 'TANSTACK_ROUTER';
@@ -23,7 +25,8 @@ export const getFsdFileMap = (cart: ReactViteCore): FileMap => {
     { relativePath: 'tsconfig.node.json', content: tsconfigNodeTemplate() },
     { relativePath: 'index.html',         content: indexHtmlTemplate(cart.projectName) },
     { relativePath: '.gitignore',         content: gitignoreTemplate() },
-    { relativePath: 'src/main.tsx',       content: mainTsxTemplate('FSD') },
+    ...getCopilotInstructionFiles(cart),
+    { relativePath: 'src/main.tsx',       content: mainTsxTemplate(cart) },
     { relativePath: 'src/app/index.tsx',  content: appTsxFsdTemplate(hasRouter, hasQuery) },
     {
       relativePath: 'src/pages/home/ui/HomePage.tsx',
@@ -54,6 +57,10 @@ export const getFsdFileMap = (cart: ReactViteCore): FileMap => {
       relativePath: 'src/shared/lib/store.ts',
       content: zustandStoreTemplate(),
     });
+  }
+
+  if (cart.css === 'TAILWIND') {
+    files.push({ relativePath: 'src/index.css', content: stylesCssTemplate() });
   }
 
   if (cart.linter === 'BIOME') {

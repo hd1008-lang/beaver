@@ -5,6 +5,7 @@ import {
   REACT_MENU_ROUTER,
   REACT_MENU_STATE_MANAGEMENT,
   REACT_MENU_QUERY,
+  REACT_MENU_CSS,
   REACT_MENU_LINTER,
 } from "@src/options/react-vite/constants";
 import { MenuOptions } from "@src/options/react-vite/types";
@@ -76,6 +77,12 @@ export const menuQuery = async (cart: Cart) => {
   );
 };
 
+export const menuCss = async (cart: Cart) => {
+  if (!cart || cart.type !== MENU_OPTIONS_LEVEL_1.ReactVite.value) return;
+
+  cart.css = await selectFromMenu(REACT_MENU_CSS, 'Choose a CSS framework');
+};
+
 export const menuLinter = async (cart: Cart) => {
   if (!cart || cart.type !== MENU_OPTIONS_LEVEL_1.ReactVite.value) return;
 
@@ -92,6 +99,7 @@ export const flowReactVite = async (cart: Cart) => {
   await menuRouter(cart);
   await menuStateManagement(cart);
   await menuQuery(cart);
+  await menuCss(cart);
   await menuLinter(cart);
   const { scaffoldReactVite } = await import("@src/scaffold/react-vite");
   await scaffoldReactVite(cart);

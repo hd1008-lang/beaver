@@ -5,6 +5,7 @@ import {
   REACT_MENU_ROUTER,
   REACT_MENU_STATE_MANAGEMENT,
   REACT_MENU_QUERY,
+  REACT_MENU_CSS,
   REACT_MENU_LINTER,
 } from "@src/options/react-vite/constants";
 
@@ -12,6 +13,7 @@ export type REACT_MENU_LAYOUT_VALUE = (typeof REACT_MENU_LAYOUT)[keyof typeof RE
 export type REACT_MENU_ROUTER_VALUE = (typeof REACT_MENU_ROUTER)[keyof typeof REACT_MENU_ROUTER]["value"];
 export type REACT_MENU_STATE_MANAGEMENT_VALUE = (typeof REACT_MENU_STATE_MANAGEMENT)[keyof typeof REACT_MENU_STATE_MANAGEMENT]["value"];
 export type REACT_MENU_QUERY_VALUE = (typeof REACT_MENU_QUERY)[keyof typeof REACT_MENU_QUERY]["value"];
+export type REACT_MENU_CSS_VALUE = (typeof REACT_MENU_CSS)[keyof typeof REACT_MENU_CSS]["value"];
 export type REACT_MENU_LINTER_VALUE = (typeof REACT_MENU_LINTER)[keyof typeof REACT_MENU_LINTER]["value"];
 
 type EnabledKeys = {
@@ -29,6 +31,7 @@ export interface ReactViteCore {
   router: REACT_MENU_ROUTER_VALUE;
   stateManagement: REACT_MENU_STATE_MANAGEMENT_VALUE;
   query: REACT_MENU_QUERY_VALUE;
+  css: REACT_MENU_CSS_VALUE;
   linter: REACT_MENU_LINTER_VALUE;
 }
 export interface NextJSCore {

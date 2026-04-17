@@ -1,9 +1,9 @@
 import { ReactViteCore } from '@src/types';
 
-const mainTsxFsd = (): string =>
+const mainTsxFsd = (hasTailwind: boolean): string =>
   `import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { App } from './app';
+${hasTailwind ? "import './index.css';\n" : ''}import { App } from './app';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -12,10 +12,10 @@ createRoot(document.getElementById('root')!).render(
 );
 `;
 
-const mainTsxBpr = (): string =>
+const mainTsxBpr = (hasTailwind: boolean): string =>
   `import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import App from './App';
+${hasTailwind ? "import './index.css';\n" : ''}import App from './App';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -24,5 +24,7 @@ createRoot(document.getElementById('root')!).render(
 );
 `;
 
-export const mainTsxTemplate = (layout: ReactViteCore['layout']): string =>
-  layout === 'FSD' ? mainTsxFsd() : mainTsxBpr();
+export const mainTsxTemplate = (cart: ReactViteCore): string => {
+  const hasTailwind = cart.css === 'TAILWIND';
+  return cart.layout === 'FSD' ? mainTsxFsd(hasTailwind) : mainTsxBpr(hasTailwind);
+};

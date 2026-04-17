@@ -95,6 +95,28 @@ Validated to allow only letters, numbers, hyphens, and underscores (`[a-zA-Z0-9_
 
 ---
 
+## Generated Project — Copilot Instructions
+
+Every scaffolded project includes a set of GitHub Copilot custom instructions so that AI-assisted coding inside the project follows the conventions of the chosen stack. The files are layout-aware — the `applyTo` glob patterns and placement rules change between FSD and BPR.
+
+Files emitted in the generated project:
+
+| File | Scope | Emitted when |
+|---|---|---|
+| `.github/copilot-instructions.md` | Repo-wide overview — stack, naming, architecture | Always |
+| `.github/instructions/components.instructions.md` | Component file paths per layout | Always |
+| `.github/instructions/hooks.instructions.md` | Hook file paths per layout | Always |
+| `.github/instructions/tanstack-router.instructions.md` | `src/routes/**/*.tsx` | Router = TanStack Router |
+| `.github/instructions/zustand.instructions.md` | Store file paths per layout | State = Zustand |
+| `.github/instructions/tanstack-query.instructions.md` | API/query file paths per layout | Query = TanStack Query |
+| `.github/instructions/biome.instructions.md` or `eslint.instructions.md` | `**` | Linter ≠ none |
+
+The format follows GitHub's [path-specific custom instructions](https://docs.github.com/en/copilot/how-tos/configure-custom-instructions/add-repository-instructions#creating-path-specific-custom-instructions) spec (`applyTo` frontmatter).
+
+**Rule for contributors:** every new option added to the CLI (new router, new state library, new UI framework, etc.) must ship with its own instruction template in `src/scaffold/react-vite/templates/copilot-instructions.ts`. See [Adding a New Option to React + Vite](#adding-a-new-option-to-react--vite) below.
+
+---
+
 ## Generated Project — Pinned Dependencies
 
 | Package | Version |
@@ -152,6 +174,7 @@ src/
         query.ts                  queryProviderBprTemplate()
         linter.ts                 biomeConfigTemplate(), eslintConfigTemplate()
         gitignore.ts              gitignoreTemplate()
+        copilot-instructions.ts   getCopilotInstructionFiles(cart) — Copilot instruction set
         fsd-layout.ts             getFsdFileMap(cart)
         bpr-layout.ts             getBprFileMap(cart)
   utils/
@@ -177,3 +200,9 @@ src/
 3. Add a `menu<OptionName>` function in `src/options/react-vite/index.ts`
 4. Call it in `flowReactVite`
 5. Update `getFsdFileMap` and `getBprFileMap` to handle the new option
+6. **Add a Copilot instruction template** in `src/scaffold/react-vite/templates/copilot-instructions.ts`:
+   - Write a new template function (e.g. `newOptionTemplate(cart)`) returning a markdown string that starts with an `applyTo` frontmatter block scoped to the right paths for both FSD and BPR (use `FSD_PATHS` / `BPR_PATHS`)
+   - Register it inside `getCopilotInstructionFiles` under a conditional block keyed by the new cart field
+   - If the new option introduces a new kind of file path, extend the `Paths` type and both `FSD_PATHS` / `BPR_PATHS` maps so every path-specific rule stays layout-aware
+
+   This step is mandatory — any user who scaffolds a project with the new option must get a matching Copilot instruction file automatically.

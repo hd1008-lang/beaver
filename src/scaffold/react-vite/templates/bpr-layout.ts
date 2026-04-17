@@ -11,6 +11,8 @@ import { zustandStoreTemplate } from './zustand';
 import { queryProviderBprTemplate, simpleProviderBprTemplate } from './query';
 import { biomeConfigTemplate, eslintConfigTemplate } from './linter';
 import { gitignoreTemplate } from './gitignore';
+import { stylesCssTemplate } from './styles';
+import { getCopilotInstructionFiles } from './copilot-instructions';
 
 export const getBprFileMap = (cart: ReactViteCore): FileMap => {
   const hasRouter = cart.router === 'TANSTACK_ROUTER';
@@ -24,7 +26,8 @@ export const getBprFileMap = (cart: ReactViteCore): FileMap => {
     { relativePath: 'tsconfig.node.json', content: tsconfigNodeTemplate() },
     { relativePath: 'index.html',         content: indexHtmlTemplate(cart.projectName) },
     { relativePath: '.gitignore',         content: gitignoreTemplate() },
-    { relativePath: 'src/main.tsx',       content: mainTsxTemplate('BPR') },
+    ...getCopilotInstructionFiles(cart),
+    { relativePath: 'src/main.tsx',       content: mainTsxTemplate(cart) },
     { relativePath: 'src/App.tsx',        content: appTsxBprTemplate(hasRouter, hasQuery) },
     {
       relativePath: 'src/providers/index.tsx',
@@ -53,6 +56,10 @@ export const getBprFileMap = (cart: ReactViteCore): FileMap => {
       relativePath: 'src/stores/appStore.ts',
       content: zustandStoreTemplate(),
     });
+  }
+
+  if (cart.css === 'TAILWIND') {
+    files.push({ relativePath: 'src/index.css', content: stylesCssTemplate() });
   }
 
   if (cart.linter === 'BIOME') {
