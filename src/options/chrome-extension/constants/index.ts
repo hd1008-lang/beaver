@@ -1,0 +1,67 @@
+import { MenuOptions } from '@src/options/react-vite/types';
+
+export const CHROME_MENU_STATE_MANAGEMENT: MenuOptions = {
+  notUsing: {
+    display: 'Not Using',
+    value: 'NOT_USING',
+    description: 'Not using any state management',
+    disabled: false,
+  },
+  zustand: {
+    display: 'Zustand',
+    value: 'ZUSTAND',
+    description: 'Zustand state management',
+    disabled: false,
+  },
+};
+
+export const CHROME_MENU_QUERY: MenuOptions = {
+  notUsing: {
+    display: 'Not Using',
+    value: 'NOT_USING',
+    description: 'No data fetching library',
+    disabled: false,
+  },
+  tanstackQuery: {
+    display: 'TanStack Query',
+    value: 'TANSTACK_QUERY',
+    description: 'Server state management (v5.74.4)',
+    disabled: false,
+  },
+};
+
+export const CHROME_MENU_CSS: MenuOptions = {
+  notUsing: {
+    display: 'Not Using',
+    value: 'NOT_USING',
+    description: 'No CSS framework',
+    disabled: false,
+  },
+  tailwind: {
+    display: 'Tailwind CSS',
+    value: 'TAILWIND',
+    description: 'Tailwind CSS v4.1.3 (Vite plugin, zero-config)',
+    disabled: false,
+  },
+};
+
+export const CHROME_MENU_LINTER: MenuOptions = {
+  notUsing: {
+    display: 'Not Using',
+    value: 'NOT_USING',
+    description: 'No linter/formatter',
+    disabled: false,
+  },
+  biome: {
+    display: 'Biome',
+    value: 'BIOME',
+    description: 'Fast all-in-one: lint + format (v1.9.4)',
+    disabled: false,
+  },
+  eslint: {
+    display: 'ESLint',
+    value: 'ESLINT',
+    description: 'ESLint v9 (flat config) + typescript-eslint',
+    disabled: false,
+  },
+};

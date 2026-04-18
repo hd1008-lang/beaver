@@ -12,6 +12,7 @@ import { queryProviderBprTemplate, simpleProviderBprTemplate } from './query';
 import { biomeConfigTemplate, eslintConfigTemplate } from './linter';
 import { gitignoreTemplate } from './gitignore';
 import { stylesCssTemplate } from './styles';
+import { viteEnvDtsTemplate } from './vite-env-d-ts';
 import { getCopilotInstructionFiles } from './copilot-instructions';
 
 export const getBprFileMap = (cart: ReactViteCore): FileMap => {
@@ -27,6 +28,7 @@ export const getBprFileMap = (cart: ReactViteCore): FileMap => {
     { relativePath: 'index.html',         content: indexHtmlTemplate(cart.projectName) },
     { relativePath: '.gitignore',         content: gitignoreTemplate() },
     ...getCopilotInstructionFiles(cart),
+    { relativePath: 'src/vite-env.d.ts',  content: viteEnvDtsTemplate() },
     { relativePath: 'src/main.tsx',       content: mainTsxTemplate(cart) },
     { relativePath: 'src/App.tsx',        content: appTsxBprTemplate(hasRouter, hasQuery) },
     {

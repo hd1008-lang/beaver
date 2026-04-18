@@ -1,4 +1,4 @@
-<div align="center"><img width="450" height="450" alt="Image" src="https://github.com/user-attachments/assets/0f41557f-1f93-48a9-85dc-3fd3cc8a5055" /></div>
+<div align="center"><img width="400" height="225" alt="Image" src="https://github.com/user-attachments/assets/d233a5ee-ef86-4f25-adb3-31fe191a08a9" /></div>
 
 # Beaver
 
@@ -44,7 +44,8 @@ npm run build
 | Type | Status |
 |---|---|
 | React + Vite | Available |
-| Next.js | Available |
+| Chrome Extension | Available |
+| Next.js | Upcoming |
 | Nuxt | Upcoming |
 
 ---
@@ -85,7 +86,14 @@ Validated to allow only letters, numbers, hyphens, and underscores (`[a-zA-Z0-9_
 | Not Using | — |
 | TanStack Query | v5.74.4 |
 
-### 6. Linter / Formatter
+### 6. CSS / Styling
+
+| Option | Version |
+|---|---|
+| Not Using | — |
+| Tailwind CSS | v4.1.3 |
+
+### 7. Linter / Formatter
 
 | Option | Version | Notes |
 |---|---|---|

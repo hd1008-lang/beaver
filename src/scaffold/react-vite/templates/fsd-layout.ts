@@ -11,6 +11,7 @@ import { zustandStoreTemplate } from './zustand';
 import { biomeConfigTemplate, eslintConfigTemplate } from './linter';
 import { gitignoreTemplate } from './gitignore';
 import { stylesCssTemplate } from './styles';
+import { viteEnvDtsTemplate } from './vite-env-d-ts';
 import { getCopilotInstructionFiles } from './copilot-instructions';
 
 export const getFsdFileMap = (cart: ReactViteCore): FileMap => {
@@ -26,6 +27,7 @@ export const getFsdFileMap = (cart: ReactViteCore): FileMap => {
     { relativePath: 'index.html',         content: indexHtmlTemplate(cart.projectName) },
     { relativePath: '.gitignore',         content: gitignoreTemplate() },
     ...getCopilotInstructionFiles(cart),
+    { relativePath: 'src/vite-env.d.ts',  content: viteEnvDtsTemplate() },
     { relativePath: 'src/main.tsx',       content: mainTsxTemplate(cart) },
     { relativePath: 'src/app/index.tsx',  content: appTsxFsdTemplate(hasRouter, hasQuery) },
     {

@@ -9,6 +9,12 @@ export const MENU_OPTIONS_LEVEL_1 = {
         display: 'Next.js',
         value: 'NEXTJS',
         description: 'Next 15',
+        disabled: true
+    },
+    ChromeExtension: {
+        display: 'Chrome Extension',
+        value: 'CHROME_EXTENSION',
+        description: 'React 19 + Vite (Manifest v3)',
         disabled: false
     },
     Nuxt: {

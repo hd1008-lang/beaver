@@ -17,7 +17,7 @@ export const menu = async () => {
         {
             name: MENU_OPTIONS_LEVEL_1.Nuxt.display,
             value: MENU_OPTIONS_LEVEL_1.Nuxt.value,
-            disabled: MENU_OPTIONS_LEVEL_1.Nuxt.description,
+            disabled: MENU_OPTIONS_LEVEL_1.Nuxt.description as string,
         },
     ];
 
@@ -30,6 +30,9 @@ export const menu = async () => {
     if(answer === MENU_OPTIONS_LEVEL_1.ReactVite.value) {
         const { flowReactVite } = await import("@src/options/react-vite");
         await flowReactVite(cart);
+    } else if (answer === MENU_OPTIONS_LEVEL_1.ChromeExtension.value) {
+        const { flowChromeExtension } = await import("@src/options/chrome-extension");
+        await flowChromeExtension(cart);
     }
     return cart
 };

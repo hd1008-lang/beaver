@@ -9,12 +9,24 @@ import {
   REACT_MENU_LINTER,
 } from "@src/options/react-vite/constants";
 
+import {
+  CHROME_MENU_STATE_MANAGEMENT,
+  CHROME_MENU_QUERY,
+  CHROME_MENU_CSS,
+  CHROME_MENU_LINTER,
+} from "@src/options/chrome-extension/constants";
+
 export type REACT_MENU_LAYOUT_VALUE = (typeof REACT_MENU_LAYOUT)[keyof typeof REACT_MENU_LAYOUT]["value"];
 export type REACT_MENU_ROUTER_VALUE = (typeof REACT_MENU_ROUTER)[keyof typeof REACT_MENU_ROUTER]["value"];
 export type REACT_MENU_STATE_MANAGEMENT_VALUE = (typeof REACT_MENU_STATE_MANAGEMENT)[keyof typeof REACT_MENU_STATE_MANAGEMENT]["value"];
 export type REACT_MENU_QUERY_VALUE = (typeof REACT_MENU_QUERY)[keyof typeof REACT_MENU_QUERY]["value"];
 export type REACT_MENU_CSS_VALUE = (typeof REACT_MENU_CSS)[keyof typeof REACT_MENU_CSS]["value"];
 export type REACT_MENU_LINTER_VALUE = (typeof REACT_MENU_LINTER)[keyof typeof REACT_MENU_LINTER]["value"];
+
+export type CHROME_MENU_STATE_MANAGEMENT_VALUE = (typeof CHROME_MENU_STATE_MANAGEMENT)[keyof typeof CHROME_MENU_STATE_MANAGEMENT]["value"];
+export type CHROME_MENU_QUERY_VALUE = (typeof CHROME_MENU_QUERY)[keyof typeof CHROME_MENU_QUERY]["value"];
+export type CHROME_MENU_CSS_VALUE = (typeof CHROME_MENU_CSS)[keyof typeof CHROME_MENU_CSS]["value"];
+export type CHROME_MENU_LINTER_VALUE = (typeof CHROME_MENU_LINTER)[keyof typeof CHROME_MENU_LINTER]["value"];
 
 type EnabledKeys = {
   [K in keyof typeof MENU_OPTIONS_LEVEL_1]: (typeof MENU_OPTIONS_LEVEL_1)[K]["disabled"] extends false
@@ -23,7 +35,7 @@ type EnabledKeys = {
 }[keyof typeof MENU_OPTIONS_LEVEL_1];
 export type ProjectType = (typeof MENU_OPTIONS_LEVEL_1)[EnabledKeys]["value"];
 
-export type Cart = ReactViteCore | NextJSCore | null;
+export type Cart = ReactViteCore | NextJSCore | ChromeExtensionCore | null;
 export interface ReactViteCore {
   type: typeof MENU_OPTIONS_LEVEL_1.ReactVite.value;
   projectName: string;
@@ -38,4 +50,12 @@ export interface NextJSCore {
   type: typeof MENU_OPTIONS_LEVEL_1.NextJS.value;
   layout: REACT_MENU_LAYOUT_VALUE;
   version: string;
+}
+export interface ChromeExtensionCore {
+  type: typeof MENU_OPTIONS_LEVEL_1.ChromeExtension.value;
+  projectName: string;
+  stateManagement: CHROME_MENU_STATE_MANAGEMENT_VALUE;
+  query: CHROME_MENU_QUERY_VALUE;
+  css: CHROME_MENU_CSS_VALUE;
+  linter: CHROME_MENU_LINTER_VALUE;
 }
