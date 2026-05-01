@@ -13,28 +13,49 @@ An interactive CLI tool for scaffolding modern web projects. Select your project
 
 ### Installation
 
+**Option 1: Install globally** (recommended for frequent use)
+
 ```bash
-npm install
+npm install -g bver-build
+beaver
+```
+
+**Option 2: Use directly with npx** (no installation needed)
+
+```bash
+npx beaver
 ```
 
 ### Usage
 
-Run interactively in development mode:
+Simply run the command and follow the interactive prompts:
 
 ```bash
-npm run dev
+beaver
 ```
 
-Or build and run the compiled output:
+The CLI will guide you through:
+
+1. **Project Type** — Choose React + Vite or Chrome Extension
+2. **Project Name** — Enter your project directory name
+3. **Configuration** — Select your preferred stack (layout, router, state management, styling, linter)
+
+After answering all prompts, your production-ready project will be generated in the specified directory with:
+
+- All dependencies pinned to stable versions
+- GitHub Copilot custom instructions for your chosen stack
+- Ready to run with `npm install && npm run dev`
+
+---
+
+## Development (Contributing)
+
+To contribute or develop locally:
 
 ```bash
-npm run dev:build
-```
-
-Build for distribution:
-
-```bash
-npm run build
+npm install
+npm run dev           # Run CLI in development mode
+npm run build         # Compile for distribution
 ```
 
 ---
