@@ -23,13 +23,13 @@ const main = async () => {
   const args = process.argv.slice(2);
 
   if (args.includes("--version") || args.includes("-v")) {
-    console.log(`bver-build v${getVersion()}`);
+    console.log(`beaver-build v${getVersion()}`);
     process.exit(0);
   }
 
   if (args.includes("--help") || args.includes("-h")) {
     console.log(`
-bver-build - Interactive CLI for scaffolding modern web projects
+beaver-build - Interactive CLI for scaffolding modern web projects
 
 Usage:
   beaver [options]

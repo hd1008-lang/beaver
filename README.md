@@ -16,7 +16,7 @@ An interactive CLI tool for scaffolding modern web projects. Select your project
 **Option 1: Install globally** (recommended for frequent use)
 
 ```bash
-npm install -g bver-build
+npm install -g beaver-build
 beaver
 ```
 
