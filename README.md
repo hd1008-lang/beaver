@@ -1,4 +1,4 @@
-<div align="center"><img width="400" height="225" alt="Image" src="https://github.com/user-attachments/assets/d233a5ee-ef86-4f25-adb3-31fe191a08a9" /></div>
+<div align="center"><img width="400" height="225" alt="Beaver CLI" src="https://raw.githubusercontent.com/hd1008-lang/beaver/main/media/beaver.gif" /></div>
 
 # Beaver
 
