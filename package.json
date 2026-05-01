@@ -1,6 +1,6 @@
 {
   "name": "bver-build",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Interactive CLI tool for scaffolding modern web projects with production-ready configurations",
   "main": "dist/index.js",
   "type": "module",
