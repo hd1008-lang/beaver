@@ -28,6 +28,14 @@
   ],
   "author": "daihoang",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hd1008-lang/beaver.git"
+  },
+  "homepage": "https://github.com/hd1008-lang/beaver#readme",
+  "bugs": {
+    "url": "https://github.com/hd1008-lang/beaver/issues"
+  },
   "dependencies": {
     "@inquirer/prompts": "^8.1.0",
     "chalk": "^5.6.2",
