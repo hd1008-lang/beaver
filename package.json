@@ -1,11 +1,11 @@
 {
-  "name": "cli",
+  "name": "beaver",
   "version": "1.0.0",
-  "description": "",
+  "description": "Interactive CLI tool for scaffolding modern web projects with production-ready configurations",
   "main": "dist/index.js",
   "type": "module",
   "bin": {
-    "cli": "dist/index.js"
+    "beaver": "dist/index.js"
   },
   "files": [
     "dist"
@@ -16,9 +16,18 @@
     "build": "tsc && tsc-alias",
     "prepublishOnly": "npm run build"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "cli",
+    "scaffolding",
+    "project-generator",
+    "react",
+    "vite",
+    "typescript",
+    "tailwind",
+    "web-development"
+  ],
+  "author": "daihoang",
+  "license": "MIT",
   "dependencies": {
     "@inquirer/prompts": "^8.1.0",
     "chalk": "^5.6.2",
