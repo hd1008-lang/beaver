@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import { menu } from "@src/options";
 import { sleep } from "@src/utils";
 import { typeWriter } from "@src/utils/animation";
