@@ -6,7 +6,7 @@ import { tsconfigTemplate, tsconfigNodeTemplate } from './tsconfig';
 import { indexHtmlTemplate } from './index-html';
 import { mainTsxTemplate } from './main-tsx';
 import { appTsxBprTemplate } from './app-tsx';
-import { rootRouteTemplate, indexRouteTemplate } from './router';
+import { rootRouteTemplate, indexRouteTemplate, routeTreeGenTemplate } from './router';
 import { zustandStoreTemplate } from './zustand';
 import { queryProviderBprTemplate, simpleProviderBprTemplate } from './query';
 import { biomeConfigTemplate, eslintConfigTemplate } from './linter';
@@ -48,8 +48,9 @@ export const getBprFileMap = (cart: ReactViteCore): FileMap => {
 
   if (hasRouter) {
     files.push(
-      { relativePath: 'src/routes/__root.tsx', content: rootRouteTemplate() },
-      { relativePath: 'src/routes/index.tsx',  content: indexRouteTemplate() },
+      { relativePath: 'src/routes/__root.tsx',        content: rootRouteTemplate() },
+      { relativePath: 'src/routes/index.tsx',         content: indexRouteTemplate() },
+      { relativePath: 'src/routes/routeTree.gen.ts',  content: routeTreeGenTemplate() },
     );
   }
 

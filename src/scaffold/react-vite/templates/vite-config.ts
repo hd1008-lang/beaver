@@ -10,7 +10,7 @@ export const viteConfigTemplate = (cart: ReactViteCore): string => {
     : '';
   const tailwindPlugin = hasTailwind ? `\n    tailwindcss(),` : '';
   const tanstackPlugin = hasTanstack
-    ? `\n    TanStackRouterVite({ routesDirectory: './src/routes' }),`
+    ? `\n    TanStackRouterVite({ routesDirectory: './src/routes', generatedRouteTree: './src/routes/routeTree.gen.ts' }),`
     : '';
 
   return `import { defineConfig } from 'vite';
