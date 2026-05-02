@@ -49,18 +49,20 @@ export const Route = createRootRoute({
 });
 `;
 
-export const indexRouteTemplate = (): string =>
+export const indexRouteFsdTemplate = (): string =>
   `import { createFileRoute } from '@tanstack/react-router';
+import { HomePage } from '@/pages/home';
 
 export const Route = createFileRoute('/')({
-  component: Index,
+  component: HomePage,
 });
+`;
 
-function Index() {
-  return (
-    <div>
-      <h3>Welcome Home!</h3>
-    </div>
-  );
-}
+export const indexRouteBprTemplate = (): string =>
+  `import { createFileRoute } from '@tanstack/react-router';
+import Home from '@/pages/Home';
+
+export const Route = createFileRoute('/')({
+  component: Home,
+});
 `;

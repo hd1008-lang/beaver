@@ -6,13 +6,14 @@ import { tsconfigTemplate, tsconfigNodeTemplate } from './tsconfig';
 import { indexHtmlTemplate } from './index-html';
 import { mainTsxTemplate } from './main-tsx';
 import { appTsxFsdTemplate } from './app-tsx';
-import { rootRouteTemplate, indexRouteTemplate, routeTreeGenTemplate } from './router';
+import { rootRouteTemplate, indexRouteFsdTemplate, routeTreeGenTemplate } from './router';
 import { zustandStoreTemplate } from './zustand';
 import { biomeConfigTemplate, eslintConfigTemplate } from './linter';
 import { gitignoreTemplate } from './gitignore';
 import { stylesCssTemplate } from './styles';
 import { viteEnvDtsTemplate } from './vite-env-d-ts';
 import { getCopilotInstructionFiles } from './copilot-instructions';
+import { homePageFsdTemplate } from './home-page';
 
 export const getFsdFileMap = (cart: ReactViteCore): FileMap => {
   const hasRouter = cart.router === 'TANSTACK_ROUTER';
@@ -32,7 +33,7 @@ export const getFsdFileMap = (cart: ReactViteCore): FileMap => {
     { relativePath: 'src/app/index.tsx',  content: appTsxFsdTemplate(hasRouter, hasQuery) },
     {
       relativePath: 'src/pages/home/ui/HomePage.tsx',
-      content: `export const HomePage = () => <div>Home Page</div>;\n`,
+      content: homePageFsdTemplate(cart),
     },
     {
       relativePath: 'src/pages/home/index.ts',
@@ -50,7 +51,7 @@ export const getFsdFileMap = (cart: ReactViteCore): FileMap => {
   if (hasRouter) {
     files.push(
       { relativePath: 'src/routes/__root.tsx',        content: rootRouteTemplate() },
-      { relativePath: 'src/routes/index.tsx',         content: indexRouteTemplate() },
+      { relativePath: 'src/routes/index.tsx',         content: indexRouteFsdTemplate() },
       { relativePath: 'src/routes/routeTree.gen.ts',  content: routeTreeGenTemplate() },
     );
   }

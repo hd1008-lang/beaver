@@ -15,12 +15,14 @@ export const appTsxFsdTemplate = (
     ? `import { RouterProvider, createRouter } from '@tanstack/react-router';\nimport { routeTree } from '../routes/routeTree.gen';\n\nconst router = createRouter({ routeTree });\n\ndeclare module '@tanstack/react-router' {\n  interface Register {\n    router: typeof router;\n  }\n}\n`
     : '';
 
+  const homeImport = !hasRouter ? `import { HomePage } from '@/pages/home';\n` : '';
+
   const inner = hasRouter
     ? `<RouterProvider router={router} />`
-    : `<div>\n      <h1>Hello from FSD</h1>\n    </div>`;
+    : `<HomePage />`;
 
   if (hasQuery) {
-    return `${queryImports}${routerImports}${queryClientDef}
+    return `${queryImports}${homeImport}${routerImports}${queryClientDef}
 export const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
@@ -40,12 +42,9 @@ export const App = () => {
 `;
   }
 
-  return `export const App = () => {
-  return (
-    <div>
-      <h1>Hello from FSD</h1>
-    </div>
-  );
+  return `${homeImport}
+export const App = () => {
+  return <HomePage />;
 };
 `;
 };
@@ -66,15 +65,17 @@ export const appTsxBprTemplate = (
     ? `import { RouterProvider, createRouter } from '@tanstack/react-router';\nimport { routeTree } from './routes/routeTree.gen';\n\nconst router = createRouter({ routeTree });\n\ndeclare module '@tanstack/react-router' {\n  interface Register {\n    router: typeof router;\n  }\n}\n`
     : '';
 
+  const homeImport = !hasRouter ? `import Home from '@/pages/Home';\n` : '';
+
   const inner = hasRouter
     ? `<RouterProvider router={router} />`
-    : `<div>\n      <h1>Hello from Bulletproof React</h1>\n    </div>`;
+    : `<Home />`;
 
   const body = hasQuery
     ? `<AppProvider>\n      ${inner}\n    </AppProvider>`
     : inner;
 
-  return `${providerImport}${routerImports}
+  return `${providerImport}${homeImport}${routerImports}
 const App = () => {
   return (
     ${body}

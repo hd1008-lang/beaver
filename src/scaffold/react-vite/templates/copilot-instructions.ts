@@ -96,6 +96,21 @@ Path-specific rules live in \`.github/instructions/*.instructions.md\` — those
 ## Stack
 ${stackLines}
 
+## Import aliases
+
+Always use path aliases instead of relative imports. Project-wide aliases are pre-configured in \`tsconfig.json\` and \`vite.config.ts\`:
+
+- \`@/*\` → \`./src/\` — use for any import from src, e.g. \`import Button from '@/components/Button'\`.
+- \`@components/*\` → \`./src/components/\` — e.g. \`import { Modal } from '@components/Modal'\`.
+- \`@pages/*\` → \`./src/pages/\` — e.g. \`import { HomePage } from '@pages/Home'\`.
+- \`@utils/*\` → \`./src/utils/\` — e.g. \`import { cn } from '@utils/cn'\`.
+- \`@types/*\` → \`./src/types/\` — e.g. \`import type { User } from '@types/user'\`.
+- \`@hooks/*\` → \`./src/hooks/\` — e.g. \`import { useAuth } from '@hooks/useAuth'\`.
+- \`@layouts/*\` → \`./src/layouts/\` — e.g. \`import { MainLayout } from '@layouts/MainLayout'\`.
+- \`@assets/*\` → \`./src/assets/\` — e.g. \`import logo from '@assets/logo.svg'\`.
+
+**Never use relative imports** like \`import Foo from '../../../components/Foo'\`. Always resolve through an alias.
+
 ## Naming conventions
 
 - **Components**: \`PascalCase.tsx\`, one component per file, named export (no default).
@@ -362,6 +377,104 @@ Use \`:root\` for runtime values (e.g., animation targets, JS-readable tokens) t
   }
 }
 \`\`\`
+
+### Color format — prefer oklch
+
+Tailwind v4's built-in palette uses oklch. Use oklch for custom colors too so tokens stay perceptually uniform and mix cleanly with the defaults:
+
+\`\`\`css
+@theme {
+  --color-primary: oklch(0.55 0.22 265);   /* L  C  H */
+  --color-muted:   oklch(0.62 0.01 265);
+}
+\`\`\`
+
+Avoid hex or \`rgb()\` unless matching a fixed brand value.
+
+### Theme variables are also CSS custom properties
+
+Every \`@theme\` variable is a real CSS custom property — read it anywhere:
+
+\`\`\`css
+.my-element {
+  color: var(--color-primary);   /* same value as the text-primary utility */
+}
+\`\`\`
+
+Use \`var()\` for CSS that Tailwind utilities cannot express (e.g. complex \`box-shadow\`, SVG \`fill\`, pseudo-element content).
+
+### Semantic token pattern — naming convention
+
+Prefer **semantic names** (\`surface\`, \`text-muted\`, \`border\`) over raw scale names (\`slate-900\`, \`zinc-300\`). Semantic names decouple the design from the specific value and make theming easy:
+
+\`\`\`css
+@theme {
+  /* Brand */
+  --color-primary:       oklch(0.55 0.22 265);
+  --color-primary-fg:    oklch(0.97 0.01 265);
+
+  /* Surfaces (dark-first) */
+  --color-surface:       oklch(0.11 0.015 265);
+  --color-surface-muted: oklch(0.16 0.012 265);
+  --color-surface-high:  oklch(0.21 0.010 265);
+
+  /* Text */
+  --color-text:          oklch(0.97 0.000 0);
+  --color-text-muted:    oklch(0.62 0.010 265);
+  --color-text-subtle:   oklch(0.42 0.010 265);
+
+  /* Border */
+  --color-border:        oklch(0.28 0.010 265);
+}
+\`\`\`
+
+This generates: \`bg-primary\`, \`text-primary-fg\`, \`bg-surface\`, \`bg-surface-high/60\`, \`text-text\`, \`text-text-muted\`, \`border-border\`, etc. The \`/opacity\` modifier works on all generated utilities.
+`
+  );
+};
+
+const importsTemplate = (): string => {
+  return (
+    frontmatter('**') +
+    `# Import aliases and code organization
+
+All imports use path aliases defined in \`tsconfig.json\` and \`vite.config.ts\`. This avoids fragile relative paths and makes moving files safe.
+
+## Available aliases
+
+- \`@/*\` → \`./src/\` — shortest form, use when unambiguous
+- \`@components/*\` — components in \`./src/components/\`
+- \`@pages/*\` — pages in \`./src/pages/\`
+- \`@utils/*\` — utilities in \`./src/utils/\`
+- \`@types/*\` — types in \`./src/types/\`
+- \`@hooks/*\` — hooks in \`./src/hooks/\`
+- \`@layouts/*\` — layouts in \`./src/layouts/\`
+- \`@assets/*\` — assets in \`./src/assets/\`
+
+## Rules
+
+- **Never use relative imports** (\`../../../\`). Always use an alias.
+- **Group imports**: standard library, third-party, then project aliases.
+- **Organize by type within a file**: imports, types, constants, then code.
+
+### Examples
+
+✅ Good:
+\`\`\`typescript
+import { ReactNode } from 'react';
+import { QueryClient } from '@tanstack/react-query';
+
+import { Button } from '@components/Button';
+import { useUser } from '@hooks/useUser';
+import type { User } from '@types/user';
+import { cn } from '@utils/cn';
+\`\`\`
+
+❌ Bad:
+\`\`\`typescript
+import { Button } from '../../../components/Button';  // relative path
+import Button from '@components/Button/Button';       // no file extension in alias
+\`\`\`
 `
   );
 };
@@ -403,6 +516,7 @@ export const getCopilotInstructionFiles = (cart: ReactViteCore): FileMap => {
 
   const files: FileMap = [
     { relativePath: '.github/copilot-instructions.md', content: generalTemplate(cart) },
+    { relativePath: '.github/instructions/imports.instructions.md', content: importsTemplate() },
     { relativePath: '.github/instructions/components.instructions.md', content: componentsTemplate(cart) },
     { relativePath: '.github/instructions/hooks.instructions.md', content: hooksTemplate(cart) },
   ];

@@ -6,7 +6,7 @@ import { tsconfigTemplate, tsconfigNodeTemplate } from './tsconfig';
 import { indexHtmlTemplate } from './index-html';
 import { mainTsxTemplate } from './main-tsx';
 import { appTsxBprTemplate } from './app-tsx';
-import { rootRouteTemplate, indexRouteTemplate, routeTreeGenTemplate } from './router';
+import { rootRouteTemplate, indexRouteBprTemplate, routeTreeGenTemplate } from './router';
 import { zustandStoreTemplate } from './zustand';
 import { queryProviderBprTemplate, simpleProviderBprTemplate } from './query';
 import { biomeConfigTemplate, eslintConfigTemplate } from './linter';
@@ -14,6 +14,7 @@ import { gitignoreTemplate } from './gitignore';
 import { stylesCssTemplate } from './styles';
 import { viteEnvDtsTemplate } from './vite-env-d-ts';
 import { getCopilotInstructionFiles } from './copilot-instructions';
+import { homePageBprTemplate } from './home-page';
 
 export const getBprFileMap = (cart: ReactViteCore): FileMap => {
   const hasRouter = cart.router === 'TANSTACK_ROUTER';
@@ -31,6 +32,7 @@ export const getBprFileMap = (cart: ReactViteCore): FileMap => {
     { relativePath: 'src/vite-env.d.ts',  content: viteEnvDtsTemplate() },
     { relativePath: 'src/main.tsx',       content: mainTsxTemplate(cart) },
     { relativePath: 'src/App.tsx',        content: appTsxBprTemplate(hasRouter, hasQuery) },
+    { relativePath: 'src/pages/Home.tsx', content: homePageBprTemplate(cart) },
     {
       relativePath: 'src/providers/index.tsx',
       content: hasQuery ? queryProviderBprTemplate() : simpleProviderBprTemplate(),
@@ -49,7 +51,7 @@ export const getBprFileMap = (cart: ReactViteCore): FileMap => {
   if (hasRouter) {
     files.push(
       { relativePath: 'src/routes/__root.tsx',        content: rootRouteTemplate() },
-      { relativePath: 'src/routes/index.tsx',         content: indexRouteTemplate() },
+      { relativePath: 'src/routes/index.tsx',         content: indexRouteBprTemplate() },
       { relativePath: 'src/routes/routeTree.gen.ts',  content: routeTreeGenTemplate() },
     );
   }
