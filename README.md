@@ -120,7 +120,7 @@ Validated to allow only letters, numbers, hyphens, and underscores (`[a-zA-Z0-9_
 |---|---|---|
 | Not Using | — | — |
 | Biome | v1.9.4 | All-in-one lint + format |
-| ESLint | v9.22.0 | Flat config + typescript-eslint |
+| ESLint | v9.39.4 | Flat config + typescript-eslint |
 
 ---
 
@@ -152,7 +152,7 @@ The format follows GitHub's [path-specific custom instructions](https://docs.git
 |---|---|
 | react | 19.1.0 |
 | react-dom | 19.1.0 |
-| vite | 6.3.1 |
+| vite | 6.4.3 |
 | @vitejs/plugin-react | 4.4.1 |
 | typescript | 5.8.3 |
 | @types/react | 19.1.1 |
@@ -164,8 +164,8 @@ The format follows GitHub's [path-specific custom instructions](https://docs.git
 | @tanstack/react-query | 5.74.4 |
 | @tanstack/react-query-devtools | 5.74.4 |
 | @biomejs/biome | 1.9.4 |
-| eslint | 9.22.0 |
-| @eslint/js | 9.22.0 |
+| eslint | 9.39.4 |
+| @eslint/js | 9.39.4 |
 | typescript-eslint | 8.26.0 |
 | eslint-plugin-react-hooks | 5.2.0 |
 | eslint-plugin-react-refresh | 0.4.19 |

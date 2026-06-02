@@ -109,7 +109,7 @@ The "cart" object accumulates user selections as the CLI progresses through menu
 - `stateManagement` — Zustand v5.0.5 or none
 - `query` — TanStack Query v5.74.4 or none
 - `css` — Tailwind CSS v4.1.3 or none
-- `linter` — Biome v1.9.4, ESLint v9.22.0, or none
+- `linter` — Biome v1.9.4, ESLint v9.39.4, or none
 
 ### Scaffold System (`src/scaffold/`)
 
@@ -153,7 +153,7 @@ src/scaffold/
 |---|---|
 | react | 19.1.0 |
 | react-dom | 19.1.0 |
-| vite | 6.3.1 |
+| vite | 6.4.3 |
 | @vitejs/plugin-react | 4.4.1 |
 | typescript | 5.8.3 |
 | @types/react | 19.1.1 |
@@ -167,8 +167,8 @@ src/scaffold/
 | tailwindcss | 4.1.3 |
 | @tailwindcss/vite | 4.1.3 |
 | @biomejs/biome | 1.9.4 |
-| eslint | 9.22.0 |
-| @eslint/js | 9.22.0 |
+| eslint | 9.39.4 |
+| @eslint/js | 9.39.4 |
 | typescript-eslint | 8.26.0 |
 | eslint-plugin-react-hooks | 5.2.0 |
 | eslint-plugin-react-refresh | 0.4.19 |

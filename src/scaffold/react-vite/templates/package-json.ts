@@ -22,7 +22,7 @@ export const packageJsonTemplate = (cart: ReactViteCore): string => {
     '@types/react-dom': '19.1.1',
     '@vitejs/plugin-react': '4.4.1',
     typescript: '5.8.3',
-    vite: '6.3.1',
+    vite: '6.4.3',
   };
 
   if (cart.router === 'TANSTACK_ROUTER') {
@@ -38,8 +38,8 @@ export const packageJsonTemplate = (cart: ReactViteCore): string => {
   if (cart.linter === 'BIOME') {
     devDeps['@biomejs/biome'] = '1.9.4';
   } else if (cart.linter === 'ESLINT') {
-    devDeps['@eslint/js'] = '9.22.0';
-    devDeps['eslint'] = '9.22.0';
+    devDeps['@eslint/js'] = '9.39.4';
+    devDeps['eslint'] = '9.39.4';
     devDeps['eslint-plugin-react-hooks'] = '5.2.0';
     devDeps['eslint-plugin-react-refresh'] = '0.4.19';
     devDeps['globals'] = '15.15.0';
