@@ -5,6 +5,7 @@ import {
   CHROME_MENU_QUERY,
   CHROME_MENU_CSS,
   CHROME_MENU_LINTER,
+  CHROME_MENU_AI,
 } from '@src/options/chrome-extension/constants';
 import { MenuOptions } from '@src/options/react-vite/types';
 import { Cart } from '@src/types';
@@ -72,6 +73,12 @@ const menuLinter = async (cart: Cart) => {
   cart.linter = await selectFromMenu(CHROME_MENU_LINTER, 'Choose a Linter / Formatter');
 };
 
+const menuAI = async (cart: Cart) => {
+  if (!cart || cart.type !== MENU_OPTIONS_LEVEL_1.ChromeExtension.value) return;
+
+  cart.ai = await selectFromMenu(CHROME_MENU_AI, 'Choose an AI setup');
+};
+
 export const flowChromeExtension = async (cart: Cart) => {
   if (!cart || cart.type !== MENU_OPTIONS_LEVEL_1.ChromeExtension.value) return;
   await menuProjectName(cart);
@@ -79,6 +86,7 @@ export const flowChromeExtension = async (cart: Cart) => {
   await menuQuery(cart);
   await menuCss(cart);
   await menuLinter(cart);
+  await menuAI(cart);
   const { scaffoldChromeExtension } = await import('@src/scaffold/chrome-extension');
   await scaffoldChromeExtension(cart);
 };

@@ -7,6 +7,8 @@ import {
   REACT_MENU_QUERY,
   REACT_MENU_CSS,
   REACT_MENU_LINTER,
+  REACT_MENU_AI,
+  REACT_MENU_TESTING,
 } from "@src/options/react-vite/constants";
 
 import {
@@ -14,6 +16,7 @@ import {
   CHROME_MENU_QUERY,
   CHROME_MENU_CSS,
   CHROME_MENU_LINTER,
+  CHROME_MENU_AI,
 } from "@src/options/chrome-extension/constants";
 
 export type REACT_MENU_LAYOUT_VALUE = (typeof REACT_MENU_LAYOUT)[keyof typeof REACT_MENU_LAYOUT]["value"];
@@ -22,11 +25,14 @@ export type REACT_MENU_STATE_MANAGEMENT_VALUE = (typeof REACT_MENU_STATE_MANAGEM
 export type REACT_MENU_QUERY_VALUE = (typeof REACT_MENU_QUERY)[keyof typeof REACT_MENU_QUERY]["value"];
 export type REACT_MENU_CSS_VALUE = (typeof REACT_MENU_CSS)[keyof typeof REACT_MENU_CSS]["value"];
 export type REACT_MENU_LINTER_VALUE = (typeof REACT_MENU_LINTER)[keyof typeof REACT_MENU_LINTER]["value"];
+export type REACT_MENU_AI_VALUE = (typeof REACT_MENU_AI)[keyof typeof REACT_MENU_AI]["value"];
+export type REACT_MENU_TESTING_VALUE = (typeof REACT_MENU_TESTING)[keyof typeof REACT_MENU_TESTING]["value"];
 
 export type CHROME_MENU_STATE_MANAGEMENT_VALUE = (typeof CHROME_MENU_STATE_MANAGEMENT)[keyof typeof CHROME_MENU_STATE_MANAGEMENT]["value"];
 export type CHROME_MENU_QUERY_VALUE = (typeof CHROME_MENU_QUERY)[keyof typeof CHROME_MENU_QUERY]["value"];
 export type CHROME_MENU_CSS_VALUE = (typeof CHROME_MENU_CSS)[keyof typeof CHROME_MENU_CSS]["value"];
 export type CHROME_MENU_LINTER_VALUE = (typeof CHROME_MENU_LINTER)[keyof typeof CHROME_MENU_LINTER]["value"];
+export type CHROME_MENU_AI_VALUE = (typeof CHROME_MENU_AI)[keyof typeof CHROME_MENU_AI]["value"];
 
 type EnabledKeys = {
   [K in keyof typeof MENU_OPTIONS_LEVEL_1]: (typeof MENU_OPTIONS_LEVEL_1)[K]["disabled"] extends false
@@ -45,6 +51,8 @@ export interface ReactViteCore {
   query: REACT_MENU_QUERY_VALUE;
   css: REACT_MENU_CSS_VALUE;
   linter: REACT_MENU_LINTER_VALUE;
+  testing: REACT_MENU_TESTING_VALUE;
+  ai: REACT_MENU_AI_VALUE;
 }
 export interface NextJSCore {
   type: typeof MENU_OPTIONS_LEVEL_1.NextJS.value;
@@ -58,4 +66,5 @@ export interface ChromeExtensionCore {
   query: CHROME_MENU_QUERY_VALUE;
   css: CHROME_MENU_CSS_VALUE;
   linter: CHROME_MENU_LINTER_VALUE;
+  ai: CHROME_MENU_AI_VALUE;
 }

@@ -94,3 +94,39 @@ export const REACT_MENU_LINTER: MenuOptions = {
   },
 };
 
+export const REACT_MENU_TESTING: MenuOptions = {
+  notUsing: {
+    display: "Not Using",
+    value: "NOT_USING",
+    description: "No testing setup",
+    disabled: false,
+  },
+  vitest: {
+    display: "Vitest",
+    value: "VITEST",
+    description: "Unit + component testing with Vitest v3.2.4 + Testing Library",
+    disabled: false,
+  },
+  playwright: {
+    display: "Playwright",
+    value: "PLAYWRIGHT",
+    description: "End-to-end testing with Playwright v1.52.0",
+    disabled: false,
+  },
+};
+
+export const REACT_MENU_AI: MenuOptions = {
+  notUsing: {
+    display: "Not Using",
+    value: "NOT_USING",
+    description: "No AI setup",
+    disabled: false,
+  },
+  claude: {
+    display: "Claude (Claude Code)",
+    value: "CLAUDE",
+    description: "CLAUDE.md + .claude/ agents + feature docs structure",
+    disabled: false,
+  },
+};
+

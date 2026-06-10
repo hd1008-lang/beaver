@@ -197,3 +197,16 @@ To add a new menu option (e.g., a new UI library choice):
    - Register it inside `getCopilotInstructionFiles` under a conditional block keyed by the new cart field (e.g. `if (cart.uiLibrary === 'SHADCN') files.push(...)`)
    - If the option introduces a new kind of file path not covered by `FSD_PATHS` / `BPR_PATHS`, extend the `Paths` type and both maps so the feature stays layout-aware
    - Also surface the new tool in the general `generalTemplate` stack summary so the repo-wide overview stays accurate
+
+## Claude Harness (this repo)
+
+This repo dogfoods the same Claude Code harness it scaffolds (see `docs/features/claude-harness/claude-harness.spec.en.md`).
+
+| Task / trigger | Agent | Notes |
+|---|---|---|
+| Feature work or bug fix in `src/` (menus, cart, templates) | `dev` | MUST read the relevant `docs/features/` spec before coding |
+| Analyzing requirements, writing/updating feature docs | `docs-writer` | owns `docs/`; rebuilds INDEX.md after every change |
+
+**DOCS-FIRST RULE:** for any request to describe, explain, or modify a documented feature, grep `docs/` frontmatter and read the relevant docs BEFORE opening source files. Start at `docs/INDEX.md`.
+
+Docs commands: `npm run docs:index` (regenerate `docs/INDEX.md`), `npm run docs:lint` (validate frontmatter). Skills: `.claude/skills/beaver-conventions`, `.claude/skills/beaver-docs`.

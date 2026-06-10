@@ -52,6 +52,11 @@ export const packageJsonTemplate = (cart: ChromeExtensionCore): string => {
     scripts['lint'] = 'eslint .';
   }
 
+  if (cart.ai === 'CLAUDE') {
+    scripts['docs:index'] = 'node .claude/scripts/build-docs-index.mjs';
+    scripts['docs:lint'] = 'node .claude/scripts/lint-docs-frontmatter.mjs';
+  }
+
   return JSON.stringify(
     {
       name: cart.projectName,

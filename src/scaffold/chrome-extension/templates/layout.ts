@@ -6,6 +6,7 @@ import { manifestJsonTemplate } from './manifest-json';
 import { buildExtensionScriptTemplate } from './build-extension-script';
 import { mainTsxTemplate } from './main-tsx';
 import { appTsxTemplate } from './app-tsx';
+import { getClaudeFileMap } from './claude-setup';
 import { viteEnvDtsTemplate } from '@src/scaffold/react-vite/templates/vite-env-d-ts';
 import { tsconfigTemplate, tsconfigNodeTemplate } from '@src/scaffold/react-vite/templates/tsconfig';
 import { indexHtmlTemplate } from '@src/scaffold/react-vite/templates/index-html';
@@ -25,6 +26,7 @@ export const getChromeExtensionFileMap = (cart: ChromeExtensionCore): FileMap =>
     { relativePath: 'index.html',            content: indexHtmlTemplate(cart.projectName) },
     { relativePath: 'manifest.json',         content: manifestJsonTemplate(cart.projectName) },
     { relativePath: '.gitignore',            content: gitignoreTemplate() },
+    ...(cart.ai === 'CLAUDE' ? getClaudeFileMap(cart) : []),
     { relativePath: 'scripts/build-extension.js', content: buildExtensionScriptTemplate() },
     { relativePath: 'src/vite-env.d.ts',     content: viteEnvDtsTemplate() },
     { relativePath: 'src/main.tsx',          content: mainTsxTemplate(cart) },
