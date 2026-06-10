@@ -45,6 +45,21 @@ export const CHROME_MENU_CSS: MenuOptions = {
   },
 };
 
+export const CHROME_MENU_AI: MenuOptions = {
+  notUsing: {
+    display: 'Not Using',
+    value: 'NOT_USING',
+    description: 'No AI setup',
+    disabled: false,
+  },
+  claude: {
+    display: 'Claude (Claude Code)',
+    value: 'CLAUDE',
+    description: 'CLAUDE.md + .claude/ agents + feature docs structure',
+    disabled: false,
+  },
+};
+
 export const CHROME_MENU_LINTER: MenuOptions = {
   notUsing: {
     display: 'Not Using',

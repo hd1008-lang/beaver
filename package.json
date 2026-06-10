@@ -14,7 +14,9 @@
     "dev": "tsx src/index.ts",
     "dev:build": "tsup && node ./dist/index.js",
     "build": "tsup",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "docs:index": "node .claude/scripts/build-docs-index.mjs",
+    "docs:lint": "node .claude/scripts/lint-docs-frontmatter.mjs"
   },
   "keywords": [
     "cli",
@@ -27,6 +29,9 @@
     "web-development"
   ],
   "author": "daihoang",
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "license": "MIT",
   "repository": {
     "type": "git",

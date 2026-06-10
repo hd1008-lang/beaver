@@ -1,7 +1,9 @@
 #!/usr/bin/env node
+import { runUpdate } from "@src/commands/update";
 import { menu } from "@src/options";
 import { sleep } from "@src/utils";
 import { typeWriter } from "@src/utils/animation";
+import { checkNodeVersion } from "@src/utils/check-node-version";
 import { getUserName } from "@src/utils/user";
 import chalk from "chalk";
 import { readFileSync } from "fs";
@@ -20,6 +22,8 @@ const getVersion = () => {
 };
 
 const main = async () => {
+  checkNodeVersion();
+
   const args = process.argv.slice(2);
 
   if (args.includes("--version") || args.includes("-v")) {
@@ -32,12 +36,20 @@ const main = async () => {
 beaver-build - Interactive CLI for scaffolding modern web projects
 
 Usage:
-  beaver [options]
+  beaver [command] [options]
+
+Commands:
+  update            Update beaver to the latest version from npm
 
 Options:
   -v, --version     Show version
   -h, --help        Show help
     `);
+    process.exit(0);
+  }
+
+  if (args[0] === "update") {
+    await runUpdate(getVersion());
     process.exit(0);
   }
 

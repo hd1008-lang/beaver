@@ -1,0 +1,36 @@
+{
+  "permissions": {
+    "deny": [
+      "Bash(git push*)",
+      "Bash(git commit*)",
+      "Bash(git merge*)",
+      "Bash(git rebase*)",
+      "Bash(git tag*)",
+      "Bash(git branch -D*)",
+      "Bash(git branch -d*)",
+      "Bash(git reset --hard*)",
+      "Bash(git clean*)"
+    ],
+    "allow": []
+  },
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/scripts/docs-first-reminder.sh\""
+          }
+        ]
+      }
+    ]
+  },
+  "sandbox": {
+    "filesystem": {
+      "denyRead": [
+        "**/.env",
+        "**/.env.*"
+      ]
+    }
+  }
+}

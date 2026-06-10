@@ -46,6 +46,18 @@ export const packageJsonTemplate = (cart: ReactViteCore): string => {
     devDeps['typescript-eslint'] = '8.26.0';
   }
 
+  if (cart.testing === 'VITEST') {
+    devDeps['vitest'] = '3.2.4';
+    devDeps['@vitest/coverage-v8'] = '3.2.4';
+    devDeps['@testing-library/react'] = '16.3.0';
+    devDeps['@testing-library/jest-dom'] = '6.6.3';
+    devDeps['jsdom'] = '26.1.0';
+  }
+
+  if (cart.testing === 'PLAYWRIGHT') {
+    devDeps['@playwright/test'] = '1.52.0';
+  }
+
   const scripts: Record<string, string> = {
     dev: 'vite',
     build: 'tsc && vite build',
@@ -57,6 +69,21 @@ export const packageJsonTemplate = (cart: ReactViteCore): string => {
     scripts['format'] = 'biome format --write .';
   } else if (cart.linter === 'ESLINT') {
     scripts['lint'] = 'eslint .';
+  }
+
+  if (cart.testing === 'VITEST') {
+    scripts['test'] = 'vitest';
+    scripts['test:run'] = 'vitest run';
+    scripts['coverage'] = 'vitest run --coverage';
+  }
+
+  if (cart.testing === 'PLAYWRIGHT') {
+    scripts['test:e2e'] = 'playwright test';
+  }
+
+  if (cart.ai === 'CLAUDE') {
+    scripts['docs:index'] = 'node .claude/scripts/build-docs-index.mjs';
+    scripts['docs:lint'] = 'node .claude/scripts/lint-docs-frontmatter.mjs';
   }
 
   return JSON.stringify(

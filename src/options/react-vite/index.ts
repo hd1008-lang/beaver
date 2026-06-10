@@ -7,6 +7,8 @@ import {
   REACT_MENU_QUERY,
   REACT_MENU_CSS,
   REACT_MENU_LINTER,
+  REACT_MENU_TESTING,
+  REACT_MENU_AI,
 } from "@src/options/react-vite/constants";
 import { MenuOptions } from "@src/options/react-vite/types";
 import { Cart } from "@src/types";
@@ -92,6 +94,18 @@ export const menuLinter = async (cart: Cart) => {
   );
 };
 
+export const menuTesting = async (cart: Cart) => {
+  if (!cart || cart.type !== MENU_OPTIONS_LEVEL_1.ReactVite.value) return;
+
+  cart.testing = await selectFromMenu(REACT_MENU_TESTING, "Choose a Testing setup");
+};
+
+export const menuAI = async (cart: Cart) => {
+  if (!cart || cart.type !== MENU_OPTIONS_LEVEL_1.ReactVite.value) return;
+
+  cart.ai = await selectFromMenu(REACT_MENU_AI, "Choose an AI setup");
+};
+
 export const flowReactVite = async (cart: Cart) => {
   if (!cart || cart.type !== MENU_OPTIONS_LEVEL_1.ReactVite.value) return;
   await menuProjectName(cart);
@@ -101,6 +115,8 @@ export const flowReactVite = async (cart: Cart) => {
   await menuQuery(cart);
   await menuCss(cart);
   await menuLinter(cart);
+  await menuTesting(cart);
+  await menuAI(cart);
   const { scaffoldReactVite } = await import("@src/scaffold/react-vite");
   await scaffoldReactVite(cart);
 };
