@@ -1,6 +1,6 @@
 import { HarnessOnlyCore } from '@src/types';
 import { FileMap } from '@src/scaffold/utils';
-import { buildClaudeFileMap } from '@src/scaffold/shared/claude-setup';
+import { buildClaudeFileMap, claudeHarnessTableTemplate } from '@src/scaffold/shared/claude-setup';
 
 const slug = (cart: HarnessOnlyCore): string =>
   cart.projectName.toLowerCase().replace(/_/g, '-');
@@ -20,6 +20,17 @@ ${cart.productDescription}
 - \`docs/INDEX.md\` — knowledge base index (auto-generated)
 - \`node .claude/scripts/build-docs-index.mjs\` — regenerate index after adding a doc
 - \`node .claude/scripts/lint-docs-frontmatter.mjs\` — validate docs frontmatter
+
+## Agent Routing
+
+| Task / trigger | Agent | Notes |
+|---|---|---|
+${claudeHarnessTableTemplate()}
+| Feature work or bug fix | \`dev\` | MUST read \`docs/INDEX.md\` before modifying a documented feature |
+
+**PARK RULE (anti-loop):** when executing a step/phase, if it fails twice and the cause isn't fixable right now (missing info, needs a user decision, environment, or out-of-scope), STOP — don't retry a third time. Set the phase \`status: blocked\`, file a \`backlog/<id>\` entry (record what was already tried so it isn't repeated), link both ways, tell the user it was parked, and move on to the next workable item. See \`backlog/README.md\`.
+
+Each agent has persistent memory at \`.claude/agent-memory/<agent>/MEMORY.md\` — agents read it on start and append new gotchas. Do NOT use the general assistant for work an agent owns — always delegate.
 `;
 
 const conventionsSkillTemplate = (cart: HarnessOnlyCore): string =>

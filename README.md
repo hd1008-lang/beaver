@@ -4,7 +4,7 @@
 
 An interactive CLI tool for scaffolding modern web projects and applying AI development harness. Select your project type, configure your stack through a guided menu, and get a production-ready project generated on disk with pinned library versions.
 
-**Current Version:** 2.0.1
+**Current Version:** 2.0.2
 
 ## Getting Started
 
