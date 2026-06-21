@@ -23,6 +23,6 @@ Frontmatter-indexed task docs. `INDEX.md` is auto-generated — never hand-edit 
 
 1. Copy `docs/_template.md`, fill ALL frontmatter fields (the index and lint are built from it).
 2. Save to the right directory per the table above.
-3. `npm run docs:index` — regenerates `INDEX.md`.
-4. `npm run docs:lint` — must pass before committing.
+3. `node .claude/scripts/build-docs-index.mjs` — regenerates `INDEX.md`.
+4. `node .claude/scripts/lint-docs-frontmatter.mjs` — must pass before committing.
 5. Commit the doc and `INDEX.md` together.

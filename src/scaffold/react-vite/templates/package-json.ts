@@ -81,11 +81,6 @@ export const packageJsonTemplate = (cart: ReactViteCore): string => {
     scripts['test:e2e'] = 'playwright test';
   }
 
-  if (cart.ai === 'CLAUDE') {
-    scripts['docs:index'] = 'node .claude/scripts/build-docs-index.mjs';
-    scripts['docs:lint'] = 'node .claude/scripts/lint-docs-frontmatter.mjs';
-  }
-
   return JSON.stringify(
     {
       name: cart.projectName,

@@ -23,5 +23,5 @@ description: How to find and write knowledge-base docs for beaver. Use when aske
 3. Keywords: lowercase, prefer real symbol/file names an engineer would grep for.
 4. Rebuild + validate, then commit doc and INDEX.md together:
    ```bash
-   npm run docs:index && npm run docs:lint
+   node .claude/scripts/build-docs-index.mjs && node .claude/scripts/lint-docs-frontmatter.mjs
    ```

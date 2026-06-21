@@ -23,7 +23,7 @@ In-depth companion to CLAUDE.md. CLAUDE.md states the rules; this skill explains
 ## Checklists (follow CLAUDE.md verbatim)
 
 - New project type → CLAUDE.md section "Adding New Project Types".
-- New react-vite menu option → CLAUDE.md section "Adding New Options to React + Vite" — including the mandatory Copilot instruction template step.
+- New react-vite menu option → CLAUDE.md section "Adding New Options to React + Vite".
 - New option that affects the Claude harness → also thread it through the relevant `claude-setup.ts` conditionals (CLAUDE.md content, conventions skill, flow/layer enums, reminder trigger).
 
 ## Verification pattern
@@ -32,6 +32,15 @@ Render templates with a throwaway script instead of running the interactive CLI:
 ```bash
 npx tsx -e "import { getClaudeFileMap } from '@src/scaffold/react-vite/templates/claude-setup'; console.log(getClaudeFileMap({...} as any).map(f => f.relativePath).join('\n'))"
 ```
+
+## Plans & backlog commands
+
+```bash
+# Check plan/backlog health (phase table sync, backlog ID uniqueness, two-way links)
+node .claude/scripts/validate-plans.mjs
+```
+
+Run after updating any phase frontmatter or creating/closing backlog entries.
 
 ## When unsure
 

@@ -61,7 +61,7 @@ The CLI will guide you through:
 After answering all prompts, your production-ready project will be generated in the specified directory with:
 
 - All dependencies pinned to stable versions
-- GitHub Copilot custom instructions for your chosen stack
+- Claude Code harness (CLAUDE.md, agents, docs) when Claude AI setup is selected
 - Ready to run with `npm install && npm run dev`
 
 ---
@@ -79,8 +79,8 @@ npm run dev:build     # Compile TypeScript, resolve aliases, then run
 npm run build         # Compile TypeScript for distribution (outputs to dist/)
 
 # Documentation
-npm run docs:index    # Regenerate docs/INDEX.md
-npm run docs:lint     # Validate frontmatter in docs/
+node .claude/scripts/build-docs-index.mjs    # Regenerate docs/INDEX.md
+node .claude/scripts/lint-docs-frontmatter.mjs     # Validate frontmatter in docs/
 ```
 
 **Publishing:**
@@ -218,28 +218,6 @@ Validated to allow only letters, numbers, hyphens, and underscores (`[a-zA-Z0-9_
 
 ---
 
-## Generated Project — Copilot Instructions
-
-Every scaffolded project includes a set of GitHub Copilot custom instructions so that AI-assisted coding inside the project follows the conventions of the chosen stack. The files are layout-aware — the `applyTo` glob patterns and placement rules change between FSD and BPR.
-
-Files emitted in the generated project:
-
-| File | Scope | Emitted when |
-|---|---|---|
-| `.github/copilot-instructions.md` | Repo-wide overview — stack, naming, architecture | Always |
-| `.github/instructions/components.instructions.md` | Component file paths per layout | Always |
-| `.github/instructions/hooks.instructions.md` | Hook file paths per layout | Always |
-| `.github/instructions/tanstack-router.instructions.md` | `src/routes/**/*.tsx` | Router = TanStack Router |
-| `.github/instructions/zustand.instructions.md` | Store file paths per layout | State = Zustand |
-| `.github/instructions/tanstack-query.instructions.md` | API/query file paths per layout | Query = TanStack Query |
-| `.github/instructions/biome.instructions.md` or `eslint.instructions.md` | `**` | Linter ≠ none |
-
-The format follows GitHub's [path-specific custom instructions](https://docs.github.com/en/copilot/how-tos/configure-custom-instructions/add-repository-instructions#creating-path-specific-custom-instructions) spec (`applyTo` frontmatter).
-
-**Rule for contributors:** every new option added to the CLI (new router, new state library, new UI framework, etc.) must ship with its own instruction template in `src/scaffold/react-vite/templates/copilot-instructions.ts`. See [Adding a New Option to React + Vite](#adding-a-new-option-to-react--vite) below.
-
----
-
 ## Generated Project — Pinned Dependencies
 
 | Package | Version |
@@ -312,7 +290,6 @@ src/
         claude-setup.ts             claudeSetupTemplate()
         home-page.ts                homePageTemplate()
         vite-env-d-ts.ts            viteEnvDtsTemplate()
-        copilot-instructions.ts     getCopilotInstructionFiles(cart)
         fsd-layout.ts               getFsdFileMap(cart)
         bpr-layout.ts               getBprFileMap(cart)
     chrome-extension/
@@ -352,7 +329,6 @@ To enable a new project type (e.g., enable Next.js):
 5. Create `src/scaffold/<project-name>/` with:
    - `index.ts` — scaffold orchestrator (spinner, file writing, cleanup on error)
    - `templates/` — all template functions (package.json, config files, source templates)
-6. Register Copilot instruction templates if AI setup is available
 
 ## Adding a New Option to React + Vite
 
@@ -364,12 +340,6 @@ To add a new menu option (e.g., a new UI library):
 3. Add a `menu<OptionName>` function in `src/options/react-vite/index.ts` using `selectFromMenu`
 4. Call it in `flowReactVite` in the right order (before scaffold step)
 5. Update `getFsdFileMap` and `getBprFileMap` in `src/scaffold/react-vite/templates/` to handle the new option
-6. **Add a Copilot instruction template** in `src/scaffold/react-vite/templates/copilot-instructions.ts`:
-   - Write a new template function (e.g. `uiLibraryTemplate(cart)`) returning markdown with `applyTo` frontmatter scoped to both FSD and BPR paths
-   - Register it inside `getCopilotInstructionFiles` under a conditional block keyed by the new cart field
-   - If the new option introduces new file paths, extend `Paths` type and both `FSD_PATHS` / `BPR_PATHS` maps
-
-   **This step is mandatory** — every scaffolded project with the new option must receive its matching Copilot instruction file.
 
 ## Adding a New Option to Chrome Extension
 
@@ -380,4 +350,3 @@ Same process as React + Vite:
 3. Add a `menu<OptionName>` function in `src/options/chrome-extension/index.ts`
 4. Call it in `flowChromeExtension`
 5. Update templates in `src/scaffold/chrome-extension/templates/` to handle the new option
-6. Add a Copilot instruction template if applicable (Chrome extensions also use AI setup)

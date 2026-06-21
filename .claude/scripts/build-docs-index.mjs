@@ -1,5 +1,5 @@
 // Regenerates docs/INDEX.md from frontmatter. Deterministic (sorted) so diffs stay clean.
-// Run via: npm run docs:index
+// Run via: node .claude/scripts/build-docs-index.mjs
 import { writeFileSync } from 'fs';
 import { join } from 'path';
 import { walkDocs, DOCS_DIR } from './_docs-shared.mjs';

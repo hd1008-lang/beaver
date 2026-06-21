@@ -91,7 +91,7 @@ After selecting "React + Vite" from the project type selection menu, users proce
   - Not Using (no AI setup)
   - Claude (Claude Code) — includes CLAUDE.md, `.claude/` agents directory, and feature docs structure
 - **Result field**: `cart.ai`
-- **Impact**: Conditionally includes Claude-specific files (CLAUDE.md, agents, docs scripts, Copilot instructions)
+- **Impact**: Conditionally includes Claude-specific files (CLAUDE.md, agents, docs scripts)
 
 ## Cart Structure (ReactViteCore)
 
@@ -214,8 +214,6 @@ src/
 - `.claude/skills/` — subdirectory with beaver-conventions and beaver-docs skills
 - `.claude/scripts/` — build-docs-index.mjs and lint-docs-frontmatter.mjs
 - `docs/` — directory structure with _template.md, INDEX.md, features/, architecture/
-- `.github/copilot-instructions.md` — general GitHub Copilot instructions
-- `.github/instructions/` — layout-specific Copilot instruction files (FSD or BPR variant)
 
 ## Pinned Library Versions
 
@@ -290,7 +288,7 @@ Next steps:
 ## Design Decisions
 
 ### Layout-Aware Scaffolding
-FSD and BPR layouts differ in file structure and provider stack. By collecting layout choice early, the feature conditionally emits different file maps and boilerplate (e.g., `src/app/index.tsx` vs `src/App.tsx`, different provider nesting, layout-specific Copilot instructions).
+FSD and BPR layouts differ in file structure and provider stack. By collecting layout choice early, the feature conditionally emits different file maps and boilerplate (e.g., `src/app/index.tsx` vs `src/App.tsx`, different provider nesting).
 
 ### Exact Version Pinning
 All library versions are pinned to specific versions in generated `package.json`. This ensures reproducible scaffolds and avoids dependency drift in new projects.
@@ -301,8 +299,8 @@ When multiple optional libraries are selected (e.g., TanStack Query + TanStack R
 ### Best-Effort Cleanup on Error
 If scaffolding fails partway through file creation, the partial project directory is removed. This prevents leaving corrupted or incomplete projects on disk, but the cleanup is best-effort (suppresses errors) to avoid masking the original failure.
 
-### Copilot Instructions as Feature
-GitHub Copilot custom instructions (`.github/copilot-instructions.md` and layout-specific files) are emitted as part of AI setup. They provide Copilot with naming, placement, and usage conventions so it can assist developers consistently with the project's chosen architecture.
+### AI Setup Integration
+When AI setup is selected during scaffolding, the project includes the Claude Code harness (CLAUDE.md, agents, skills, and docs structure). This enables Claude Code to assist with development tasks within the project's chosen architecture.
 
 ## Related Files
 

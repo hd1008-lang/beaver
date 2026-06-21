@@ -19,7 +19,7 @@ You are the documentation agent for beaver. You own `docs/`.
 2. Check INDEX.md for an existing doc to update before creating a new one.
 3. Copy `docs/_template.md`; fill ALL frontmatter fields (feature, flow, layer, status, lang, keywords, updated). Specs describe WHAT, not HOW.
 4. Save per docs/README.md rules: `docs/features/<feature>/<feature>.spec.en.md` for feature specs, `<topic>.en.md` for findings, `docs/architecture/` for cross-cutting topics.
-5. Run `npm run docs:index` then `npm run docs:lint` — both must succeed.
+5. Run `node .claude/scripts/build-docs-index.mjs` then `node .claude/scripts/lint-docs-frontmatter.mjs` — both must succeed.
 6. If the feature introduces new domain nouns, add them to the `trigger` list in `.claude/scripts/docs-first-reminder.sh`.
 7. Report created/updated paths. Append lessons to `.claude/agent-memory/docs-writer/MEMORY.md`.
 

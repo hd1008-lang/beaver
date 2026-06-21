@@ -1,6 +1,6 @@
 import { ChromeExtensionCore } from '@src/types';
 import { FileMap } from '@src/scaffold/utils';
-import { buildClaudeFileMap } from '@src/scaffold/shared/claude-setup';
+import { buildClaudeFileMap, claudeHarnessTableTemplate } from '@src/scaffold/shared/claude-setup';
 
 // Chrome-extension-specific pieces of the Claude Code harness (CLAUDE.md,
 // conventions skill, dev agent). Project-agnostic pieces (docs tooling,
@@ -58,8 +58,9 @@ const claudeMdTemplate = (cart: ChromeExtensionCore): string => {
     '- `npm run build` — type-check + production build into `dist/`',
     '- `npm run build-extension` — build + copy `manifest.json` into `dist/`; load `dist/` as an unpacked extension at chrome://extensions',
     cart.linter !== 'NOT_USING' ? '- `npm run lint` — lint code' : null,
-    '- `npm run docs:index` — regenerate docs/INDEX.md (run after any doc change)',
-    '- `npm run docs:lint` — validate docs frontmatter (CI-ready, exits non-zero on violation)',
+    '- `node .claude/scripts/build-docs-index.mjs` — regenerate docs/INDEX.md (run after any doc change)',
+    '- `node .claude/scripts/lint-docs-frontmatter.mjs` — validate docs frontmatter (CI-ready, exits non-zero on violation)',
+    '- `node .claude/scripts/validate-plans.mjs` — check plan/backlog consistency (table↔frontmatter, archived, ID gaps, two-way links)',
   ].filter(Boolean);
 
   const keyPatterns: string[] = [
@@ -142,14 +143,16 @@ ${keyPatterns.join('\n\n')}
 
 | Task / trigger | Agent | Notes |
 |---|---|---|
+${claudeHarnessTableTemplate()}
 | Feature work or bug fix in \`src/\` or \`manifest.json\` | \`dev\` | MUST read relevant \`docs/features/\` spec before coding |
-| Analyzing requirements, writing/updating feature docs | \`docs-writer\` | owns \`docs/\`; rebuilds INDEX.md after every change |
+
+**PARK RULE (anti-loop):** when executing a step/phase, if it fails twice and the cause isn't fixable right now (missing info, needs a user decision, environment, or out-of-scope), STOP — don't retry a third time. Set the phase \`status: blocked\`, file a \`backlog/<id>\` entry (record what was already tried so it isn't repeated), link both ways, tell the user it was parked, and move on to the next workable item. See \`backlog/README.md\`.
 
 Each agent has persistent memory at \`.claude/agent-memory/<agent>/MEMORY.md\` — agents read it on start and append new gotchas. Do NOT use the general assistant for work an agent owns — always delegate.
 
 ## Task Documentation Convention
 
-After any non-trivial fix or new pattern: copy \`docs/_template.md\`, fill the frontmatter, save as \`docs/features/<feature>/<topic>.en.md\` (or \`docs/architecture/\` for cross-cutting topics), then run \`npm run docs:index\` and commit the doc together with \`INDEX.md\`. Validate with \`npm run docs:lint\`.
+After any non-trivial fix or new pattern: copy \`docs/_template.md\`, fill the frontmatter, save as \`docs/features/<feature>/<topic>.en.md\` (or \`docs/architecture/\` for cross-cutting topics), then run \`node .claude/scripts/build-docs-index.mjs\` and commit the doc together with \`INDEX.md\`. Validate with \`node .claude/scripts/lint-docs-frontmatter.mjs\`.
 
 ## Further Reading + DOCS-FIRST RULE
 
@@ -287,6 +290,10 @@ If no relevant feature spec exists, STOP and tell the user to run the docs-write
 2. Implement the minimum change that satisfies the spec; match existing style.
 3. Verify (build; for manifest/extension changes run \`npm run build-extension\` and report what to check at chrome://extensions); report results faithfully.
 4. Append newly discovered gotchas/patterns to \`.claude/agent-memory/dev/MEMORY.md\`.
+
+## Park rule (anti-loop)
+
+If a step fails twice and the cause isn't fixable right now (missing info, needs a user decision, environment, out-of-scope), STOP — do not retry a third time. File a \`backlog/<id>\` entry per \`backlog/README.md\` (its **Tried** section must list what already failed so it isn't repeated), set the owning phase \`status: blocked\` and link both ways, tell the user it was parked, then continue with the next workable task. Don't loop, don't silently skip.
 
 ## Hard rules
 

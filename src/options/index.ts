@@ -13,7 +13,7 @@ export const menu = async () => {
             value: MENU_OPTIONS_LEVEL_1[key].value,
             description: MENU_OPTIONS_LEVEL_1[key].description,
         })),
-        new Separator(),
+            new Separator(),
         {
             name: MENU_OPTIONS_LEVEL_1.Nuxt.display,
             value: MENU_OPTIONS_LEVEL_1.Nuxt.value,
@@ -33,6 +33,9 @@ export const menu = async () => {
     } else if (answer === MENU_OPTIONS_LEVEL_1.ChromeExtension.value) {
         const { flowChromeExtension } = await import("@src/options/chrome-extension");
         await flowChromeExtension(cart);
+    } else if (answer === MENU_OPTIONS_LEVEL_1.HarnessOnly.value) {
+        const { flowHarnessOnly } = await import("@src/options/harness-only");
+        await flowHarnessOnly();
     }
     return cart
 };

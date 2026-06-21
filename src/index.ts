@@ -44,12 +44,26 @@ Commands:
 Options:
   -v, --version     Show version
   -h, --help        Show help
+      --ai          Apply AI harness to an existing project
     `);
     process.exit(0);
   }
 
   if (args[0] === "update") {
     await runUpdate(getVersion());
+    process.exit(0);
+  }
+
+  if (args.includes("--ai")) {
+    try {
+      const { flowHarnessOnly } = await import("@src/options/harness-only");
+      await flowHarnessOnly();
+    } catch (err) {
+      if (err instanceof Error) {
+        console.error(chalk.red(err.message));
+      }
+      process.exit(1);
+    }
     process.exit(0);
   }
 

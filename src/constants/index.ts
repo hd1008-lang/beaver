@@ -22,6 +22,12 @@ export const MENU_OPTIONS_LEVEL_1 = {
         value: 'NUXT',
         description: 'Upcoming...',
         disabled: true
+    },
+    HarnessOnly: {
+        display: 'Apply AI Harness',
+        value: 'HARNESS_ONLY',
+        description: 'Add Claude Code harness to an existing project',
+        disabled: false
     }
 } as const;
 

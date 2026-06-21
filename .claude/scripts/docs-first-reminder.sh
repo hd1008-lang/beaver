@@ -6,7 +6,7 @@ payload="$(cat)"
 
 # Keep in sync with feature folders under docs/features/ + key domain nouns.
 # Add an alternation entry whenever a new feature doc is created.
-trigger='scaffold|template|menu|cart|claude-setup|copilot|harness'
+trigger='scaffold|template|menu|cart|claude-setup|harness'
 
 if echo "$payload" | grep -iqE "$trigger"; then
   cat <<'EOF'

@@ -23,6 +23,10 @@ If no relevant feature spec exists, STOP and tell the user to run the docs-write
 3. Verify: `npx tsc --noEmit` + `npm run build`; for template changes, render the affected file map with a throwaway `npx tsx` script and inspect the output. Report results faithfully.
 4. Append newly discovered gotchas/patterns to `.claude/agent-memory/dev/MEMORY.md`.
 
+## Park rule (anti-loop)
+
+If a step fails twice and the cause isn't fixable right now (missing info, needs a user decision, environment, out-of-scope), STOP — do not retry a third time. File a `backlog/<id>` entry per `backlog/README.md` (its **Tried** section must list what already failed so it isn't repeated), set the owning phase `status: blocked` and link both ways, tell the user it was parked, then continue with the next workable task. Don't loop, don't silently skip.
+
 ## Hard rules
 
 - Never commit or push — a human does that.

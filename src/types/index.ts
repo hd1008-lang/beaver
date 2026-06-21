@@ -1,4 +1,5 @@
 import { MENU_OPTIONS_LEVEL_1 } from "@src/constants";
+import { HARNESS_MENU_PROJECT_TYPE } from "@src/options/harness-only/constants";
 
 import {
   REACT_MENU_LAYOUT,
@@ -41,7 +42,16 @@ type EnabledKeys = {
 }[keyof typeof MENU_OPTIONS_LEVEL_1];
 export type ProjectType = (typeof MENU_OPTIONS_LEVEL_1)[EnabledKeys]["value"];
 
-export type Cart = ReactViteCore | NextJSCore | ChromeExtensionCore | null;
+export type HARNESS_PROJECT_TYPE_VALUE = (typeof HARNESS_MENU_PROJECT_TYPE)[keyof typeof HARNESS_MENU_PROJECT_TYPE]["value"];
+
+export interface HarnessOnlyCore {
+  type: typeof MENU_OPTIONS_LEVEL_1.HarnessOnly.value;
+  targetDirectory: string;
+  projectName: string;
+  projectType: HARNESS_PROJECT_TYPE_VALUE;
+}
+
+export type Cart = ReactViteCore | NextJSCore | ChromeExtensionCore | HarnessOnlyCore | null;
 export interface ReactViteCore {
   type: typeof MENU_OPTIONS_LEVEL_1.ReactVite.value;
   projectName: string;
