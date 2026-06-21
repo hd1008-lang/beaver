@@ -4,7 +4,7 @@
 
 An interactive CLI tool for scaffolding modern web projects and applying AI development harness. Select your project type, configure your stack through a guided menu, and get a production-ready project generated on disk with pinned library versions.
 
-**Current Version:** 2.0.0
+**Current Version:** 2.0.1
 
 ## Getting Started
 
@@ -156,14 +156,20 @@ Validated to allow only letters, numbers, hyphens, and underscores (`[a-zA-Z0-9_
 | Not Using | — |
 | Claude (Claude Code) | CLAUDE.md + .claude/ agents + feature docs |
 
-### 8. Testing
+### 8. Project Description
+
+| Prompt | Notes |
+|---|---|
+| Describe your project (one line) | Optional — appears when Claude AI setup is selected |
+
+### 9. Testing
 
 | Option | Description |
 |---|---|
 | Not Using | — |
 | Setup Testing Base | Vitest + React Testing Library configuration |
 
-### 9. Linter / Formatter
+### 10. Linter / Formatter
 
 | Option | Version | Notes |
 |---|---|---|
@@ -209,7 +215,13 @@ Validated to allow only letters, numbers, hyphens, and underscores (`[a-zA-Z0-9_
 | Not Using | — |
 | Claude (Claude Code) | CLAUDE.md + .claude/ agents + feature docs |
 
-### 6. Linter / Formatter
+### 6. Project Description
+
+| Prompt | Notes |
+|---|---|
+| Describe your project (one line) | Optional — appears when Claude AI setup is selected |
+
+### 7. Linter / Formatter
 
 | Option | Version | Notes |
 |---|---|---|

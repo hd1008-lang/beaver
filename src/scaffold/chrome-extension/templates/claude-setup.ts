@@ -96,6 +96,8 @@ useQuery({ queryKey: todoKeys.detail(id), queryFn: () => fetchTodo(id) });
 
 ## Project Overview
 
+${cart.productDescription}
+
 ${stack.map((s) => `- ${s}`).join('\n')}
 
 This is a **popup-only MV3 extension**: \`index.html\` → \`src/main.tsx\` → \`src/App.tsx\` is the popup root. No background service worker or content scripts are configured — adding one requires registering it in \`manifest.json\` AND adding a Rollup input in \`vite.config.ts\`.
@@ -311,6 +313,7 @@ export const getClaudeFileMap = (cart: ChromeExtensionCore): FileMap =>
   buildClaudeFileMap({
     projectName: cart.projectName,
     slug: projectSlug(cart),
+    productDescription: cart.productDescription,
     flowEnum: flowEnum(cart),
     layerEnum: layerEnum(cart),
     reminderTrigger: reminderTrigger(cart),

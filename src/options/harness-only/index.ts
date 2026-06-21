@@ -70,12 +70,26 @@ const menuProjectType = async (cart: Cart): Promise<void> => {
   );
 };
 
+const menuProductDescription = async (cart: Cart): Promise<void> => {
+  if (!cart || cart.type !== MENU_OPTIONS_LEVEL_1.HarnessOnly.value) return;
+
+  (cart as HarnessOnlyCore).productDescription = await input({
+    message: chalk.whiteBright("Describe your project (one line):"),
+    validate: (value) => {
+      if (!value.trim()) return "Description cannot be empty";
+      return true;
+    },
+    transformer: (value) => value.trim(),
+  });
+};
+
 export const flowHarnessOnly = async (): Promise<void> => {
   const cart: Cart = { type: MENU_OPTIONS_LEVEL_1.HarnessOnly.value } as HarnessOnlyCore;
 
   await menuTargetDirectory(cart);
   await menuProjectName(cart);
   await menuProjectType(cart);
+  await menuProductDescription(cart);
 
   const { scaffoldHarnessOnly } = await import("@src/scaffold/harness-only");
   await scaffoldHarnessOnly(cart);

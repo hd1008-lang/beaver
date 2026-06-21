@@ -79,6 +79,19 @@ const menuAI = async (cart: Cart) => {
   cart.ai = await selectFromMenu(CHROME_MENU_AI, 'Choose an AI setup');
 };
 
+const menuProductDescription = async (cart: Cart) => {
+  if (!cart || cart.type !== MENU_OPTIONS_LEVEL_1.ChromeExtension.value) return;
+
+  cart.productDescription = await input({
+    message: chalk.whiteBright('Describe your project (one line):'),
+    validate: (value) => {
+      if (!value.trim()) return 'Description cannot be empty';
+      return true;
+    },
+    transformer: (value) => value.trim(),
+  });
+};
+
 export const flowChromeExtension = async (cart: Cart) => {
   if (!cart || cart.type !== MENU_OPTIONS_LEVEL_1.ChromeExtension.value) return;
   await menuProjectName(cart);
@@ -87,6 +100,9 @@ export const flowChromeExtension = async (cart: Cart) => {
   await menuCss(cart);
   await menuLinter(cart);
   await menuAI(cart);
+  if (cart.ai !== CHROME_MENU_AI.notUsing.value) {
+    await menuProductDescription(cart);
+  }
   const { scaffoldChromeExtension } = await import('@src/scaffold/chrome-extension');
   await scaffoldChromeExtension(cart);
 };

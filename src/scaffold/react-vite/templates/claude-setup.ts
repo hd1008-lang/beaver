@@ -166,6 +166,8 @@ Every test file has a paired \`test/specs/.../<name>.spec.md\` describing WHAT i
 
 ## Project Overview
 
+${cart.productDescription}
+
 ${stack.map((s) => `- ${s}`).join('\n')}
 
 Architecture: **${isFsd ? 'Feature Slice Design (FSD)' : 'Bulletproof React (BPR)'}**. Reference implementation: \`src/pages/home${isFsd ? '/' : '.tsx'}\` — consult it before generating new pages. Verify actual directory names with \`ls\` before writing paths.
@@ -451,6 +453,7 @@ export const getClaudeFileMap = (cart: ReactViteCore): FileMap => {
   return buildClaudeFileMap({
     projectName: cart.projectName,
     slug: projectSlug(cart),
+    productDescription: cart.productDescription,
     flowEnum: flowEnum(cart),
     layerEnum: layerEnum(cart),
     reminderTrigger: reminderTrigger(cart),

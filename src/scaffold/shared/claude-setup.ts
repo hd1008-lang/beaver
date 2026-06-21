@@ -94,6 +94,7 @@ export const LANG_ENUM = ['en', 'vi'];
 export interface ClaudeHarnessParams {
   projectName: string;
   slug: string;
+  productDescription: string;
   flowEnum: string[];
   layerEnum: string[];
   reminderTrigger: string;

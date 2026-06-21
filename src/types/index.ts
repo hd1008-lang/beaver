@@ -49,6 +49,7 @@ export interface HarnessOnlyCore {
   targetDirectory: string;
   projectName: string;
   projectType: HARNESS_PROJECT_TYPE_VALUE;
+  productDescription: string;
 }
 
 export type Cart = ReactViteCore | NextJSCore | ChromeExtensionCore | HarnessOnlyCore | null;
@@ -63,6 +64,7 @@ export interface ReactViteCore {
   linter: REACT_MENU_LINTER_VALUE;
   testing: REACT_MENU_TESTING_VALUE;
   ai: REACT_MENU_AI_VALUE;
+  productDescription: string;
 }
 export interface NextJSCore {
   type: typeof MENU_OPTIONS_LEVEL_1.NextJS.value;
@@ -77,4 +79,5 @@ export interface ChromeExtensionCore {
   css: CHROME_MENU_CSS_VALUE;
   linter: CHROME_MENU_LINTER_VALUE;
   ai: CHROME_MENU_AI_VALUE;
+  productDescription: string;
 }

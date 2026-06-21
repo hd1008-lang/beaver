@@ -106,6 +106,19 @@ export const menuAI = async (cart: Cart) => {
   cart.ai = await selectFromMenu(REACT_MENU_AI, "Choose an AI setup");
 };
 
+const menuProductDescription = async (cart: Cart) => {
+  if (!cart || cart.type !== MENU_OPTIONS_LEVEL_1.ReactVite.value) return;
+
+  cart.productDescription = await input({
+    message: chalk.whiteBright("Describe your project (one line):"),
+    validate: (value) => {
+      if (!value.trim()) return "Description cannot be empty";
+      return true;
+    },
+    transformer: (value) => value.trim(),
+  });
+};
+
 export const flowReactVite = async (cart: Cart) => {
   if (!cart || cart.type !== MENU_OPTIONS_LEVEL_1.ReactVite.value) return;
   await menuProjectName(cart);
@@ -117,6 +130,9 @@ export const flowReactVite = async (cart: Cart) => {
   await menuLinter(cart);
   await menuTesting(cart);
   await menuAI(cart);
+  if (cart.ai !== REACT_MENU_AI.notUsing.value) {
+    await menuProductDescription(cart);
+  }
   const { scaffoldReactVite } = await import("@src/scaffold/react-vite");
   await scaffoldReactVite(cart);
 };

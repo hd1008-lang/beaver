@@ -11,6 +11,10 @@ const claudeMdTemplate = (cart: HarnessOnlyCore): string =>
 > This project uses a Claude Code harness for AI-assisted development.
 > Run \`claude /init\` to auto-generate a detailed CLAUDE.md tailored to this codebase.
 
+## Project Overview
+
+${cart.productDescription}
+
 ## Docs
 
 - \`docs/INDEX.md\` — knowledge base index (auto-generated)
@@ -86,6 +90,7 @@ export const getGenericHarnessFileMap = (cart: HarnessOnlyCore): FileMap =>
   buildClaudeFileMap({
     projectName: cart.projectName,
     slug: slug(cart),
+    productDescription: cart.productDescription,
     flowEnum: ['ui', 'data', 'infra', '_meta'],
     layerEnum: ['src', '_cross'],
     reminderTrigger: 'home',
