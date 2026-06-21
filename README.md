@@ -2,9 +2,9 @@
 
 # Beaver
 
-An interactive CLI tool for scaffolding modern web projects. Select your project type, configure your stack through a guided menu, and get a production-ready project generated on disk with pinned library versions.
+An interactive CLI tool for scaffolding modern web projects and applying AI development harness. Select your project type, configure your stack through a guided menu, and get a production-ready project generated on disk with pinned library versions.
 
-**Current Version:** 1.0.7
+**Current Version:** 2.0.0
 
 ## Getting Started
 
@@ -100,6 +100,7 @@ npm publish                      # Publishes to npm (runs build automatically)
 |---|---|---|
 | React + Vite | React 19 + Vite with comprehensive tooling options | ✅ Available |
 | Chrome Extension | React 19 + Vite for Chrome Manifest v3 extensions | ✅ Available |
+| Apply AI Harness | Add Claude Code harness to an existing project | ✅ Available |
 | Next.js | Next 15 with app router and modern features | 🔄 Upcoming |
 | Nuxt | Nuxt 4 with Vue 3 composition API | 🔄 Upcoming |
 
@@ -218,6 +219,24 @@ Validated to allow only letters, numbers, hyphens, and underscores (`[a-zA-Z0-9_
 
 ---
 
+## Apply AI Harness
+
+Add Claude Code harness setup to an existing project. This creates CLAUDE.md, .claude/ agents, and feature documentation for AI-assisted development.
+
+The CLI guides you through:
+
+### 1. Project Type
+
+| Option | Description |
+|---|---|
+| React + Vite | For React + Vite projects |
+| Chrome Extension | For Chrome Manifest v3 extensions |
+| Generic Project | For any other project type |
+
+This generates appropriate skeleton files and agent setup based on your project type.
+
+---
+
 ## Generated Project — Pinned Dependencies
 
 | Package | Version |
@@ -253,8 +272,8 @@ Validated to allow only letters, numbers, hyphens, and underscores (`[a-zA-Z0-9_
 ```
 src/
   index.ts                          Entry point — greeting, menu, error handling
-  types/index.ts                    Cart, ProjectType, ReactViteCore, ChromeExtensionCore, NextJSCore
-  constants/index.ts                Top-level menu options (React+Vite, Chrome Extension, Next.js, Nuxt)
+  types/index.ts                    Cart, ProjectType, ReactViteCore, ChromeExtensionCore, HarnessOnlyCore
+  constants/index.ts                Top-level menu options (React+Vite, Chrome Extension, Apply AI Harness, Next.js, Nuxt)
   commands/
     update.ts                       runUpdate() — check and install latest version from npm
   options/
@@ -266,6 +285,9 @@ src/
     chrome-extension/
       index.ts                      Chrome Extension menu flow
       constants/index.ts            Menu option definitions (state, query, CSS, AI, linter)
+    harness-only/
+      index.ts                      Apply AI Harness menu flow
+      constants/index.ts            Menu option definitions (project type selection)
   scaffold/
     errors.ts                       ScaffoldError, isNodeError
     utils.ts                        FileMap, dirExists(), writeProjectFile()
@@ -307,6 +329,12 @@ src/
         gitignore.ts                gitignoreTemplate()
         claude-setup.ts             claudeSetupTemplate()
         build-extension-script.ts   buildExtensionScriptTemplate()
+    harness-only/
+      index.ts                      Scaffold orchestrator for AI harness setup
+      templates/
+        generic-skeleton.ts         Generic project skeleton
+        react-vite-skeleton.ts      React + Vite skeleton
+        chrome-extension-skeleton.ts Chrome Extension skeleton
   utils/
     animation.ts                    typeWriter effect
     user.ts                         getUserName() from git config
@@ -350,3 +378,12 @@ Same process as React + Vite:
 3. Add a `menu<OptionName>` function in `src/options/chrome-extension/index.ts`
 4. Call it in `flowChromeExtension`
 5. Update templates in `src/scaffold/chrome-extension/templates/` to handle the new option
+
+## Adding Support for New Project Types in Apply AI Harness
+
+To add support for a new project type in Apply AI Harness:
+
+1. Create a new skeleton template in `src/scaffold/harness-only/templates/<project-type>-skeleton.ts`
+2. Update `src/options/harness-only/constants/index.ts` to include the new project type
+3. Update `src/options/harness-only/index.ts` to handle the new type in the menu flow
+4. Add the skeleton template to the harness scaffold orchestrator
