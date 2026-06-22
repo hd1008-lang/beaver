@@ -1,7 +1,7 @@
 // Mechanically checks derived invariants between the AGENTS registry, emitted
 // agent .md files, and the guard. Generated from the AGENTS registry at scaffold
 // time — do not edit by hand.
-// Run via: node .claude/scripts/validate-structure.mjs
+// Run via: node scripts/validate-structure.mjs
 import { readdirSync, readFileSync } from 'fs';
 import { join } from 'path';
 

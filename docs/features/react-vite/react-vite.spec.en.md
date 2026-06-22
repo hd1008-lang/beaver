@@ -212,7 +212,7 @@ src/
 - `CLAUDE.md` — codebase documentation and behavioral guidelines
 - `.claude/agents/` — subdirectory with dev and docs-writer agents
 - `.claude/skills/` — subdirectory with beaver-conventions and beaver-docs skills
-- `.claude/scripts/` — build-docs-index.mjs and lint-docs-frontmatter.mjs
+- `scripts/` — build-docs-index.mjs and lint-docs-frontmatter.mjs (harness-neutral shared scripts)
 - `docs/` — directory structure with _template.md, INDEX.md, features/, architecture/
 
 ## Pinned Library Versions
@@ -266,8 +266,8 @@ The scaffolded `package.json` includes these npm scripts (conditionally):
 | test:run | `vitest run` | testing === "VITEST" |
 | coverage | `vitest run --coverage` | testing === "VITEST" |
 | test:e2e | `playwright test` | testing === "PLAYWRIGHT" |
-| docs:index | `node .claude/scripts/build-docs-index.mjs` | ai === "CLAUDE" |
-| docs:lint | `node .claude/scripts/lint-docs-frontmatter.mjs` | ai === "CLAUDE" |
+| docs:index | `node scripts/build-docs-index.mjs` | ai === "CLAUDE" |
+| docs:lint | `node scripts/lint-docs-frontmatter.mjs` | ai === "CLAUDE" |
 
 ## User Interactions After Scaffolding
 

@@ -1,5 +1,5 @@
 // Validates every doc against the frontmatter schema. Exits non-zero on violation → CI-ready.
-// Run via: node .claude/scripts/lint-docs-frontmatter.mjs
+// Run via: node scripts/lint-docs-frontmatter.mjs
 import { existsSync } from 'fs';
 import { join } from 'path';
 import { walkDocs, ENUMS, REQUIRED_FIELDS, DOCS_DIR } from './_docs-shared.mjs';

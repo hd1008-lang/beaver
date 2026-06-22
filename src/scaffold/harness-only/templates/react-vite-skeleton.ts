@@ -25,8 +25,8 @@ npm run build
 ## Docs
 
 - \`docs/INDEX.md\` — knowledge base index (auto-generated)
-- \`node .claude/scripts/build-docs-index.mjs\` — regenerate index after adding a doc
-- \`node .claude/scripts/lint-docs-frontmatter.mjs\` — validate docs frontmatter
+- \`node scripts/build-docs-index.mjs\` — regenerate index after adding a doc
+- \`node scripts/lint-docs-frontmatter.mjs\` — validate docs frontmatter
 
 ## Agent Routing
 
@@ -37,7 +37,7 @@ ${claudeHarnessTableTemplate()}
 
 **PARK RULE (anti-loop):** when executing a step/phase, if it fails twice and the cause isn't fixable right now (missing info, needs a user decision, environment, or out-of-scope), STOP — don't retry a third time. Set the phase \`status: blocked\`, file a \`backlog/<id>\` entry (record what was already tried so it isn't repeated), link both ways, tell the user it was parked, and move on to the next workable item. See \`backlog/README.md\`.
 
-Each agent has persistent memory at \`.claude/agent-memory/<agent>/MEMORY.md\` — agents read it on start and append new gotchas. Do NOT use the general assistant for work an agent owns — always delegate.
+Each agent has persistent memory at \`.agents/memory/<agent>/MEMORY.md\` — agents read it on start and append new gotchas. Do NOT use the general assistant for work an agent owns — always delegate.
 `;
 
 const conventionsSkillTemplate = (cart: HarnessOnlyCore): string =>
@@ -74,7 +74,7 @@ You are the implementation agent for ${cart.projectName} (React + Vite project).
 
 ## Onboarding
 
-1. Read \`.claude/agent-memory/dev/MEMORY.md\`.
+1. Read \`.agents/memory/dev/MEMORY.md\`.
 2. Read \`CLAUDE.md\` for project overview and commands.
 3. Load the \`${slug(cart)}-conventions\` skill.
 
@@ -117,11 +117,18 @@ _To be documented._
   },
 ];
 
+const aiToHarness = (ai: HarnessOnlyCore['ai']): 'claude' | 'codex' | 'both' => {
+  if (ai === 'CODEX') return 'codex';
+  if (ai === 'BOTH') return 'both';
+  return 'claude';
+};
+
 export const getReactViteHarnessFileMap = (cart: HarnessOnlyCore): FileMap =>
   buildClaudeFileMap({
     projectName: cart.projectName,
     slug: slug(cart),
     productDescription: cart.productDescription,
+    harness: aiToHarness(cart.ai),
     flowEnum: ['ui', 'data', 'infra', 'architecture', '_meta'],
     layerEnum: ['app', 'pages', 'features', 'entities', 'shared', '_cross'],
     reminderTrigger: 'home|landing',

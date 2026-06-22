@@ -6,8 +6,8 @@ layer: scaffold
 status: active
 lang: en
 related: [architecture/agent-workflow.en.md, features/harness-only/harness-only.spec.en.md]
-keywords: [claudesetup, harness, aiharnesssetup, buildclaudefilemap, agents, agentregistry, skills, backlog, parkrule, plans, validator, productdescription]
-updated: 2026-06-21
+keywords: [claudesetup, harness, aiharnesssetup, buildclaudefilemap, agents, agentregistry, skills, backlog, parkrule, plans, validator, productdescription, codexharness, dualharness, harnessscaffold, toml, codexhooks, agentstoml]
+updated: 2026-06-22
 ---
 
 # Claude Harness Generation — Feature Spec
@@ -28,9 +28,9 @@ The scaffolded agent workflow had no story-level planning or blocker-tracking. W
 - Shared, project-agnostic pieces (docs tooling, settings.json, docs skill, docs-writer agent, memory seeds, backlog, plans scaffolding) live in `src/scaffold/shared/claude-setup.ts` as `buildClaudeFileMap(params: ClaudeHarnessParams)`.
 - Each project type renders its own CLAUDE.md, conventions skill, and dev agent, and passes them in (`src/scaffold/react-vite/templates/claude-setup.ts`, `src/scaffold/chrome-extension/templates/claude-setup.ts`).
 - Everything is strictly cart-conditional: flow/layer enums, reminder trigger, key patterns, naming rows, and the test-writer agent (emitted only when `params.testing` is set — react-vite with a test framework chosen; never for chrome-extension).
-- The shared file map always emits five agents: `dev`, `docs-writer`, `planner`, `advisor` (read-only brainstorming/trade-off analysis), and `scout` (read-only cheap factual lookup). `advisor` carries project memory (`.claude/agent-memory/advisor/`); `scout` is stateless (no memory seed).
+- The shared file map always emits five agents: `dev`, `docs-writer`, `planner`, `advisor` (read-only brainstorming/trade-off analysis), and `scout` (read-only cheap factual lookup). `advisor` carries project memory (`.agents/memory/advisor/`); `scout` is stateless (no memory seed).
 - Agent models: dev = sonnet, docs-writer = haiku, planner = sonnet, advisor = opus, scout = haiku, test-writer = haiku.
-- Read-only agents are constrained by their `tools:` allowlist (advisor/scout have no `Write`/`Edit`). `planner` needs `Write`/`Edit` to author plans, so a path allowlist alone can't bound it — it is double-guarded: (a) a `tools:` allowlist with no `Bash`, and (b) a `PreToolUse` hook (`.claude/scripts/agent-guard.mjs`, matcher `Write|Edit|MultiEdit`) that hard-denies any write where `agent_type == "planner"` and the target is outside `plans/` (or `.claude/agent-memory/planner/`). This stops the "planner drifts into coding" failure mode that prose rules alone can't prevent.
+- Read-only agents are constrained by their `tools:` allowlist (advisor/scout have no `Write`/`Edit`). `planner` needs `Write`/`Edit` to author plans, so a path allowlist alone can't bound it — it is double-guarded: (a) a `tools:` allowlist with no `Bash`, and (b) a `PreToolUse` hook (`.claude/scripts/agent-guard.mjs`, matcher `Write|Edit|MultiEdit`) that hard-denies any write where `agent_type == "planner"` and the target is outside `plans/` (or `.agents/memory/planner/`). This stops the "planner drifts into coding" failure mode that prose rules alone can't prevent.
 
 ### Product Description Field
 When Claude Harness is enabled, users are prompted: "Describe your project. What is it?" (or equivalent in their language). This **required** field captures a one-line product summary and is rendered into the scaffolded `CLAUDE.md` file's `## Project Overview` section as the opening sentence.
@@ -51,13 +51,13 @@ Agents are defined declaratively in a single source-of-truth table (`AGENTS` at 
 |---|---|---|
 | `name` | string | Agent identifier (e.g., `dev`, `advisor`) |
 | `model` | string | Model choice: `sonnet`, `haiku`, or `opus` |
-| `writeScope` | string[] | Path prefixes the agent may write (e.g., `["src/", "package.json"]`). Empty = read-only; `.claude/agent-memory/<name>/` is always implicitly allowed |
-| `memory` | boolean | Whether to seed `.claude/agent-memory/<name>/MEMORY.md` on first run |
+| `writeScope` | string[] | Path prefixes the agent may write (e.g., `["src/", "package.json"]`). Empty = read-only; `.agents/memory/<name>/` is always implicitly allowed |
+| `memory` | boolean | Whether to seed `.agents/memory/<name>/MEMORY.md` on first run |
 
 **Derived invariants** (enforced mechanically, NOT re-declared):
 - **Read-only constraint**: if `writeScope` is empty, the agent's emitted `tools:` list must NOT include `Write` or `Edit` — violations are flagged by a runtime validator.
 - **Unique ownership**: no two agents may have the same primary owned directory (e.g., two agents can't both write `plans/`).
-- **Path guarding**: the `agent-guard.mjs` hook becomes a GENERAL guard parameterized from the registry, denying writes outside each agent's `writeScope` and `.claude/agent-memory/<name>/`.
+- **Path guarding**: the `agent-guard.mjs` hook becomes a GENERAL guard parameterized from the registry, denying writes outside each agent's `writeScope` and `.agents/memory/<name>/`.
 - **Validators**: 
   - `validate-structure.mjs` (sibling to lint-docs-frontmatter.mjs) checks that emitted agents' `tools` lists respect their `writeScope` (read-only agents have no write tools; others have write tools if allowed).
   - `validate-plans.mjs` is a plan/backlog consistency checker emitted by `buildClaudeFileMap`, performing four checks: (A) the ordered phases table in `00-overview.md` matches frontmatter `status` values from each phase file, staying synchronized; (B) warning when a plan is all-done but not yet archived; (C) validating backlog ID format and monotonic ordering (4-digit zero-padded, e.g., `backlog/0001`, `backlog/0042`); (D) verifying bidirectional links between `status: blocked` phases and their corresponding `backlog/<id>` entries (each blocked phase must link to a backlog entry, and each entry's `source:` must point back).
@@ -86,8 +86,81 @@ The **park rule** (wired into CLAUDE.md and agent definitions) stops token-wasti
 
 Backlog files live at `backlog/<NNNN>-<slug>.md` (`NNNN` zero-padded to 4 digits) with frontmatter (`id`, `status: open|resolved|wontfix`, `source`, `severity`, `created`) and body sections: **Symptom**, **Tried**, **Why parked**, **Suggested direction**. When revived, the planner reads it and produces fresh phases under `plans/`.
 
+## Harness Choice Option
+
+When Claude Harness is enabled, users select which harness(es) to generate: **Claude**, **Codex**, or **Both**.
+
+The `harness` field in `ClaudeHarnessParams` accepts `'claude' | 'codex' | 'both'`, controlling which file sets are emitted by `buildClaudeFileMap`:
+
+- `'claude'` — Claude harness only: CLAUDE.md, .claude/settings.json, .claude/agents/*.md, .agents/memory/, .claude/scripts/agent-guard.mjs
+- `'codex'` — Codex harness only: AGENTS.md, .codex/, .agents/skills/, Codex-specific hook scripts
+- `'both'` — Full dual harness: both sets above
+
+Shared files are emitted for any harness choice: docs tooling, agent-guard-core.mjs, docs-first-reminder.sh, knowledge base (plans/, backlog/, docs/).
+
+## Claude Harness Output
+
+**Emitted when** `harness: 'claude'` or `harness: 'both'`.
+
+| File / Directory | Purpose |
+|---|---|
+| `CLAUDE.md` | Agent onboarding and behavioral guidelines |
+| `.claude/settings.json` | Claude Code workspace config (env vars, permissions, hooks) |
+| `.claude/scripts/agent-guard.mjs` | Claude adapter; enforces agent `writeScope` boundaries |
+| `.claude/agents/dev.md` | Dev agent (project-specific, write-capable) |
+| `.claude/agents/docs-writer.md` | Docs-writer agent (read-only docs, writes to `docs/`) |
+| `.claude/agents/planner.md` | Planner agent (writes resumable plans to `plans/`) |
+| `.claude/agents/advisor.md` | Advisor agent (read-only: trade-off analysis and brainstorming) |
+| `.claude/agents/scout.md` | Scout agent (read-only: cheap factual lookups) |
+| `.claude/agents/test-writer.md` | Test-writer agent (optional, only if testing framework selected) |
+| `.agents/memory/<agent>/MEMORY.md` | Per-agent persistent memory seeds (`dev`, `docs-writer`, `planner`, `advisor`, and optionally `test-writer`) |
+
+## Codex Harness Output
+
+**Emitted when** `harness: 'codex'` or `harness: 'both'`.
+
+| File / Directory | Purpose |
+|---|---|
+| `AGENTS.md` | Codex harness entry point; points to CLAUDE.md for context |
+| `.codex/hooks.json` | Codex hook configuration (PreToolUse, PostToolUse handlers) |
+| `.codex/agents/dev.toml` | Dev agent (project-specific) |
+| `.codex/agents/docs-writer.toml` | Docs-writer agent |
+| `.codex/agents/planner.toml` | Planner agent |
+| `.codex/agents/advisor.toml` | Advisor agent |
+| `.codex/agents/scout.toml` | Scout agent |
+| `.agents/skills/<slug>-conventions/SKILL.md` | Conventions skill (real file; Codex reads from `.agents/skills/`) |
+| `.agents/skills/<slug>-docs/SKILL.md` | Docs skill (real file; Codex reads from `.agents/skills/`) |
+| `.codex/scripts/agent-guard-codex.mjs` | Codex adapter; enforces agent `writeScope` boundaries via PreToolUse hook |
+| `.codex/scripts/codex-subagent-start.mjs` | Codex hook handler for SubagentStart events (agent identity reconstruction) |
+| `.codex/scripts/codex-subagent-stop.mjs` | Codex hook handler for SubagentStop events |
+| `.codex/scripts/codex-permission-guard.mjs` | Codex hook handler for permission enforcement |
+
+**Note:** Skills are real files under `.agents/skills/`, not symlinks — symlinks do not survive npm pack or CI. Both Claude (which reads from `.claude/skills/`) and Codex (which reads from `.agents/skills/`) receive their own copies of the same skills content.
+
+## Shared Harness Output
+
+**Emitted for any harness choice** (`'claude'`, `'codex'`, or `'both'`).
+
+| File / Directory | Purpose |
+|---|---|
+| `plans/README.md` | Plan artifact guide and lifecycle documentation |
+| `backlog/README.md` | Backlog artifact guide (append-only log of deferred work) |
+| `docs/README.md` | Docs knowledge-base guide |
+| `docs/INDEX.md` | Auto-generated index of all knowledge-base docs (regenerated by `build-docs-index.mjs`) |
+| `docs/_template.md` | Template for new docs; includes frontmatter schema enums for the project |
+| `docs/<feature-specs>` | Seed docs passed in via `ClaudeHarnessParams.seedDocs` |
+| `scripts/_docs-shared.mjs` | Shared frontmatter schema helpers for docs tooling |
+| `scripts/build-docs-index.mjs` | Regenerates `docs/INDEX.md` from frontmatter |
+| `scripts/lint-docs-frontmatter.mjs` | Validates doc frontmatter completeness and correctness |
+| `scripts/validate-structure.mjs` | Validator: checks agents' `tools` lists respect `writeScope` constraints |
+| `scripts/validate-plans.mjs` | Validator: checks plan/backlog consistency (ordered phases, bidirectional links, backlog ID format) |
+| `scripts/docs-first-reminder.sh` | Hook script; logs reminder to read docs before opening source files (triggered by symbol name) |
+| `scripts/agent-guard-core.mjs` | Core ACL implementation; imported by both Claude (`agent-guard.mjs`) and Codex (`agent-guard-codex.mjs`) adapters |
+
 ## What Changed
 - **Product Description field is now required** when enabling Claude Harness. The field is captured via prompt at harness-enable time and rendered into CLAUDE.md's `## Project Overview` section, providing agents with immediate context about the project's domain and purpose.
+- **Harness choice is now selectable**: users pick Claude, Codex, or Both at scaffold time. The `buildClaudeFileMap` function is fully dual-harness-aware and emits appropriate file sets per selection.
+- **Codex harness output is now documented** (see "Codex Harness Output" section above), including .toml agent configs, hooks.json, skills duplication, and hook scripts.
 
 ## Key Decisions
 - Parameter object over inheritance/abstraction for project types — only ~10 fields, no project-type registry. `ClaudeHarnessParams` now includes the required `productDescription: string` field.
@@ -102,8 +175,8 @@ Backlog files live at `backlog/<NNNN>-<slug>.md` (`NNNN` zero-padded to 4 digits
 - src/scaffold/react-vite/templates/claude-setup.ts
 - src/scaffold/chrome-extension/templates/claude-setup.ts
 - .claude/scripts/agent-guard.mjs
-- .claude/scripts/validate-structure.mjs
-- .claude/scripts/validate-plans.mjs
+- scripts/validate-structure.mjs
+- scripts/validate-plans.mjs
 - src/options/chrome-extension/index.ts
 - backlog/README.md
 - plans/README.md

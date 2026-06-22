@@ -28,7 +28,7 @@ export const getFsdFileMap = (cart: ReactViteCore): FileMap => {
     { relativePath: 'tsconfig.node.json', content: tsconfigNodeTemplate() },
     { relativePath: 'index.html',         content: indexHtmlTemplate(cart.projectName) },
     { relativePath: '.gitignore',         content: gitignoreTemplate() },
-    ...(cart.ai === 'CLAUDE' ? getClaudeFileMap(cart) : []),
+    ...(cart.ai !== 'NOT_USING' ? getClaudeFileMap(cart) : []),
     ...(cart.testing !== 'NOT_USING' ? getTestingFileMap(cart) : []),
     { relativePath: 'src/vite-env.d.ts',  content: viteEnvDtsTemplate() },
     { relativePath: 'src/main.tsx',       content: mainTsxTemplate(cart) },

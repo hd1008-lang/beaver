@@ -205,4 +205,4 @@ This repo dogfoods the same Claude Code harness it scaffolds (see `docs/features
 
 **DOCS-FIRST RULE:** for any request to describe, explain, or modify a documented feature, grep `docs/` frontmatter and read the relevant docs BEFORE opening source files. Start at `docs/INDEX.md`.
 
-Docs commands: `node .claude/scripts/build-docs-index.mjs` (regenerate `docs/INDEX.md`), `node .claude/scripts/lint-docs-frontmatter.mjs` (validate frontmatter), `node .claude/scripts/validate-plans.mjs` (check plan/backlog consistency). Skills: `.claude/skills/beaver-conventions`, `.claude/skills/beaver-docs`.
+Docs commands: `node scripts/build-docs-index.mjs` (regenerate `docs/INDEX.md`), `node scripts/lint-docs-frontmatter.mjs` (validate frontmatter), `node scripts/validate-plans.mjs` (check plan/backlog consistency). Skills: `.claude/skills/beaver-conventions`, `.claude/skills/beaver-docs`.
