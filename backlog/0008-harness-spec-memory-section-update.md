@@ -1,7 +1,7 @@
 ---
 id: "0008"
 title: "Spec: move .agents/memory/ from Claude-only to Shared Harness Output"
-status: open
+status: resolved
 source: plans/codex-memory-seed/01-fix-template.md
 severity: low
 created: 2026-06-22
@@ -24,3 +24,9 @@ docs-writer should update the "Harness Choice Option" section:
 - Move `.agents/memory/` from the `'claude'` bullet to the "Shared files" sentence
   at the end of that section.
 - No other sections need changing.
+
+## Resolution (2026-06-23)
+docs-writer updated `docs/features/claude-harness/claude-harness.spec.en.md`:
+- Removed `.agents/memory/` from the `'claude'` bullet (line 95).
+- Added it to the "Shared files" sentence (line 99).
+Validated: lint-docs-frontmatter, build-docs-index, validate-plans all passed.

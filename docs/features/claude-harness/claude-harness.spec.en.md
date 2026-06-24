@@ -92,11 +92,11 @@ When Claude Harness is enabled, users select which harness(es) to generate: **Cl
 
 The `harness` field in `ClaudeHarnessParams` accepts `'claude' | 'codex' | 'both'`, controlling which file sets are emitted by `buildClaudeFileMap`:
 
-- `'claude'` — Claude harness only: CLAUDE.md, .claude/settings.json, .claude/agents/*.md, .agents/memory/, .claude/scripts/agent-guard.mjs
+- `'claude'` — Claude harness only: CLAUDE.md, .claude/settings.json, .claude/agents/*.md, .claude/scripts/agent-guard.mjs
 - `'codex'` — Codex harness only: AGENTS.md, .codex/, .agents/skills/, Codex-specific hook scripts
 - `'both'` — Full dual harness: both sets above
 
-Shared files are emitted for any harness choice: docs tooling, agent-guard-core.mjs, docs-first-reminder.sh, knowledge base (plans/, backlog/, docs/).
+Shared files are emitted for any harness choice: docs tooling, agent-guard-core.mjs, docs-first-reminder.sh, .agents/memory/, knowledge base (plans/, backlog/, docs/).
 
 ## Claude Harness Output
 
