@@ -36,3 +36,6 @@ Thumbs.db
 # Coverage
 coverage/
 dist/
+
+# Guard-script audit log (local-only noise, not team-shared)
+.agents/audit.log

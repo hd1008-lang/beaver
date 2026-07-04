@@ -11,6 +11,11 @@
       "Bash(git reset --hard*)",
       "Bash(git clean*)"
     ],
+    "ask": [
+      "Bash(curl*)",
+      "Bash(wget*)",
+      "Bash(Invoke-WebRequest*)"
+    ],
     "allow": []
   },
   "hooks": {
@@ -40,7 +45,13 @@
     "filesystem": {
       "denyRead": [
         "**/.env",
-        "**/.env.*"
+        "**/.env.*",
+        "**/*.pem",
+        "**/*.key",
+        "**/credentials*",
+        "**/secrets*",
+        "~/.ssh/**",
+        "~/.aws/**"
       ]
     }
   }

@@ -6,6 +6,7 @@
 // NOTE: Do not edit WRITE_SCOPES or ACL logic here — they live in agent-guard-core.mjs.
 import { readFileSync } from 'fs';
 import { checkWritePermission } from '../../scripts/agent-guard-core.mjs';
+import { appendAuditLog } from '../../scripts/audit-log.mjs';
 
 let payload;
 try {
@@ -25,6 +26,7 @@ if (result.decision === 'pass' || result.decision === 'allow') {
 }
 
 // deny
+appendAuditLog({ agentType, reason: result.reason });
 process.stdout.write(
   JSON.stringify({
     hookSpecificOutput: {

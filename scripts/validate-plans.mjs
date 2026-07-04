@@ -8,7 +8,7 @@ const BACKLOG_DIR = 'backlog';
 
 // Minimal frontmatter parser — same pattern as validate-structure.mjs (no external deps).
 function parseFrontmatter(content) {
-  const match = content.match(/^---\n([\s\S]*?)\n---/);
+  const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
   if (!match) return null;
   const meta = {};
   for (const line of match[1].split('\n')) {
@@ -204,7 +204,7 @@ for (const { path: phaseFilePath, rel } of collectPhaseFiles()) {
   if (!fm || fm.status !== 'blocked') continue;
 
   // Look for a backlog link in the body.
-  const bodyMatch = content.match(/^---\n[\s\S]*?\n---\n([\s\S]*)$/);
+  const bodyMatch = content.match(/^---\r?\n[\s\S]*?\r?\n---\r?\n([\s\S]*)$/);
   const body = bodyMatch ? bodyMatch[1] : content;
   const backlogLinkMatch = body.match(/backlog\/(\d{4})/g);
 

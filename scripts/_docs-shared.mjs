@@ -16,7 +16,7 @@ export const REQUIRED_FIELDS = ['title', 'feature', 'flow', 'layer', 'status', '
 
 // Minimal YAML frontmatter parser: scalar values and inline arrays ([a, b]).
 export function parseFrontmatter(content) {
-  const match = content.match(/^---\n([\s\S]*?)\n---/);
+  const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
   if (!match) return null;
   const meta = {};
   for (const line of match[1].split('\n')) {

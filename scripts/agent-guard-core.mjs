@@ -50,9 +50,16 @@ export function checkWritePermission(agentType, filePath, cwd) {
   }
 
   // Normalize to project-relative path when an absolute path is given.
-  let rel = filePath;
-  if (filePath.startsWith('/') && cwd && filePath.startsWith(cwd + '/')) {
-    rel = filePath.slice(cwd.length + 1);
+  // Handles POSIX (/repo/...) and Windows (C:\repo\... or C:/repo/...) paths.
+  let rel = filePath.replace(/\\/g, '/');
+  if (cwd) {
+    const prefix = cwd.replace(/\\/g, '/').replace(/\/+$/, '') + '/';
+    if (rel.startsWith(prefix)) {
+      rel = rel.slice(prefix.length);
+    } else if (/^[A-Za-z]:\//.test(rel) && rel.toLowerCase().startsWith(prefix.toLowerCase())) {
+      // Windows drive-letter paths are case-insensitive.
+      rel = rel.slice(prefix.length);
+    }
   }
 
   const allowedPrefixes = WRITE_SCOPES[agentType];

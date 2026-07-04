@@ -20,6 +20,7 @@
 //   extracting a path from tool_input.command (first argument or patch header line "+ b/...").
 import { readFileSync, existsSync } from 'fs';
 import { checkWritePermission } from '../../scripts/agent-guard-core.mjs';
+import { appendAuditLog } from '../../scripts/audit-log.mjs';
 
 let payload;
 try {
@@ -76,6 +77,7 @@ if (result.decision === 'pass' || result.decision === 'allow') {
 }
 
 // deny — same response format as Claude
+appendAuditLog({ agentType, reason: result.reason });
 process.stdout.write(
   JSON.stringify({
     hookSpecificOutput: {

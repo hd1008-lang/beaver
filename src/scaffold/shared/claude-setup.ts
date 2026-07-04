@@ -207,7 +207,7 @@ export const REQUIRED_FIELDS = ['title', 'feature', 'flow', 'layer', 'status', '
 
 // Minimal YAML frontmatter parser: scalar values and inline arrays ([a, b]).
 export function parseFrontmatter(content) {
-  const match = content.match(/^---\\n([\\s\\S]*?)\\n---/);
+  const match = content.match(/^---\\r?\\n([\\s\\S]*?)\\r?\\n---/);
   if (!match) return null;
   const meta = {};
   for (const line of match[1].split('\\n')) {
@@ -435,6 +435,7 @@ const agentGuardMjsTemplate = (agents: AgentDef[]): string => {
 // place test files under src/__tests__ instead of test/ or tests/ will need to
 // extend the test-writer scope — this guard is lenient for dev rather than tight.
 import { readFileSync } from 'fs';
+import { appendAuditLog } from '../../scripts/audit-log.mjs';
 
 const WRITE_SCOPES = ${scopesJson};
 
@@ -467,12 +468,14 @@ if (rel.startsWith(memoryPrefix)) process.exit(0);
 
 // Read-only agents (empty writeScope): deny all other writes with a specific message.
 if (allowedPrefixes.length === 0) {
+  const reason = \`read-only agent may not write any file. \${agentType} attempted to write \${filePath}. Route implementation to the dev agent instead.\`;
+  appendAuditLog({ agentType, reason });
   process.stdout.write(
     JSON.stringify({
       hookSpecificOutput: {
         hookEventName: 'PreToolUse',
         permissionDecision: 'deny',
-        permissionDecisionReason: \`read-only agent may not write any file. \${agentType} attempted to write \${filePath}. Route implementation to the dev agent instead.\`,
+        permissionDecisionReason: reason,
       },
     })
   );
@@ -484,18 +487,38 @@ const allowed = allowedPrefixes.some((prefix) => rel.startsWith(prefix));
 
 if (allowed) process.exit(0);
 
+const reason = \`\${agentType} may only write under [\${allowedPrefixes.join(', ')}] (and \${memoryPrefix}). Blocked write to \${filePath}. Route to the correct agent instead.\`;
+appendAuditLog({ agentType, reason });
 process.stdout.write(
   JSON.stringify({
     hookSpecificOutput: {
       hookEventName: 'PreToolUse',
       permissionDecision: 'deny',
-      permissionDecisionReason: \`\${agentType} may only write under [\${allowedPrefixes.join(', ')}] (and \${memoryPrefix}). Blocked write to \${filePath}. Route to the correct agent instead.\`,
+      permissionDecisionReason: reason,
     },
   })
 );
 process.exit(0);
 `;
 };
+
+// ---------------------------------------------------------------------------
+// Sensitive file patterns — single source of truth
+// ---------------------------------------------------------------------------
+// Feeds BOTH Claude's `sandbox.filesystem.denyRead` globs (claudeSettingsTemplate,
+// below) AND the Codex secret-read guard's regex fragments (buildCodexSecretFileTargetSource,
+// near codexPermissionGuardMjsTemplate) so the two enforcement mechanisms can't drift
+// independently. See plans/security-hardening/03-shared-secret-guard-core.md.
+const SENSITIVE_FILE_PATTERNS = [
+  '**/.env',
+  '**/.env.*',
+  '**/*.pem',
+  '**/*.key',
+  '**/credentials*',
+  '**/secrets*',
+  '~/.ssh/**',
+  '~/.aws/**',
+];
 
 // ---------------------------------------------------------------------------
 // .claude/settings.json
@@ -516,6 +539,7 @@ const claudeSettingsTemplate = (): string =>
           'Bash(git reset --hard*)',
           'Bash(git clean*)',
         ],
+        ask: ['Bash(curl*)', 'Bash(wget*)', 'Bash(Invoke-WebRequest*)'],
         allow: [],
       },
       hooks: {
@@ -542,7 +566,9 @@ const claudeSettingsTemplate = (): string =>
         ],
       },
       sandbox: {
-        filesystem: { denyRead: ['**/.env', '**/.env.*'] },
+        filesystem: {
+          denyRead: SENSITIVE_FILE_PATTERNS,
+        },
       },
     },
     null,
@@ -933,7 +959,7 @@ const WRITE_SCOPES = ${scopesJson};
 
 // Minimal frontmatter parser (no external deps — inlined from _docs-shared.mjs pattern).
 function parseFrontmatter(content) {
-  const match = content.match(/^---\\n([\\s\\S]*?)\\n---/);
+  const match = content.match(/^---\\r?\\n([\\s\\S]*?)\\r?\\n---/);
   if (!match) return null;
   const meta = {};
   for (const line of match[1].split('\\n')) {
@@ -1038,7 +1064,7 @@ const BACKLOG_DIR = 'backlog';
 
 // Minimal frontmatter parser — same pattern as validate-structure.mjs (no external deps).
 function parseFrontmatter(content) {
-  const match = content.match(/^---\\n([\\s\\S]*?)\\n---/);
+  const match = content.match(/^---\\r?\\n([\\s\\S]*?)\\r?\\n---/);
   if (!match) return null;
   const meta = {};
   for (const line of match[1].split('\\n')) {
@@ -1234,7 +1260,7 @@ for (const { path: phaseFilePath, rel } of collectPhaseFiles()) {
   if (!fm || fm.status !== 'blocked') continue;
 
   // Look for a backlog link in the body.
-  const bodyMatch = content.match(/^---\\n[\\s\\S]*?\\n---\\n([\\s\\S]*)$/);
+  const bodyMatch = content.match(/^---\\r?\\n[\\s\\S]*?\\r?\\n---\\r?\\n([\\s\\S]*)$/);
   const body = bodyMatch ? bodyMatch[1] : content;
   const backlogLinkMatch = body.match(/backlog\\/(\\d{4})/g);
 
@@ -1558,6 +1584,49 @@ const codexHooksJsonTemplate = (): string =>
     2
   );
 
+// Standalone audit-log module — kept OUT of agentGuardCoreMjsTemplate because that module
+// has a documented "no fs side effects" constraint (see its own header). Every guard-script
+// deny (write-scope ACL adapters, codex-permission-guard.mjs pattern groups) appends one
+// line here. See plans/security-hardening/05-guard-audit-log.md.
+const auditLogMjsTemplate = (): string =>
+  `// audit-log.mjs — append-only audit log for guard-script-mediated denials.
+//
+// Logs ONLY denials that pass through our OWN guard scripts: the write-scope ACL
+// adapters (agent-guard.mjs, agent-guard-codex.mjs) and the codex-permission-guard.mjs
+// pattern groups (git / secret-read / network-egress). Kept as a standalone module
+// (not a function inside agent-guard-core.mjs) because that module has a documented
+// "no fs side effects" constraint — see its header comment.
+//
+// HARD LIMITATION: Claude's native \`permissions.deny\` / \`permissions.ask\` and
+// \`sandbox.filesystem.denyRead\` are enforced INSIDE Claude Code itself, with no hook
+// firing at all — those denials never reach this log. Only denials produced by our own
+// guard scripts (which do run as hooks) can be recorded here.
+import { appendFileSync, mkdirSync } from 'fs';
+import { dirname } from 'path';
+
+const AUDIT_LOG_PATH = '.agents/audit.log';
+const MAX_DETAIL_LENGTH = 150;
+
+/**
+ * Append one line to .agents/audit.log: \`<ISO timestamp> | <agent_type or "unknown"> | deny | <reason or command, truncated>\`.
+ * Never throws — a logging failure must not break the guard that calls it.
+ *
+ * @param {{ agentType?: string, reason?: string }} entry
+ */
+export function appendAuditLog(entry) {
+  try {
+    const timestamp = new Date().toISOString();
+    const agentType = entry?.agentType || 'unknown';
+    const detail = (entry?.reason || '').slice(0, MAX_DETAIL_LENGTH);
+    const line = \`\${timestamp} | \${agentType} | deny | \${detail}\\n\`;
+    mkdirSync(dirname(AUDIT_LOG_PATH), { recursive: true });
+    appendFileSync(AUDIT_LOG_PATH, line, 'utf-8');
+  } catch {
+    // Logging must never break the guard — swallow any fs error.
+  }
+}
+`;
+
 // Shared guard core — pure logic, no process.exit()/stdout. Both Claude and Codex adapters
 // import from here. Content is data-driven from the agents array (same as agentGuardMjsTemplate).
 const agentGuardCoreMjsTemplate = (agents: AgentDef[]): string => {
@@ -1596,9 +1665,16 @@ export function checkWritePermission(agentType, filePath, cwd) {
   }
 
   // Normalize to project-relative path when an absolute path is given.
-  let rel = filePath;
-  if (filePath.startsWith('/') && cwd && filePath.startsWith(cwd + '/')) {
-    rel = filePath.slice(cwd.length + 1);
+  // Handles POSIX (/repo/...) and Windows (C:\\repo\\... or C:/repo/...) paths.
+  let rel = filePath.replace(/\\\\/g, '/');
+  if (cwd) {
+    const prefix = cwd.replace(/\\\\/g, '/').replace(/\\/+$/, '') + '/';
+    if (rel.startsWith(prefix)) {
+      rel = rel.slice(prefix.length);
+    } else if (/^[A-Za-z]:\\//.test(rel) && rel.toLowerCase().startsWith(prefix.toLowerCase())) {
+      // Windows drive-letter paths are case-insensitive.
+      rel = rel.slice(prefix.length);
+    }
   }
 
   const allowedPrefixes = WRITE_SCOPES[agentType];
@@ -1646,6 +1722,7 @@ const agentGuardCodexMjsTemplate = (): string =>
 //   If the temp file is missing, the adapter fails-open (pass-through).
 import { readFileSync, existsSync } from 'fs';
 import { checkWritePermission } from '../../scripts/agent-guard-core.mjs';
+import { appendAuditLog } from '../../scripts/audit-log.mjs';
 
 let payload;
 try {
@@ -1694,6 +1771,7 @@ if (result.decision === 'pass' || result.decision === 'allow') {
   process.exit(0);
 }
 
+appendAuditLog({ agentType, reason: result.reason });
 process.stdout.write(
   JSON.stringify({
     hookSpecificOutput: {
@@ -1774,11 +1852,55 @@ if (existsSync(tempFile)) {
 process.exit(0);
 `;
 
-// Codex permission guard — denies dangerous git commands (mirrors Claude's permissions.deny).
-const codexPermissionGuardMjsTemplate = (): string =>
-  `// codex-permission-guard.mjs — Codex PreToolUse hook for blocking dangerous git commands.
-// Mirrors Claude's permissions.deny static list.
+// Convert a Claude denyRead glob (e.g. "**/.env.*", "~/.ssh/**") into a regex-fragment
+// source string that matches sensitive filenames inside a shell command string. Strips
+// glob-only prefixes/suffixes ("**/", "~/", trailing "/**"), escapes regex metacharacters,
+// then turns "*" into a generous "any non-whitespace run" match — this is a heuristic
+// substring match against command text, not a real path/glob matcher.
+const globPatternToCommandRegexFragment = (pattern: string): string => {
+  let base = pattern;
+  if (base.startsWith('**/')) base = base.slice(3);
+  else if (base.startsWith('~/')) base = base.slice(2);
+  if (base.endsWith('/**')) base = base.slice(0, -3);
+  const escaped = base.replace(/[.+^${}()|[\]\\]/g, '\\$&');
+  return escaped.replace(/\*/g, '[^\\s]*');
+};
+
+// Single source: SENSITIVE_FILE_PATTERNS feeds both claudeSettingsTemplate's denyRead
+// array (above) and this Codex regex-fragment builder.
+const buildCodexSecretFileTargetSource = (): string =>
+  SENSITIVE_FILE_PATTERNS.map(globPatternToCommandRegexFragment).join('|');
+
+// Codex permission guard — denies dangerous git commands (mirrors Claude's permissions.deny),
+// commands that could read sensitive files or dump the environment (mirrors Claude's
+// sandbox.filesystem.denyRead, via SENSITIVE_FILE_PATTERNS above), and network-egress
+// commands (mirrors Claude's permissions.ask — Codex has no ask tier, so this group denies).
+const codexPermissionGuardMjsTemplate = (): string => {
+  const secretFileTarget = buildCodexSecretFileTargetSource();
+  return `// codex-permission-guard.mjs — Codex PreToolUse hook for blocking dangerous git
+// commands, commands that could read sensitive files / dump the environment, and
+// network-egress commands (curl/wget/Invoke-WebRequest).
+// Mirrors Claude's permissions.deny (git), sandbox.filesystem.denyRead (secrets), and
+// permissions.ask (network egress — Codex has no ask tier, so this group denies instead).
+//
+// Pattern groups (SYNC BY HAND — see below):
+//   DENY_PATTERNS            — dangerous git commands; fail-open on JSON-parse errors.
+//   SECRET_READ_PATTERNS     — reads of sensitive files / env dumps; fail-closed on match.
+//   NETWORK_EGRESS_PATTERNS  — curl/wget/Invoke-WebRequest; fail-closed on match (Codex
+//                              has no interactive "ask", so this is a stricter fallback
+//                              than Claude's ask-tier prompt for the same commands).
+//
+// SYNC BY HAND: this file must be kept identical to the dogfood copy at
+// .codex/scripts/codex-permission-guard.mjs in the beaver repo itself. This guard is
+// NOT imported from a shared module the way agent-guard-core.mjs is — update both
+// copies together whenever either changes (see plans/security-hardening phase 03, 04).
+//
+// Every deny below is appended to .agents/audit.log via appendAuditLog() (phase 05).
+// Codex PreToolUse payloads carry no agent_type field, so denials here are logged as
+// "unknown" — see scripts/audit-log.mjs for the hard limitation this implies for Claude's
+// native permissions.deny/ask and sandbox.filesystem.denyRead (no hook fires for those).
 import { readFileSync } from 'fs';
+import { appendAuditLog } from '../../scripts/audit-log.mjs';
 
 let payload;
 try {
@@ -1801,20 +1923,48 @@ const DENY_PATTERNS = [
   /\\bgit\\s+clean\\b/,
 ];
 
-const matched = DENY_PATTERNS.find((p) => p.test(cmd));
-if (!matched) process.exit(0);
+// Secret-read guard: cat/less/head/tail/grep/sed/awk/strings targeting a sensitive file,
+// plus a bare "printenv" or bare "env" (full environment dump — "env FOO=bar cmd" does
+// NOT match). Fail-closed at the pattern-matching level: any match here denies. JSON-parse
+// failures above stay fail-open (unchanged, rare, pre-existing behavior for both groups).
+const SECRET_READ_PATTERNS = [
+  /\\b(?:cat|less|head|tail|grep|sed|awk|strings)\\b[^\\n]*(?:${secretFileTarget})/,
+  /^(?:printenv|env)(?:\\s+-\\S+)*\\s*$/,
+];
 
+// Network-egress guard: curl/wget/Invoke-WebRequest could ship file contents (including
+// secrets) to an external host without the user noticing. Claude routes these through
+// permissions.ask (a confirmation prompt); Codex has no equivalent "ask" tier, so this
+// group denies outright — a stricter fallback than Claude's, not a symmetric one.
+const NETWORK_EGRESS_PATTERNS = [
+  /\\b(?:curl|wget)\\b/,
+  /\\bInvoke-WebRequest\\b/,
+];
+
+const matchedGit = DENY_PATTERNS.find((p) => p.test(cmd));
+const matchedSecret = !matchedGit && SECRET_READ_PATTERNS.find((p) => p.test(cmd));
+const matchedNetwork = !matchedGit && !matchedSecret && NETWORK_EGRESS_PATTERNS.find((p) => p.test(cmd));
+if (!matchedGit && !matchedSecret && !matchedNetwork) process.exit(0);
+
+const reason = matchedSecret
+  ? \`Blocked command that may read a sensitive file or dump environment variables: "\${cmd.slice(0, 120)}". Reading .env/.pem/.key/credentials/secrets files, SSH/AWS credential directories, or a full environment dump is not permitted via automated tool calls. A human must run this manually.\`
+  : matchedNetwork
+  ? \`Blocked network-egress command: "\${cmd.slice(0, 120)}". curl/wget/Invoke-WebRequest are not permitted via automated tool calls, since they could ship file contents to an external host unnoticed. A human must run this manually.\`
+  : \`Blocked git command: "\${cmd.slice(0, 120)}". Dangerous git operations (push, commit, merge, rebase, tag, branch -D, reset --hard, clean) are not permitted. A human must run this manually.\`;
+
+appendAuditLog({ agentType: 'unknown', reason });
 process.stdout.write(
   JSON.stringify({
     hookSpecificOutput: {
       hookEventName: 'PreToolUse',
       permissionDecision: 'deny',
-      permissionDecisionReason: \`Blocked git command: "\${cmd.slice(0, 120)}". Dangerous git operations (push, commit, merge, rebase, tag, branch -D, reset --hard, clean) are not permitted. A human must run this manually.\`,
+      permissionDecisionReason: reason,
     },
   })
 );
 process.exit(0);
 `;
+};
 
 // AGENTS.md — Codex entry point; mirrors the dogfood AGENTS.md but generic.
 const agentsMdTemplate = (projectName: string): string =>
@@ -1901,6 +2051,8 @@ export const buildClaudeFileMap = (params: ClaudeHarnessParams): FileMap => {
     { relativePath: 'scripts/docs-first-reminder.sh', content: docsFirstReminderShTemplate(params.reminderTrigger) },
     // agent-guard-core.mjs is imported by both Claude and Codex adapters.
     { relativePath: 'scripts/agent-guard-core.mjs', content: agentGuardCoreMjsTemplate(allAgents) },
+    // audit-log.mjs is imported by all deny call sites across both harnesses (phase 05).
+    { relativePath: 'scripts/audit-log.mjs', content: auditLogMjsTemplate() },
     // ── Knowledge base ──────────────────────────────────────────────────────
     { relativePath: 'plans/README.md', content: plansReadmeTemplate() },
     { relativePath: 'backlog/README.md', content: backlogReadmeTemplate() },

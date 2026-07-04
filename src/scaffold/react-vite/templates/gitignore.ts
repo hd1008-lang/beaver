@@ -20,4 +20,13 @@ dist-ssr/
 *.njsproj
 *.sln
 *.sw?
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Guard-script audit log (local-only noise, not team-shared)
+.agents/audit.log
 `;
