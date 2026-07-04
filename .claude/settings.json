@@ -19,7 +19,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/scripts/docs-first-reminder.sh\""
+            "command": "bash \"$CLAUDE_PROJECT_DIR/scripts/docs-first-reminder.sh\""
           }
         ]
       }

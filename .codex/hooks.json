@@ -1,0 +1,64 @@
+{
+  "_comment": "Codex hook registry for beaver. Agent identity is recovered via the two-hook approach: SubagentStart writes /tmp/.codex-agent-<session_id>; PreToolUse reads it. SubagentStop cleans up.",
+  "hooks": {
+    "SubagentStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$(git rev-parse --show-toplevel)/.codex/scripts/codex-subagent-start.mjs\"",
+            "statusMessage": "Recording subagent identity…"
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$(git rev-parse --show-toplevel)/.codex/scripts/codex-subagent-stop.mjs\"",
+            "statusMessage": "Cleaning up subagent identity…"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "write|edit|apply_patch|patch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$(git rev-parse --show-toplevel)/.codex/scripts/agent-guard-codex.mjs\"",
+            "statusMessage": "Checking write-scope ACL…",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "bash|shell|run_command",
+        "_comment_git_deny": "Git command deny list — mirrors Claude's permissions.deny. Codex does not have a static deny mechanism, so a PermissionRequest hook intercepts dangerous git commands.",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$(git rev-parse --show-toplevel)/.codex/scripts/codex-permission-guard.mjs\"",
+            "statusMessage": "Checking command permissions…",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$(git rev-parse --show-toplevel)/scripts/docs-first-reminder.sh\"",
+            "statusMessage": "Docs-first reminder…",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

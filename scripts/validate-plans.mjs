@@ -1,5 +1,5 @@
 // Mechanically checks plan/backlog consistency across four invariants.
-// Run via: node .claude/scripts/validate-plans.mjs
+// Run via: node scripts/validate-plans.mjs
 import { readdirSync, readFileSync, existsSync } from 'fs';
 import { join } from 'path';
 

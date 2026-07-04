@@ -21,6 +21,18 @@ const getVersion = () => {
   }
 };
 
+const handleFatal = (err: unknown): void => {
+  if (err instanceof Error && err.name === "ExitPromptError") {
+    process.exit(0);
+  }
+  if (err instanceof Error) {
+    console.error(chalk.red(err.message));
+  } else {
+    console.error(chalk.red("An unexpected error occurred."), err);
+  }
+  process.exit(1);
+};
+
 const main = async () => {
   checkNodeVersion();
 
@@ -59,10 +71,7 @@ Options:
       const { flowHarnessOnly } = await import("@src/options/harness-only");
       await flowHarnessOnly();
     } catch (err) {
-      if (err instanceof Error) {
-        console.error(chalk.red(err.message));
-      }
-      process.exit(1);
+      handleFatal(err);
     }
     process.exit(0);
   }
@@ -72,11 +81,11 @@ Options:
   try {
     await menu();
   } catch (err) {
-    if (err instanceof Error) {
-      console.error(chalk.red(err.message));
-    }
-    process.exit(1);
+    handleFatal(err);
   }
 };
 
-main();
+process.on("unhandledRejection", handleFatal);
+process.on("uncaughtException", handleFatal);
+
+main().catch(handleFatal);

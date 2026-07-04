@@ -1,7 +1,7 @@
 import { select, input } from "@inquirer/prompts";
 import path from "path";
 import { MENU_OPTIONS_LEVEL_1 } from "@src/constants";
-import { HARNESS_MENU_PROJECT_TYPE } from "@src/options/harness-only/constants";
+import { HARNESS_MENU_AI, HARNESS_MENU_PROJECT_TYPE } from "@src/options/harness-only/constants";
 import { MenuOptions } from "@src/options/react-vite/types";
 import { Cart, HarnessOnlyCore } from "@src/types";
 import { dirExists } from "@src/scaffold/utils";
@@ -70,6 +70,15 @@ const menuProjectType = async (cart: Cart): Promise<void> => {
   );
 };
 
+const menuAI = async (cart: Cart): Promise<void> => {
+  if (!cart || cart.type !== MENU_OPTIONS_LEVEL_1.HarnessOnly.value) return;
+
+  (cart as HarnessOnlyCore).ai = await selectFromMenu(
+    HARNESS_MENU_AI,
+    "Choose an AI harness:"
+  );
+};
+
 const menuProductDescription = async (cart: Cart): Promise<void> => {
   if (!cart || cart.type !== MENU_OPTIONS_LEVEL_1.HarnessOnly.value) return;
 
@@ -89,6 +98,7 @@ export const flowHarnessOnly = async (): Promise<void> => {
   await menuTargetDirectory(cart);
   await menuProjectName(cart);
   await menuProjectType(cart);
+  await menuAI(cart);
   await menuProductDescription(cart);
 
   const { scaffoldHarnessOnly } = await import("@src/scaffold/harness-only");

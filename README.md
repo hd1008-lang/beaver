@@ -79,8 +79,8 @@ npm run dev:build     # Compile TypeScript, resolve aliases, then run
 npm run build         # Compile TypeScript for distribution (outputs to dist/)
 
 # Documentation
-node .claude/scripts/build-docs-index.mjs    # Regenerate docs/INDEX.md
-node .claude/scripts/lint-docs-frontmatter.mjs     # Validate frontmatter in docs/
+node scripts/build-docs-index.mjs    # Regenerate docs/INDEX.md
+node scripts/lint-docs-frontmatter.mjs     # Validate frontmatter in docs/
 ```
 
 **Publishing:**

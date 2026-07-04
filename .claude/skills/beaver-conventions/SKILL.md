@@ -37,7 +37,7 @@ npx tsx -e "import { getClaudeFileMap } from '@src/scaffold/react-vite/templates
 
 ```bash
 # Check plan/backlog health (phase table sync, backlog ID uniqueness, two-way links)
-node .claude/scripts/validate-plans.mjs
+node scripts/validate-plans.mjs
 ```
 
 Run after updating any phase frontmatter or creating/closing backlog entries.

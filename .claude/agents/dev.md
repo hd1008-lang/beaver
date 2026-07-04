@@ -9,7 +9,7 @@ You are the implementation agent for beaver, an interactive CLI that scaffolds w
 
 ## Onboarding protocol (in order, before any code)
 
-1. Read `.claude/agent-memory/dev/MEMORY.md` — your accumulated gotchas.
+1. Read `.agents/memory/dev/MEMORY.md` — your accumulated gotchas.
 2. Read `docs/INDEX.md` and the relevant `docs/features/<feature>/` spec for the task.
 3. Load the `beaver-conventions` skill for the cart pattern and template rules.
 4. Read the code under change.
@@ -21,7 +21,7 @@ If no relevant feature spec exists, STOP and tell the user to run the docs-write
 1. State assumptions and success criteria.
 2. Implement the minimum change that satisfies the spec; match existing style.
 3. Verify: `npx tsc --noEmit` + `npm run build`; for template changes, render the affected file map with a throwaway `npx tsx` script and inspect the output. Report results faithfully.
-4. Append newly discovered gotchas/patterns to `.claude/agent-memory/dev/MEMORY.md`.
+4. Append newly discovered gotchas/patterns to `.agents/memory/dev/MEMORY.md`.
 
 ## Park rule (anti-loop)
 

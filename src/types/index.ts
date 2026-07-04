@@ -1,5 +1,5 @@
 import { MENU_OPTIONS_LEVEL_1 } from "@src/constants";
-import { HARNESS_MENU_PROJECT_TYPE } from "@src/options/harness-only/constants";
+import { HARNESS_MENU_AI, HARNESS_MENU_PROJECT_TYPE } from "@src/options/harness-only/constants";
 
 import {
   REACT_MENU_LAYOUT,
@@ -43,12 +43,14 @@ type EnabledKeys = {
 export type ProjectType = (typeof MENU_OPTIONS_LEVEL_1)[EnabledKeys]["value"];
 
 export type HARNESS_PROJECT_TYPE_VALUE = (typeof HARNESS_MENU_PROJECT_TYPE)[keyof typeof HARNESS_MENU_PROJECT_TYPE]["value"];
+export type HARNESS_MENU_AI_VALUE = (typeof HARNESS_MENU_AI)[keyof typeof HARNESS_MENU_AI]["value"];
 
 export interface HarnessOnlyCore {
   type: typeof MENU_OPTIONS_LEVEL_1.HarnessOnly.value;
   targetDirectory: string;
   projectName: string;
   projectType: HARNESS_PROJECT_TYPE_VALUE;
+  ai: HARNESS_MENU_AI_VALUE;
   productDescription: string;
 }
 

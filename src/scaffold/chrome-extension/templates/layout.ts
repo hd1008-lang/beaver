@@ -26,7 +26,7 @@ export const getChromeExtensionFileMap = (cart: ChromeExtensionCore): FileMap =>
     { relativePath: 'index.html',            content: indexHtmlTemplate(cart.projectName) },
     { relativePath: 'manifest.json',         content: manifestJsonTemplate(cart.projectName) },
     { relativePath: '.gitignore',            content: gitignoreTemplate() },
-    ...(cart.ai === 'CLAUDE' ? getClaudeFileMap(cart) : []),
+    ...(cart.ai !== 'NOT_USING' ? getClaudeFileMap(cart) : []),
     { relativePath: 'scripts/build-extension.js', content: buildExtensionScriptTemplate() },
     { relativePath: 'src/vite-env.d.ts',     content: viteEnvDtsTemplate() },
     { relativePath: 'src/main.tsx',          content: mainTsxTemplate(cart) },
