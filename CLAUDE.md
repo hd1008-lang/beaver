@@ -205,4 +205,6 @@ This repo dogfoods the same Claude Code harness it scaffolds (see `docs/features
 
 **DOCS-FIRST RULE:** for any request to describe, explain, or modify a documented feature, grep `docs/` frontmatter and read the relevant docs BEFORE opening source files. Start at `docs/INDEX.md`.
 
+**MEMORY LIFECYCLE:** `.agents/memory/<agent>/MEMORY.md` is short-term, not an append-only log — budget ≤ 15 bullets / ≤ 100 lines per file (`node scripts/validate-structure.mjs` warns over budget, fails at 2×). Durable facts get promoted to `docs/` and deleted from memory; one-off fix notes recorded in plans/backlog don't belong there. Any change to a path/scope/convention must update/delete memory bullets referencing the old state in the same change. Over budget or archiving a plan → run the `.claude/skills/beaver-memory-retro` skill.
+
 Docs commands: `node scripts/build-docs-index.mjs` (regenerate `docs/INDEX.md`), `node scripts/lint-docs-frontmatter.mjs` (validate frontmatter), `node scripts/validate-plans.mjs` (check plan/backlog consistency). Skills: `.claude/skills/beaver-conventions`, `.claude/skills/beaver-docs`.

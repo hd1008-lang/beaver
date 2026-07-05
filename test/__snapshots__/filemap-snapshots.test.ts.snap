@@ -8,6 +8,7 @@ exports[`filemap snapshots > both-no-testing: structure 1`] = `
   ".agents/memory/planner/MEMORY.md",
   ".agents/skills/beaver-conventions/SKILL.md",
   ".agents/skills/beaver-docs/SKILL.md",
+  ".agents/skills/beaver-memory-retro/SKILL.md",
   ".claude/agents/advisor.md",
   ".claude/agents/dev.md",
   ".claude/agents/docs-writer.md",
@@ -17,6 +18,7 @@ exports[`filemap snapshots > both-no-testing: structure 1`] = `
   ".claude/settings.json",
   ".claude/skills/beaver-conventions/SKILL.md",
   ".claude/skills/beaver-docs/SKILL.md",
+  ".claude/skills/beaver-memory-retro/SKILL.md",
   ".codex/agents/advisor.toml",
   ".codex/agents/dev.toml",
   ".codex/agents/docs-writer.toml",
@@ -50,7 +52,13 @@ exports[`filemap snapshots > both-testing: full content 1`] = `
   {
     "content": "# advisor — Agent Memory
 
-Append durable, non-obvious gotchas and patterns discovered while working — one bullet each, newest first. Link related docs/ files. Read this file at the start of every session.
+Short-term memory with a lifecycle — NOT an append-only log. One bullet per durable, non-obvious gotcha, newest first. Link related docs/ files. Read this file at the start of every session.
+
+Lifecycle (see the memory-retro skill):
+- **Budget**: keep ≤ 15 bullets / ≤ 100 lines (\`validate-structure.mjs\` warns over budget, fails at 2×).
+- **Promote**: durable, architecture-level truth belongs in \`docs/\` — move it there, then delete the bullet.
+- **Invalidate**: when a path/scope/convention changes, update or delete bullets referencing the old state in the same change.
+- **Don't duplicate**: one-off fix notes already recorded in plans/ Resolutions or backlog/ don't belong here.
 
 _(no entries yet)_
 ",
@@ -59,7 +67,13 @@ _(no entries yet)_
   {
     "content": "# dev — Agent Memory
 
-Append durable, non-obvious gotchas and patterns discovered while working — one bullet each, newest first. Link related docs/ files. Read this file at the start of every session.
+Short-term memory with a lifecycle — NOT an append-only log. One bullet per durable, non-obvious gotcha, newest first. Link related docs/ files. Read this file at the start of every session.
+
+Lifecycle (see the memory-retro skill):
+- **Budget**: keep ≤ 15 bullets / ≤ 100 lines (\`validate-structure.mjs\` warns over budget, fails at 2×).
+- **Promote**: durable, architecture-level truth belongs in \`docs/\` — move it there, then delete the bullet.
+- **Invalidate**: when a path/scope/convention changes, update or delete bullets referencing the old state in the same change.
+- **Don't duplicate**: one-off fix notes already recorded in plans/ Resolutions or backlog/ don't belong here.
 
 _(no entries yet)_
 ",
@@ -68,7 +82,13 @@ _(no entries yet)_
   {
     "content": "# docs-writer — Agent Memory
 
-Append durable, non-obvious gotchas and patterns discovered while working — one bullet each, newest first. Link related docs/ files. Read this file at the start of every session.
+Short-term memory with a lifecycle — NOT an append-only log. One bullet per durable, non-obvious gotcha, newest first. Link related docs/ files. Read this file at the start of every session.
+
+Lifecycle (see the memory-retro skill):
+- **Budget**: keep ≤ 15 bullets / ≤ 100 lines (\`validate-structure.mjs\` warns over budget, fails at 2×).
+- **Promote**: durable, architecture-level truth belongs in \`docs/\` — move it there, then delete the bullet.
+- **Invalidate**: when a path/scope/convention changes, update or delete bullets referencing the old state in the same change.
+- **Don't duplicate**: one-off fix notes already recorded in plans/ Resolutions or backlog/ don't belong here.
 
 _(no entries yet)_
 ",
@@ -77,7 +97,13 @@ _(no entries yet)_
   {
     "content": "# planner — Agent Memory
 
-Append durable, non-obvious gotchas and patterns discovered while working — one bullet each, newest first. Link related docs/ files. Read this file at the start of every session.
+Short-term memory with a lifecycle — NOT an append-only log. One bullet per durable, non-obvious gotcha, newest first. Link related docs/ files. Read this file at the start of every session.
+
+Lifecycle (see the memory-retro skill):
+- **Budget**: keep ≤ 15 bullets / ≤ 100 lines (\`validate-structure.mjs\` warns over budget, fails at 2×).
+- **Promote**: durable, architecture-level truth belongs in \`docs/\` — move it there, then delete the bullet.
+- **Invalidate**: when a path/scope/convention changes, update or delete bullets referencing the old state in the same change.
+- **Don't duplicate**: one-off fix notes already recorded in plans/ Resolutions or backlog/ don't belong here.
 
 _(no entries yet)_
 ",
@@ -86,7 +112,13 @@ _(no entries yet)_
   {
     "content": "# test-writer — Agent Memory
 
-Append durable, non-obvious gotchas and patterns discovered while working — one bullet each, newest first. Link related docs/ files. Read this file at the start of every session.
+Short-term memory with a lifecycle — NOT an append-only log. One bullet per durable, non-obvious gotcha, newest first. Link related docs/ files. Read this file at the start of every session.
+
+Lifecycle (see the memory-retro skill):
+- **Budget**: keep ≤ 15 bullets / ≤ 100 lines (\`validate-structure.mjs\` warns over budget, fails at 2×).
+- **Promote**: durable, architecture-level truth belongs in \`docs/\` — move it there, then delete the bullet.
+- **Invalidate**: when a path/scope/convention changes, update or delete bullets referencing the old state in the same change.
+- **Don't duplicate**: one-off fix notes already recorded in plans/ Resolutions or backlog/ don't belong here.
 
 _(no entries yet)_
 ",
@@ -173,6 +205,34 @@ description: How to find and write knowledge-base docs for beaver. Use when aske
    \`\`\`
 ",
     "relativePath": ".agents/skills/beaver-docs/SKILL.md",
+  },
+  {
+    "content": "---
+name: beaver-memory-retro
+description: Memory hygiene retro for beaver agent memory (.agents/memory/<agent>/MEMORY.md). Use when validate-structure.mjs warns a memory file is over budget, when archiving a completed plan, or when asked to "clean up memory" / "memory retro" / "dọn memory". Dedupes, deletes stale bullets, and promotes durable facts to docs/.
+---
+
+# Memory Retro
+
+Agent memory (\`.agents/memory/<agent>/MEMORY.md\`) is SHORT-TERM: recent gotchas, temporary state, and facts not yet stable enough for \`docs/\`. Budget: **≤ 15 bullets / ≤ 100 lines** per file — \`node scripts/validate-structure.mjs\` warns over budget and fails at 2× budget.
+
+## Procedure
+
+Go through the target file bullet by bullet; pick exactly one fate per bullet:
+
+1. **Delete — stale**: it references a path, scope, or convention that has since changed. Verify against current code/docs before deleting if unsure.
+2. **Delete — recorded elsewhere**: it's a one-off fix note already captured in a plan's Resolution section or a \`backlog/\` entry. Memory must not duplicate plans/backlog.
+3. **Promote**: it's durable, architecture-level truth (formats, protocols, design rules, invariants). Move it into the relevant \`docs/\` spec (route to the docs-writer agent), run \`node scripts/build-docs-index.mjs\`, then delete the bullet from memory.
+4. **Keep**: a recent, non-obvious, still-true gotcha that saves future sessions real time. Rewrite for brevity if wordy.
+5. **Merge**: overlapping bullets become one.
+
+Finish by re-running \`node scripts/validate-structure.mjs\` — the file must be back within budget.
+
+## Invalidation rule (applies outside retros too)
+
+Any change that renames a path, scope, or convention MUST grep \`.agents/memory/*/MEMORY.md\` for the old state and update/delete matching bullets in the same change — stale memory is worse than no memory.
+",
+    "relativePath": ".agents/skills/beaver-memory-retro/SKILL.md",
   },
   {
     "content": "---
@@ -591,6 +651,34 @@ description: How to find and write knowledge-base docs for beaver. Use when aske
    \`\`\`
 ",
     "relativePath": ".claude/skills/beaver-docs/SKILL.md",
+  },
+  {
+    "content": "---
+name: beaver-memory-retro
+description: Memory hygiene retro for beaver agent memory (.agents/memory/<agent>/MEMORY.md). Use when validate-structure.mjs warns a memory file is over budget, when archiving a completed plan, or when asked to "clean up memory" / "memory retro" / "dọn memory". Dedupes, deletes stale bullets, and promotes durable facts to docs/.
+---
+
+# Memory Retro
+
+Agent memory (\`.agents/memory/<agent>/MEMORY.md\`) is SHORT-TERM: recent gotchas, temporary state, and facts not yet stable enough for \`docs/\`. Budget: **≤ 15 bullets / ≤ 100 lines** per file — \`node scripts/validate-structure.mjs\` warns over budget and fails at 2× budget.
+
+## Procedure
+
+Go through the target file bullet by bullet; pick exactly one fate per bullet:
+
+1. **Delete — stale**: it references a path, scope, or convention that has since changed. Verify against current code/docs before deleting if unsure.
+2. **Delete — recorded elsewhere**: it's a one-off fix note already captured in a plan's Resolution section or a \`backlog/\` entry. Memory must not duplicate plans/backlog.
+3. **Promote**: it's durable, architecture-level truth (formats, protocols, design rules, invariants). Move it into the relevant \`docs/\` spec (route to the docs-writer agent), run \`node scripts/build-docs-index.mjs\`, then delete the bullet from memory.
+4. **Keep**: a recent, non-obvious, still-true gotcha that saves future sessions real time. Rewrite for brevity if wordy.
+5. **Merge**: overlapping bullets become one.
+
+Finish by re-running \`node scripts/validate-structure.mjs\` — the file must be back within budget.
+
+## Invalidation rule (applies outside retros too)
+
+Any change that renames a path, scope, or convention MUST grep \`.agents/memory/*/MEMORY.md\` for the old state and update/delete matching bullets in the same change — stale memory is worse than no memory.
+",
+    "relativePath": ".claude/skills/beaver-memory-retro/SKILL.md",
   },
   {
     "content": "# test-author skill
@@ -1400,6 +1488,8 @@ This repo dogfoods the same Claude Code harness it scaffolds (see \`docs/feature
 
 **DOCS-FIRST RULE:** for any request to describe, explain, or modify a documented feature, grep \`docs/\` frontmatter and read the relevant docs BEFORE opening source files. Start at \`docs/INDEX.md\`.
 
+**MEMORY LIFECYCLE:** \`.agents/memory/<agent>/MEMORY.md\` is short-term, not an append-only log — budget ≤ 15 bullets / ≤ 100 lines per file (\`node scripts/validate-structure.mjs\` warns over budget, fails at 2×). Durable facts get promoted to \`docs/\` and deleted from memory; one-off fix notes recorded in plans/backlog don't belong there. Any change to a path/scope/convention must update/delete memory bullets referencing the old state in the same change. Over budget or archiving a plan → run the \`.claude/skills/beaver-memory-retro\` skill.
+
 Docs commands: \`node scripts/build-docs-index.mjs\` (regenerate \`docs/INDEX.md\`), \`node scripts/lint-docs-frontmatter.mjs\` (validate frontmatter), \`node scripts/validate-plans.mjs\` (check plan/backlog consistency). Skills: \`.claude/skills/beaver-conventions\`, \`.claude/skills/beaver-docs\`.
 ",
     "relativePath": "CLAUDE.md",
@@ -1550,6 +1640,8 @@ When all phases are \`done\`, the plan becomes a completed artifact — it can e
 - **Be deleted** if context is not valuable (rare; prefer archival so git history is preserved).
 
 Choose based on project norms. The key: **plans are owned by whoever executed them** (usually \`dev\`) and the decision to archive/delete is theirs. Do not leave a stale plan in \`plans/\` — either keep it active (if next phases are coming) or archive it. The \`00-overview.md\` progress table is the arbiter: if all rows are \`done\` and no new work is queued, the plan is complete.
+
+Closing a plan also closes its memory: run a **memory retro** (see the memory-retro skill) on the executing agents' \`.agents/memory/<agent>/MEMORY.md\` — delete bullets that only mattered during execution (they're recorded in the phases' Resolution sections), promote durable facts to \`docs/\`, and confirm \`node scripts/validate-structure.mjs\` stays within the memory budget.
 ",
     "relativePath": "plans/README.md",
   },
@@ -2298,6 +2390,39 @@ for (const [agentName, scope] of Object.entries(WRITE_SCOPES)) {
   }
 }
 
+// 4. Memory budget (backlog/0015): agent memory is short-term with a lifecycle,
+// not an append-only log. Over budget → warn (prune/promote via the memory-retro
+// skill); at 2× budget → error.
+const MEMORY_DIR = '.agents/memory';
+const MEMORY_BULLET_BUDGET = 15;
+const MEMORY_LINE_BUDGET = 100;
+const warnings = [];
+let memoryEntries = [];
+try {
+  memoryEntries = readdirSync(MEMORY_DIR);
+} catch {
+  // No memory directory — nothing to check.
+}
+for (const entry of memoryEntries) {
+  let content;
+  try {
+    content = readFileSync(join(MEMORY_DIR, entry, 'MEMORY.md'), 'utf-8');
+  } catch {
+    continue; // not an agent memory directory
+  }
+  const lines = content.split(/\\r?\\n/);
+  const bulletCount = lines.filter((line) => line.startsWith('- ')).length;
+  const stats = bulletCount + ' bullets, ' + lines.length + ' lines (budget ' +
+    MEMORY_BULLET_BUDGET + ' bullets / ' + MEMORY_LINE_BUDGET + ' lines)';
+  const memPath = MEMORY_DIR + '/' + entry + '/MEMORY.md';
+  if (bulletCount >= MEMORY_BULLET_BUDGET * 2 || lines.length >= MEMORY_LINE_BUDGET * 2) {
+    errors.push(memPath + ': memory at 2x budget — ' + stats + '. Run a memory retro: delete stale/one-off bullets, promote durable facts to docs/.');
+  } else if (bulletCount > MEMORY_BULLET_BUDGET || lines.length > MEMORY_LINE_BUDGET) {
+    warnings.push(memPath + ': memory over budget — ' + stats + '. Prune or promote to docs/ (memory-retro skill).');
+  }
+}
+
+for (const warning of warnings) console.warn('validate-structure: WARN ' + warning);
 if (errors.length > 0) {
   console.error('validate-structure: failed with ' + errors.length + ' error(s):');
   for (const error of errors) console.error('  - ' + error);
@@ -2319,6 +2444,7 @@ exports[`filemap snapshots > both-testing: structure 1`] = `
   ".agents/memory/test-writer/MEMORY.md",
   ".agents/skills/beaver-conventions/SKILL.md",
   ".agents/skills/beaver-docs/SKILL.md",
+  ".agents/skills/beaver-memory-retro/SKILL.md",
   ".claude/agents/advisor.md",
   ".claude/agents/dev.md",
   ".claude/agents/docs-writer.md",
@@ -2329,6 +2455,7 @@ exports[`filemap snapshots > both-testing: structure 1`] = `
   ".claude/settings.json",
   ".claude/skills/beaver-conventions/SKILL.md",
   ".claude/skills/beaver-docs/SKILL.md",
+  ".claude/skills/beaver-memory-retro/SKILL.md",
   ".claude/skills/beaver-test-author/SKILL.md",
   ".codex/agents/advisor.toml",
   ".codex/agents/dev.toml",
@@ -2373,6 +2500,7 @@ exports[`filemap snapshots > claude-no-testing: structure 1`] = `
   ".claude/settings.json",
   ".claude/skills/beaver-conventions/SKILL.md",
   ".claude/skills/beaver-docs/SKILL.md",
+  ".claude/skills/beaver-memory-retro/SKILL.md",
   "CLAUDE.md",
   "backlog/README.md",
   "docs/INDEX.md",
@@ -2407,6 +2535,7 @@ exports[`filemap snapshots > claude-testing: structure 1`] = `
   ".claude/settings.json",
   ".claude/skills/beaver-conventions/SKILL.md",
   ".claude/skills/beaver-docs/SKILL.md",
+  ".claude/skills/beaver-memory-retro/SKILL.md",
   ".claude/skills/beaver-test-author/SKILL.md",
   "CLAUDE.md",
   "backlog/README.md",
@@ -2433,6 +2562,7 @@ exports[`filemap snapshots > codex-no-testing: structure 1`] = `
   ".agents/memory/planner/MEMORY.md",
   ".agents/skills/beaver-conventions/SKILL.md",
   ".agents/skills/beaver-docs/SKILL.md",
+  ".agents/skills/beaver-memory-retro/SKILL.md",
   ".codex/agents/advisor.toml",
   ".codex/agents/dev.toml",
   ".codex/agents/docs-writer.toml",
@@ -2468,6 +2598,7 @@ exports[`filemap snapshots > codex-testing: structure 1`] = `
   ".agents/memory/planner/MEMORY.md",
   ".agents/skills/beaver-conventions/SKILL.md",
   ".agents/skills/beaver-docs/SKILL.md",
+  ".agents/skills/beaver-memory-retro/SKILL.md",
   ".codex/agents/advisor.toml",
   ".codex/agents/dev.toml",
   ".codex/agents/docs-writer.toml",

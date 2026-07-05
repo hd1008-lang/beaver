@@ -1,7 +1,7 @@
 ---
 id: "0015"
 title: "Agent memory lifecycle: capture → distill → promote to docs → prune (currently append-only, unbounded, goes stale)"
-status: open
+status: resolved
 source: advisor-consultation-2026-07-04
 severity: medium
 created: 2026-07-04
@@ -19,6 +19,34 @@ The whole "AI learns continuously" vision (the core product goal of the beaver h
 ## Tried
 
 Nothing yet — parked for time.
+
+## Resolution (2026-07-05)
+
+All six suggested-direction items implemented (main session, after backlog/0014):
+
+1. **Budget** — `harness-assets/scripts/validate-structure.mjs` gained check 4:
+   walks `.agents/memory/*/MEMORY.md`, WARNs over 15 bullets / 100 lines,
+   ERRORs (exit 1) at 2× budget. Skips silently when no memory dir exists.
+2. **Promote rule + 3. Invalidation rule** — stated in the seed header
+   (`harness-assets/.agents/memory/_seed.md`), the new memory-retro skill, the
+   claude-harness spec (new "Agent Memory Lifecycle" section), and this repo's
+   CLAUDE.md ("MEMORY LIFECYCLE" rule).
+4. **Distill triggers** — (a) new shared skill asset
+   `harness-assets/skills/memory-retro/SKILL.md`, emitted to
+   `.claude/skills/<slug>-memory-retro/` and `.agents/skills/<slug>-memory-retro/`
+   for both harnesses; (c) `plans/README.md` lifecycle section now requires a
+   memory retro when closing/archiving a plan. Option (b) SessionEnd hook was
+   skipped — the validator + skill cover the loop without more machinery.
+5. **Pilot compaction** — `.agents/memory/dev/MEMORY.md` 27 → 15 bullets
+   (Codex payload fields / TOML format / hooks.json discovery PROMOTED to the
+   claude-harness spec's new "Codex integration facts"; one-off notes already in
+   plan Resolutions/backlog deleted). Bonus: `.agents/memory/planner/MEMORY.md`
+   26 → 10 bullets (stale post-0013 bullets deleted, spec-gap bullets merged) —
+   clears the validator's live WARN.
+6. **Mirrored into the scaffold** — the seed header, validator check, and skill
+   are all assets, so every scaffolded project gets the same lifecycle; dogfood
+   regenerated via `npx tsx test/helpers/regen-dogfood.ts`, snapshots updated,
+   full suite green.
 
 ## Why parked
 

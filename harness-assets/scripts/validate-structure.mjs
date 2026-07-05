@@ -91,6 +91,39 @@ for (const [agentName, scope] of Object.entries(WRITE_SCOPES)) {
   }
 }
 
+// 4. Memory budget (backlog/0015): agent memory is short-term with a lifecycle,
+// not an append-only log. Over budget → warn (prune/promote via the memory-retro
+// skill); at 2× budget → error.
+const MEMORY_DIR = '.agents/memory';
+const MEMORY_BULLET_BUDGET = 15;
+const MEMORY_LINE_BUDGET = 100;
+const warnings = [];
+let memoryEntries = [];
+try {
+  memoryEntries = readdirSync(MEMORY_DIR);
+} catch {
+  // No memory directory — nothing to check.
+}
+for (const entry of memoryEntries) {
+  let content;
+  try {
+    content = readFileSync(join(MEMORY_DIR, entry, 'MEMORY.md'), 'utf-8');
+  } catch {
+    continue; // not an agent memory directory
+  }
+  const lines = content.split(/\r?\n/);
+  const bulletCount = lines.filter((line) => line.startsWith('- ')).length;
+  const stats = bulletCount + ' bullets, ' + lines.length + ' lines (budget ' +
+    MEMORY_BULLET_BUDGET + ' bullets / ' + MEMORY_LINE_BUDGET + ' lines)';
+  const memPath = MEMORY_DIR + '/' + entry + '/MEMORY.md';
+  if (bulletCount >= MEMORY_BULLET_BUDGET * 2 || lines.length >= MEMORY_LINE_BUDGET * 2) {
+    errors.push(memPath + ': memory at 2x budget — ' + stats + '. Run a memory retro: delete stale/one-off bullets, promote durable facts to docs/.');
+  } else if (bulletCount > MEMORY_BULLET_BUDGET || lines.length > MEMORY_LINE_BUDGET) {
+    warnings.push(memPath + ': memory over budget — ' + stats + '. Prune or promote to docs/ (memory-retro skill).');
+  }
+}
+
+for (const warning of warnings) console.warn('validate-structure: WARN ' + warning);
 if (errors.length > 0) {
   console.error('validate-structure: failed with ' + errors.length + ' error(s):');
   for (const error of errors) console.error('  - ' + error);
