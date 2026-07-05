@@ -37,6 +37,10 @@ succeeds cleanly (pinned versions still resolve, confirmed 2026-07-05). The
 `tsc` failure reproduced on the first attempt; not re-run a second time since
 it is clearly a template/script-ordering issue, not a flaky install.
 
+Also reproduced on real GitHub Actions 2026-07-05: Weekly Scaffold
+`workflow_dispatch` run 28730532593 failed at "Install and build the scaffolded
+fixture" with the identical TS2345 error (all prior CI steps green).
+
 ## Why parked
 
 Out of scope for phase 08 (CI/workflow wiring only — the plan's non-goals

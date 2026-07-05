@@ -13,7 +13,7 @@ GitHub Actions enforce the suite on every push and catch pinned-version rot week
 - [x] Create a non-interactive scaffold entry for CI: `test/helpers/scaffold-fixture.ts` (run via `npx tsx`) that imports `scaffoldReactVite` directly with a full-featured hardcoded cart (router + zustand + query + tailwind + biome, harness `both`, testing on) and scaffolds into a path given by argv. The interactive menu is NOT driven in CI.
 - [x] Create `.github/workflows/weekly-scaffold.yml` — trigger: `schedule` (weekly cron, e.g. Monday 03:00 UTC) + `workflow_dispatch` (manual re-run for debugging). Steps: checkout, setup-node 20, `npm ci`, `npm run build`, run `scaffold-fixture.ts` into `$RUNNER_TEMP/fixture`, then inside it `npm install && npm run build`. This exercises the pinned dependency versions (pins date from mid-2025 — this is the rot detector).
 - [x] Confirm `.github/` is inside dev's writeScope (it is, per the AGENTS registry `dev.writeScope` in `src/scaffold/shared/claude-setup.ts`) — dev can execute this phase without main-session help.
-- [ ] Push-trigger sanity: after the human commits/pushes, check the Actions run is green (dev cannot push — ask the user to push and report back; do not mark this step done on local green alone). **Not done — requires the user to push and report back; see Resolution.**
+- [x] Push-trigger sanity: after the human commits/pushes, check the Actions run is green (dev cannot push — ask the user to push and report back; do not mark this step done on local green alone). **Done 2026-07-05: first push (run 28726978201) failed — `package-lock.json` was gitignored, so `setup-node` `cache: npm` found no lockfile. Fixed by un-ignoring and committing the lockfile; re-push run 28730507625 is green (all steps: `npm ci`, build, test, 3 validators).**
 - [x] Update `backlog/0013-assets-as-files-and-test-suite.md`: `status: resolved` + one-line conclusion linking `plans/assets-and-tests/` (dev-scope write; also add the plan link if planner could not — see 00-overview note).
 - [x] Check backlog/0016's sequencing note is now unblocked (Part A landed) — no edit needed unless 0016 references stale assumptions; if it does, add a one-line update there.
 - [x] Archive: move `plans/assets-and-tests/` to `plans/.archive/assets-and-tests/` once all phases are `done`, and run `node scripts/validate-plans.mjs` to confirm consistency.
@@ -64,7 +64,14 @@ GitHub Actions enforce the suite on every push and catch pinned-version rot week
 - `backlog/0013` set to `status: resolved` with a resolution note; `backlog/0016`
   updated to note it is now unblocked (0013 landed).
 - Push-trigger sanity (Actions run green) and the `workflow_dispatch` weekly run
-  are **not verifiable from this session** (dev cannot push) -- left for the user
-  to confirm after pushing, per this phase's own Verify step.
+  were verified 2026-07-05 after the user pushed:
+  - First CI run (28726978201) failed because `package-lock.json` was gitignored
+    (`setup-node` `cache: npm` requires a lockfile). Fixed by un-ignoring and
+    committing the lockfile; run 28730507625 on `main` is green.
+  - Weekly Scaffold triggered via `workflow_dispatch` (run 28730532593): CI wiring
+    works (checkout → npm ci → build → scaffold fixture all green); the fixture's
+    own `npm run build` fails with the known [[backlog/0019-router-fixture-build-order.md]]
+    bug (`tsc` before `routeTree.gen.ts` exists) — exactly the class of failure this
+    workflow exists to catch; out of scope here per the notes above.
 - Plan archival (`plans/assets-and-tests/` -> `plans/.archive/assets-and-tests/`)
   is left to the main session per this task's instructions.
