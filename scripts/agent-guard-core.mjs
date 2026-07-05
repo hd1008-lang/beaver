@@ -1,31 +1,28 @@
 // agent-guard-core.mjs — shared ACL logic for Claude and Codex guard adapters.
 // Pure logic only: no process.exit(), no process.stdout.write(), no fs side effects.
 // Both agent-guard.mjs (Claude adapter) and agent-guard-codex.mjs (Codex adapter) import from here.
+// Generated from the AGENTS registry at scaffold time — do not edit by hand.
 
 export const WRITE_SCOPES = {
   "dev": [
     "src/",
+    "test/",
     "package.json",
     "tsconfig.json",
     "vite.config.ts",
     "biome.json",
     "eslint.config.js",
     ".github/",
-    "backlog/",
-    "scripts/",
-    ".claude/scripts/",
-    ".codex/scripts/",
-    ".claude/agents/",
-    ".claude/skills/",
+    "backlog/"
   ],
   "docs-writer": [
-    "docs/",
+    "docs/"
   ],
   "planner": [
-    "plans/",
+    "plans/"
   ],
   "advisor": [],
-  "scout": [],
+  "scout": []
 };
 
 /**

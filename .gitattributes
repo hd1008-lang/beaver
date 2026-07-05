@@ -1,0 +1,15 @@
+# Assets shipped in the npm package are read verbatim by readAsset() and
+# emitted into scaffolded projects. CRLF here would break bash hooks / .mjs
+# scripts on checkout (see backlog/0012), so pin LF regardless of platform
+# autocrlf settings.
+harness-assets/** text eol=lf
+
+# The dogfood copies below are asserted byte-for-byte against the rendered
+# harness by test/golden-dogfood.test.ts — a CRLF checkout would fail the
+# golden test spuriously, so pin LF for the whole asserted set.
+scripts/** text eol=lf
+.claude/** text eol=lf
+.codex/** text eol=lf
+AGENTS.md text eol=lf
+plans/README.md text eol=lf
+backlog/README.md text eol=lf

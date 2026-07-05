@@ -1,0 +1,58 @@
+{
+  "permissions": {
+    "deny": [
+      "Bash(git push*)",
+      "Bash(git commit*)",
+      "Bash(git merge*)",
+      "Bash(git rebase*)",
+      "Bash(git tag*)",
+      "Bash(git branch -D*)",
+      "Bash(git branch -d*)",
+      "Bash(git reset --hard*)",
+      "Bash(git clean*)"
+    ],
+    "ask": [
+      "Bash(curl*)",
+      "Bash(wget*)",
+      "Bash(Invoke-WebRequest*)"
+    ],
+    "allow": []
+  },
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/scripts/docs-first-reminder.sh\""
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/scripts/agent-guard.mjs\""
+          }
+        ]
+      }
+    ]
+  },
+  "sandbox": {
+    "filesystem": {
+      "denyRead": [
+        "**/.env",
+        "**/.env.*",
+        "**/*.pem",
+        "**/*.key",
+        "**/credentials*",
+        "**/secrets*",
+        "~/.ssh/**",
+        "~/.aws/**"
+      ]
+    }
+  }
+}

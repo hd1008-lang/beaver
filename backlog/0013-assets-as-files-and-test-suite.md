@@ -1,11 +1,13 @@
 ---
 id: "0013"
 title: "Assets-as-files refactor + test suite/CI — kill the template-in-string dual-maintenance problem"
-status: open
+status: resolved
 source: advisor-consultation-2026-07-04
 severity: medium
 created: 2026-07-04
 ---
+
+> **Plan created 2026-07-05**: [[plans/assets-and-tests/00-overview.md]] — 8 phases (01 packaging investigation → 04 dogfood regeneration → 05 golden test → 08 CI). Entry stays open until the work lands.
 
 ## Symptom
 
@@ -48,3 +50,13 @@ Combine advisory items #1 (assets-as-files) and #5 (test suite/CI) into ONE plan
 6. GitHub Actions: on push — build + vitest + the 3 repo validators. Weekly cron — scaffold a project into temp, `npm install && npm run build` inside it (catches pinned-version rot; pins date from mid-2025).
 
 **Sequencing note:** do Part A before backlog/0016 (neutral canonical) — inverting the canonical is far easier once assets are real files.
+
+## Resolution (2026-07-05)
+
+All 8 phases landed: [[plans/.archive/assets-and-tests/00-overview.md]]. Assets live
+under `harness-assets/`, `buildClaudeFileMap` reads+interpolates them, dogfood
+(`scripts/`, `.claude/`, `.codex/`, `AGENTS.md`, `plans/README.md`,
+`backlog/README.md`) is regenerated to byte-match the render (asserted by
+`test/golden-dogfood.test.ts`), vitest suite is 94/94 green, and
+`.github/workflows/ci.yml` (push/PR) + `.github/workflows/weekly-scaffold.yml`
+(pinned-version rot detector) are in place. backlog/0016 is now unblocked.

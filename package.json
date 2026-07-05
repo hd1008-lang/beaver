@@ -8,13 +8,15 @@
     "beaver": "dist/index.js"
   },
   "files": [
-    "dist"
+    "dist",
+    "harness-assets"
   ],
   "scripts": {
     "dev": "tsx src/index.ts",
     "dev:build": "tsup && node ./dist/index.js",
     "build": "tsup",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "test": "vitest run"
   },
   "keywords": [
     "cli",
@@ -47,9 +49,11 @@
   "devDependencies": {
     "@types/chalk-animation": "^1.6.3",
     "@types/node": "^25.6.0",
+    "smol-toml": "^1.7.0",
     "tsc-alias": "^1.8.16",
     "tsup": "^8.5.1",
     "tsx": "^4.21.0",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.9"
   }
 }

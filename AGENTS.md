@@ -1,6 +1,6 @@
 # AGENTS.md
 
-> This file is the Codex entry point for the beaver repository.
+> This file is the Codex entry point for beaver.
 > All project context, behavioral guidelines, architecture details, and agent routing
 > live in **CLAUDE.md** (repo root). Read that file first and in full.
 
@@ -16,7 +16,7 @@ agent's job.
 |---|---|---|
 | Brainstorming / trade-off analysis / "what's the best approach?" before any change | `advisor` | read-only; deepest source mental model; recommends, never edits — hands off to dev/planner/docs-writer |
 | Decomposing a story into a resumable, multi-phase implementation plan | `planner` | owns `plans/`; writes phase files only, never code (see `plans/README.md`) |
-| Feature work or bug fix in `src/` (menus, cart, templates) | `dev` | MUST read the relevant `docs/features/` spec before coding |
+| Feature work or bug fix | `dev` | MUST read the relevant `docs/features/` spec before coding |
 | Analyzing requirements, writing/updating feature docs | `docs-writer` | owns `docs/`; rebuilds INDEX.md after every change |
 | Fast read-only lookups, file/symbol searches, factual Q&A | `scout` | never edits; cites path:line |
 
@@ -43,4 +43,4 @@ description, and developer instructions. These mirror the Claude agent definitio
 ## For full context
 
 Read **CLAUDE.md** — it contains the complete behavioral guidelines, architecture overview,
-cart pattern, scaffold system, pinned library versions, and agent-routing notes.
+and agent-routing notes.

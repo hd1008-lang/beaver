@@ -9,12 +9,14 @@ import { join } from 'path';
 const WRITE_SCOPES = {
   "dev": [
     "src/",
+    "test/",
     "package.json",
     "tsconfig.json",
     "vite.config.ts",
     "biome.json",
     "eslint.config.js",
-    ".github/"
+    ".github/",
+    "backlog/"
   ],
   "docs-writer": [
     "docs/"

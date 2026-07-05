@@ -1,0 +1,27 @@
+name: Weekly Scaffold
+
+on:
+  schedule:
+    - cron: '0 3 * * 1'
+  workflow_dispatch:
+
+jobs:
+  scaffold-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+      - run: npm run build
+      - run: npx tsx test/helpers/scaffold-fixture.ts "$RUNNER_TEMP/fixture"
+
+      - name: Install and build the scaffolded fixture
+        working-directory: ${{ runner.temp }}/fixture
+        run: |
+          npm install --fetch-retries=3
+          npm run build

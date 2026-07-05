@@ -31,5 +31,7 @@ End of session 2026-07-04. Deliberately sequenced LAST of the four advisory item
 
 ## Related
 
-- backlog/0013 — hard prerequisite in practice (do 0013 first)
+- backlog/0013 — hard prerequisite in practice (do 0013 first). **Resolved 2026-07-05**
+  ([[plans/.archive/assets-and-tests/00-overview.md]]) — assets are now real files
+  under `harness-assets/`, so this item is unblocked.
 - backlog/0005 (resolved?) — earlier spec-gap about Codex scaffold output; the spec restructure here should absorb any remainder
