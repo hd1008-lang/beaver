@@ -1,7 +1,7 @@
 ---
 id: "0014"
 title: "Guard Bash-bypass loophole: write scopes don't match real agent duties, memory teaches the workaround"
-status: open
+status: resolved
 source: advisor-consultation-2026-07-04
 severity: medium
 created: 2026-07-04
@@ -18,6 +18,37 @@ Net effect: for Bash-holding agents the guard is theater; it only genuinely cons
 ## Tried
 
 Nothing yet — parked for time.
+
+## Resolution (2026-07-05)
+
+Policy decided by the user (main session, backlog/0014 triage):
+
+1. **Guard purpose made explicit**: the write-scope guard is a HARD boundary only
+   for agents without `Bash` (planner, advisor, scout — their `tools:` allowlist
+   is the real enforcement). For Bash-holding agents (dev, docs-writer) it is an
+   advisory guardrail + audit log. Documented as a new derived invariant
+   ("Hard boundary ⇔ no Bash") in
+   `docs/features/claude-harness/claude-harness.spec.en.md`. The optional
+   Bash-matcher regex hook (suggested direction #5) was explicitly rejected —
+   heuristics oversell the boundary.
+2. **`plans/` added to dev's writeScope** (AGENTS registry in
+   `src/scaffold/shared/claude-setup.ts`): dev updates phase status/checkboxes/
+   Resolution while executing; planner remains the primary owner (`writeScope[0]`
+   uniqueness preserved — `plans/` sits last in dev's list). "Unique ownership"
+   invariant in the spec updated to clarify primary-vs-secondary overlap.
+   Dogfood regenerated via `npx tsx test/helpers/regen-dogfood.ts`
+   (scripts/agent-guard-core.mjs, scripts/validate-structure.mjs,
+   .codex/agents/dev.toml); filemap snapshot updated; 94/94 tests green.
+3. **Memory pruned** (suggested direction #4): `.agents/memory/dev/MEMORY.md`
+   rewritten — all bullets teaching the Bash workaround for `plans/`,
+   `scripts/`, `.codex/agents/` removed or rewritten to point at the sanctioned
+   paths (Write/Edit now that plans/ is in scope; regen-dogfood for generated
+   files; hand-off for genuinely out-of-scope targets). A new top bullet states
+   the 2026-07-05 policy. The broader scope-narrowing part of this entry was
+   already resolved 2026-07-05 during plans/assets-and-tests phase 04 triage.
+
+Remaining overlap with [[backlog/0015]] (general memory budget/promote/prune
+lifecycle) stays in 0015 — nothing further needed here.
 
 ## Why parked
 

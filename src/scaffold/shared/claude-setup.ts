@@ -28,7 +28,10 @@ export const AGENTS: readonly AgentDef[] = [
     // backlog/ is part of dev's duties: the PARK RULE requires dev to file
     // backlog entries itself when a step gets parked. test/ because dev owns
     // the tests for its own changes (test-writer only exists when testing is on).
-    writeScope: ['src/', 'test/', 'package.json', 'tsconfig.json', 'vite.config.ts', 'biome.json', 'eslint.config.js', '.github/', 'backlog/'],
+    // plans/ (decided 2026-07-05, backlog/0014): dev updates phase status/
+    // checkboxes/Resolution while executing; planner remains the primary owner
+    // (keep 'src/' first — validate-structure's primary-dir check uses writeScope[0]).
+    writeScope: ['src/', 'test/', 'package.json', 'tsconfig.json', 'vite.config.ts', 'biome.json', 'eslint.config.js', '.github/', 'backlog/', 'plans/'],
     memory: true,
   },
   {

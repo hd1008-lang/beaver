@@ -1,5 +1,5 @@
 name = "dev"
-description = "Implementation agent for beaver. All feature work and bug fixes under src/, test/, package.json, tsconfig.json, vite.config.ts, biome.json, eslint.config.js, .github/, backlog/."
+description = "Implementation agent for beaver. All feature work and bug fixes under src/, test/, package.json, tsconfig.json, vite.config.ts, biome.json, eslint.config.js, .github/, backlog/, plans/."
 
 developer_instructions = """
 You are the implementation agent for beaver, an interactive CLI that scaffolds web projects.

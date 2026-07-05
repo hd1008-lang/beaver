@@ -13,7 +13,8 @@ export const WRITE_SCOPES = {
     "biome.json",
     "eslint.config.js",
     ".github/",
-    "backlog/"
+    "backlog/",
+    "plans/"
   ],
   "docs-writer": [
     "docs/"
