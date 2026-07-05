@@ -71,3 +71,5 @@ When all phases are `done`, the plan becomes a completed artifact — it can eit
 - **Be deleted** if context is not valuable (rare; prefer archival so git history is preserved).
 
 Choose based on project norms. The key: **plans are owned by whoever executed them** (usually `dev`) and the decision to archive/delete is theirs. Do not leave a stale plan in `plans/` — either keep it active (if next phases are coming) or archive it. The `00-overview.md` progress table is the arbiter: if all rows are `done` and no new work is queued, the plan is complete.
+
+Closing a plan also closes its memory: run a **memory retro** (see the memory-retro skill) on the executing agents' `.agents/memory/<agent>/MEMORY.md` — delete bullets that only mattered during execution (they're recorded in the phases' Resolution sections), promote durable facts to `docs/`, and confirm `node scripts/validate-structure.mjs` stays within the memory budget.

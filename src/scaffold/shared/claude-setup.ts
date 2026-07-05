@@ -169,6 +169,10 @@ export const buildClaudeFileMap = (params: ClaudeHarnessParams): FileMap => {
     flowEnumSlash: flowEnum.join('/'),
     layerEnumSlash: layerEnum.join('/'),
   });
+  const memoryRetroSkillContent = interpolate(readAsset('skills/memory-retro/SKILL.md'), {
+    projectName,
+    slug,
+  });
 
   // ── SHARED — emitted for either claude, codex, or both ─────────────────────
   // Includes: docs tooling, agent-guard-core (imported by both adapters),
@@ -233,6 +237,7 @@ export const buildClaudeFileMap = (params: ClaudeHarnessParams): FileMap => {
     // (Codex twins live in .agents/skills/ under codexOnly.)
     { relativePath: `.claude/skills/${slug}-conventions/SKILL.md`, content: conventionsSkillContent },
     { relativePath: `.claude/skills/${slug}-docs/SKILL.md`, content: docsSkillContent },
+    { relativePath: `.claude/skills/${slug}-memory-retro/SKILL.md`, content: memoryRetroSkillContent },
     { relativePath: '.claude/settings.json', content: readAsset('.claude/settings.json') },
     // Thin adapter — scopes live in scripts/agent-guard-core.mjs, so no tokens.
     { relativePath: '.claude/scripts/agent-guard.mjs', content: readAsset('.claude/scripts/agent-guard.mjs') },
@@ -317,6 +322,7 @@ export const buildClaudeFileMap = (params: ClaudeHarnessParams): FileMap => {
     // Skills duplicated as real files (no symlinks — symlinks don't survive npm pack / CI).
     { relativePath: `.agents/skills/${slug}-conventions/SKILL.md`, content: conventionsSkillContent },
     { relativePath: `.agents/skills/${slug}-docs/SKILL.md`, content: docsSkillContent },
+    { relativePath: `.agents/skills/${slug}-memory-retro/SKILL.md`, content: memoryRetroSkillContent },
     // Codex hook scripts under .codex/scripts/ — hooks.json references them via git rev-parse.
     { relativePath: '.codex/scripts/agent-guard-codex.mjs', content: readAsset('.codex/scripts/agent-guard-codex.mjs') },
     { relativePath: '.codex/scripts/codex-subagent-start.mjs', content: readAsset('.codex/scripts/codex-subagent-start.mjs') },

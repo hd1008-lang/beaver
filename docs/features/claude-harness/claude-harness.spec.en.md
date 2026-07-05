@@ -114,7 +114,17 @@ Shared files are emitted for any harness choice: docs tooling, agent-guard-core.
 | `.claude/agents/advisor.md` | Advisor agent (read-only: trade-off analysis and brainstorming) |
 | `.claude/agents/scout.md` | Scout agent (read-only: cheap factual lookups) |
 | `.claude/agents/test-writer.md` | Test-writer agent (optional, only if testing framework selected) |
-| `.agents/memory/<agent>/MEMORY.md` | Per-agent persistent memory seeds (`dev`, `docs-writer`, `planner`, `advisor`, and optionally `test-writer`) |
+| `.agents/memory/<agent>/MEMORY.md` | Per-agent short-term memory seeds (`dev`, `docs-writer`, `planner`, `advisor`, and optionally `test-writer`) — see "Agent Memory Lifecycle" |
+| `.claude/skills/<slug>-memory-retro/SKILL.md` | Memory hygiene skill (dedupe / delete stale / promote to docs) |
+
+### Agent Memory Lifecycle
+
+Agent memory is SHORT-TERM with an explicit lifecycle, enforced by mechanism not discipline (decided 2026-07-05, backlog/0015):
+
+- **Budget**: ≤ 15 bullets / ≤ 100 lines per `MEMORY.md`. `scripts/validate-structure.mjs` WARNs over budget and ERRORs (exit 1) at 2× budget.
+- **Promote**: a bullet that is durable, architecture-level truth (formats, protocols, design rules) is moved into the relevant `docs/` spec by docs-writer, then deleted from memory. Memory holds only recent gotchas, temp state, and facts not yet stable enough for docs.
+- **Invalidate**: any change renaming a path/scope/convention must update or delete memory bullets referencing the old state in the same change.
+- **Distill triggers**: (a) the emitted `<slug>-memory-retro` skill (run when the validator warns, or on request); (b) plan archival — `plans/README.md`'s lifecycle section requires a memory retro when closing a plan. The seed template (`.agents/memory/_seed.md`) states these rules in its header so every agent sees them each session.
 
 ## Codex Harness Output
 
@@ -131,12 +141,18 @@ Shared files are emitted for any harness choice: docs tooling, agent-guard-core.
 | `.codex/agents/scout.toml` | Scout agent |
 | `.agents/skills/<slug>-conventions/SKILL.md` | Conventions skill (real file; Codex reads from `.agents/skills/`) |
 | `.agents/skills/<slug>-docs/SKILL.md` | Docs skill (real file; Codex reads from `.agents/skills/`) |
+| `.agents/skills/<slug>-memory-retro/SKILL.md` | Memory hygiene skill twin |
 | `.codex/scripts/agent-guard-codex.mjs` | Codex adapter; enforces agent `writeScope` boundaries via PreToolUse hook |
 | `.codex/scripts/codex-subagent-start.mjs` | Codex hook handler for SubagentStart events (agent identity reconstruction) |
 | `.codex/scripts/codex-subagent-stop.mjs` | Codex hook handler for SubagentStop events |
 | `.codex/scripts/codex-permission-guard.mjs` | Codex hook handler for permission enforcement |
 
 **Note:** Skills are real files under `.agents/skills/`, not symlinks — symlinks do not survive npm pack or CI. Both Claude (which reads from `.claude/skills/`) and Codex (which reads from `.agents/skills/`) receive their own copies of the same skills content.
+
+**Codex integration facts** (promoted from dev agent memory, 2026-07-05):
+- `.codex/agents/<name>.toml` fields: `name`, `description`, `developer_instructions` (triple-quoted multiline), optional `sandbox_mode`, `model`.
+- Codex PreToolUse hook payloads contain `turn_id`, `tool_name`, `tool_use_id`, `tool_input`, `session_id`, `cwd`, `hook_event_name`, `model`, `permission_mode` — there is NO equivalent of Claude's `agent_type` field (verified against developers.openai.com/codex/hooks). Agent identity is reconstructed via the SubagentStart/SubagentStop hook scripts instead. The deny response format is the same as Claude's (`hookSpecificOutput.permissionDecision = "deny"`).
+- hooks.json discovery is at `<repo>/.codex/hooks.json`; no project-root env var is documented — hook commands use `$(git rev-parse --show-toplevel)`.
 
 ## Shared Harness Output
 
@@ -153,7 +169,7 @@ Shared files are emitted for any harness choice: docs tooling, agent-guard-core.
 | `scripts/_docs-shared.mjs` | Shared frontmatter schema helpers for docs tooling |
 | `scripts/build-docs-index.mjs` | Regenerates `docs/INDEX.md` from frontmatter |
 | `scripts/lint-docs-frontmatter.mjs` | Validates doc frontmatter completeness and correctness |
-| `scripts/validate-structure.mjs` | Validator: checks agents' `tools` lists respect `writeScope` constraints |
+| `scripts/validate-structure.mjs` | Validator: checks agents' `tools` lists respect `writeScope` constraints + memory budget (warn > 15 bullets/100 lines, fail at 2×) |
 | `scripts/validate-plans.mjs` | Validator: checks plan/backlog consistency (ordered phases, bidirectional links, backlog ID format) |
 | `scripts/docs-first-reminder.sh` | Hook script; logs reminder to read docs before opening source files (triggered by symbol name) |
 | `scripts/agent-guard-core.mjs` | Core ACL implementation; imported by both Claude (`agent-guard.mjs`) and Codex (`agent-guard-codex.mjs`) adapters |
