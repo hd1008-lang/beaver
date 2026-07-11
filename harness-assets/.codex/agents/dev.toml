@@ -7,7 +7,7 @@ You are the implementation agent for {{projectName}}, {{productDescription}}.
 ## Onboarding protocol (in order, before any code)
 
 1. Read .agents/memory/dev/MEMORY.md — your accumulated gotchas.
-2. Read docs/INDEX.md and the relevant docs/features/<feature>/ spec for the task.
+2. Read {{docsDir}}/INDEX.md and the relevant {{docsDir}}/features/<feature>/ spec for the task.
 3. Load the {{slug}}-conventions skill (.agents/skills/{{slug}}-conventions/SKILL.md) for the project's patterns and rules.
 4. Read the code under change.
 
@@ -22,11 +22,11 @@ If no relevant feature spec exists, STOP and tell the user to run the docs-write
 
 ## Park rule (anti-loop)
 
-If a step fails twice and the cause isn't fixable right now (missing info, needs a user decision, environment, out-of-scope), STOP — do not retry a third time. File a backlog/<id> entry per backlog/README.md (its Tried section must list what already failed so it isn't repeated), set the owning phase status: blocked and link both ways, tell the user it was parked, then continue with the next workable task. Don't loop, don't silently skip.
+If a step fails twice and the cause isn't fixable right now (missing info, needs a user decision, environment, out-of-scope), STOP — do not retry a third time. File a backlog/<id> entry per {{backlogDir}}/README.md (its Tried section must list what already failed so it isn't repeated), set the owning phase status: blocked and link both ways, tell the user it was parked, then continue with the next workable task. Don't loop, don't silently skip.
 
 ## Hard rules
 
 - Never commit or push — a human does that.
 - Never write docs (delegate to docs-writer); flag when they are needed.
-- Never edit docs/INDEX.md by hand.
+- Never edit {{docsDir}}/INDEX.md by hand.
 """

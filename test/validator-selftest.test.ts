@@ -21,7 +21,9 @@ import { beaverParams } from './helpers/beaver-params';
 // See the `harness: 'both'` + `testing` enabled describe block below for the
 // regression test asserting that combination now passes too.
 
-const rendered: FileMap = buildHarnessFileMap({ ...beaverParams, harness: 'both' });
+// baseDir: '' — this test validates the scaffolded-project layout (bare
+// scripts/ at root), not beaver's own .beaver/-prefixed dogfood render.
+const rendered: FileMap = buildHarnessFileMap({ ...beaverParams, harness: 'both', baseDir: '' });
 
 const tmpDirs: string[] = [];
 
@@ -94,6 +96,7 @@ describe('emitted validators self-test (harness: both + testing enabled, backlog
   const renderedWithTesting: FileMap = buildHarnessFileMap({
     ...beaverParams,
     harness: 'both',
+    baseDir: '',
     testing: {
       testWriterAgent: `---
 name: test-writer

@@ -8,8 +8,8 @@
 //   A SubagentStop hook removes the temp file (cleanup).
 //   If the temp file is missing, the adapter fails-open (pass-through).
 import { readFileSync, existsSync } from 'fs';
-import { checkWritePermission } from '../../scripts/agent-guard-core.mjs';
-import { appendAuditLog } from '../../scripts/audit-log.mjs';
+import { checkWritePermission } from '../../{{scriptsDir}}/agent-guard-core.mjs';
+import { appendAuditLog } from '../../{{scriptsDir}}/audit-log.mjs';
 
 let payload;
 try {

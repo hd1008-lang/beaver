@@ -24,6 +24,7 @@ export const beaverParams: HarnessParams = {
   // Clause form: assets interpolate it as "for {{projectName}}, {{productDescription}}."
   productDescription: 'an interactive CLI that scaffolds web projects',
   harness: 'both',
+  baseDir: '.beaver',
   // Recovered from the live rendered copies (scripts/_docs-shared.mjs:9-10).
   flowEnum: ['menu', 'scaffold', 'templates', 'infra', 'architecture', 'onboarding', '_meta'],
   layerEnum: ['options', 'scaffold', 'types', 'constants', 'utils', '_cross'],
@@ -43,11 +44,14 @@ export const beaverParams: HarnessParams = {
 };
 
 // Regeneration/golden file set (decided 2026-07-05, plans/assets-and-tests/00-overview.md;
-// CLAUDE.md added by plans/neutral-canonical-harness phase 03): everything
-// harness-emitted EXCEPT docs/** (real knowledge base) and .agents/** (live
-// memory + skill twins diverge by design).
+// CLAUDE.md added by plans/neutral-canonical-harness phase 03; .beaver/ prefix
+// added by plans/0017-beaver-folder-structure): everything harness-emitted
+// EXCEPT docs/** (real knowledge base) and .agents/** (live memory + skill
+// twins diverge by design). scripts/ is knowledge-base tooling and moves under
+// `.beaver/` (see baseDir in beaverParams below); .claude/ and .codex/ are
+// tool-discovery paths and stay bare at root.
 export const REGEN_PREFIXES = [
-  'scripts/',
+  '.beaver/scripts/',
   '.claude/scripts/',
   '.claude/agents/',
   '.claude/skills/',
@@ -58,8 +62,8 @@ export const REGEN_FILES = [
   '.claude/settings.json',
   'AGENTS.md',
   'CLAUDE.md',
-  'plans/README.md',
-  'backlog/README.md',
+  '.beaver/plans/README.md',
+  '.beaver/backlog/README.md',
 ] as const;
 
 export const inRegenSet = (relativePath: string): boolean =>

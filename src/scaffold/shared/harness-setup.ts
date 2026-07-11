@@ -110,6 +110,8 @@ export interface HarnessParams {
   /** Which harness(es) to emit. Callers map cart.ai → this field.
    *  'claude' = .claude/ only; 'codex' = .codex/ only; 'both' = full dual harness. */
   harness: 'claude' | 'codex' | 'both';
+  /** Directory prefix for harness files, e.g. '.beaver' for beaver's dogfood, '' for scaffolded projects. Defaults to ''. */
+  baseDir?: string;
   flowEnum: string[];
   layerEnum: string[];
   reminderTrigger: string;
@@ -150,10 +152,30 @@ const TEST_WRITER_DEF: AgentDef = {
 // ---------------------------------------------------------------------------
 
 export const buildHarnessFileMap = (params: HarnessParams): FileMap => {
-  const { projectName, slug, flowEnum, layerEnum, harness } = params;
+  const { projectName, slug, flowEnum, layerEnum, harness, baseDir = '' } = params;
 
   const wantClaude = harness === 'claude' || harness === 'both';
   const wantCodex  = harness === 'codex'  || harness === 'both';
+
+  // Selective baseDir application: only knowledge-base paths (plans/, docs/,
+  // backlog/, scripts/) move under baseDir (e.g. '.beaver' for this repo's own
+  // dogfood); tool-discovery paths (.claude/, .codex/, .agents/, AGENTS.md,
+  // CLAUDE.md) always stay bare at root. Pre-computed *Dir tokens (rather than
+  // interpolating a raw baseDir + hardcoded literal slash) avoid producing a
+  // leading '/plans/' when baseDir is ''.
+  const KB_ROOTS = ['plans/', 'docs/', 'backlog/', 'scripts/'];
+  const kbDir = (name: string): string => (baseDir ? `${baseDir}/${name}` : name);
+  const kb = (relativePath: string): string => {
+    if (!baseDir) return relativePath;
+    return KB_ROOTS.some((root) => relativePath.startsWith(root))
+      ? `${baseDir}/${relativePath}`
+      : relativePath;
+  };
+  const plansDir = kbDir('plans');
+  const docsDir = kbDir('docs');
+  const backlogDir = kbDir('backlog');
+  const scriptsDir = kbDir('scripts');
+  const kbDirTokens = { plansDir, docsDir, backlogDir, scriptsDir };
 
   const agentDef = (name: string): AgentDef => {
     const found = AGENTS.find((a) => a.name === name);
@@ -162,7 +184,12 @@ export const buildHarnessFileMap = (params: HarnessParams): FileMap => {
   };
 
   const allAgents = [...AGENTS, ...(params.testing ? [TEST_WRITER_DEF] : [])];
-  const scopesJson = writeScopesJson(allAgents);
+  // ACL entries for knowledge-base paths move with baseDir too (e.g. planner's
+  // 'plans/' -> '.beaver/plans/'); tool paths in writeScope (src/, test/, etc.)
+  // are untouched by kb() since they don't match KB_ROOTS.
+  const scopesJson = writeScopesJson(
+    allAgents.map((a) => ({ ...a, writeScope: a.writeScope.map(kb) }))
+  );
 
   const memorySeedAsset = readAsset('.agents/memory/_seed.md');
   const memorySeed = (agentName: string): string => interpolate(memorySeedAsset, { agentName });
@@ -202,48 +229,55 @@ export const buildHarnessFileMap = (params: HarnessParams): FileMap => {
   // All shared scripts live in top-level scripts/ — harness-neutral, no .claude/ prefix.
   const shared: FileMap = [
     {
-      relativePath: 'scripts/_docs-shared.mjs',
+      relativePath: kb('scripts/_docs-shared.mjs'),
       content: interpolate(readAsset('scripts/_docs-shared.mjs'), {
         flowEnumJson: JSON.stringify(flowEnum),
         layerEnumJson: JSON.stringify(layerEnum),
+        docsDir,
       }),
     },
     // Fully static (zero-token) templates are read from harness-assets/ (see
     // plans/assets-and-tests/02-static-script-assets.md) instead of embedded template literals.
-    { relativePath: 'scripts/build-docs-index.mjs', content: readAsset('scripts/build-docs-index.mjs') },
-    { relativePath: 'scripts/lint-docs-frontmatter.mjs', content: readAsset('scripts/lint-docs-frontmatter.mjs') },
+    { relativePath: kb('scripts/build-docs-index.mjs'), content: readAsset('scripts/build-docs-index.mjs') },
+    { relativePath: kb('scripts/lint-docs-frontmatter.mjs'), content: readAsset('scripts/lint-docs-frontmatter.mjs') },
     {
-      relativePath: 'scripts/validate-structure.mjs',
+      relativePath: kb('scripts/validate-structure.mjs'),
       content: interpolate(readAsset('scripts/validate-structure.mjs'), { writeScopesJson: scopesJson }),
     },
-    { relativePath: 'scripts/validate-plans.mjs', content: readAsset('scripts/validate-plans.mjs') },
     {
-      relativePath: 'scripts/docs-first-reminder.sh',
+      relativePath: kb('scripts/validate-plans.mjs'),
+      content: interpolate(readAsset('scripts/validate-plans.mjs'), { plansDir, backlogDir }),
+    },
+    {
+      relativePath: kb('scripts/docs-first-reminder.sh'),
       content: interpolate(readAsset('scripts/docs-first-reminder.sh'), { reminderTrigger: params.reminderTrigger }),
     },
-    // agent-guard-core.mjs is imported by both Claude and Codex adapters.
+    // agent-guard-core.mjs is imported by both Claude and Codex adapters (via a
+    // relative path threaded with scriptsDir — see claudeOnly/codexOnly below).
     {
-      relativePath: 'scripts/agent-guard-core.mjs',
+      relativePath: kb('scripts/agent-guard-core.mjs'),
       content: interpolate(readAsset('scripts/agent-guard-core.mjs'), { writeScopesJson: scopesJson }),
     },
     // audit-log.mjs is imported by all deny call sites across both harnesses (phase 05).
-    { relativePath: 'scripts/audit-log.mjs', content: readAsset('scripts/audit-log.mjs') },
+    { relativePath: kb('scripts/audit-log.mjs'), content: readAsset('scripts/audit-log.mjs') },
     // ── Knowledge base ──────────────────────────────────────────────────────
-    { relativePath: 'plans/README.md', content: readAsset('plans/README.md') },
-    { relativePath: 'backlog/README.md', content: readAsset('backlog/README.md') },
-    { relativePath: 'docs/README.md', content: readAsset('docs/README.md') },
-    { relativePath: 'docs/INDEX.md', content: readAsset('docs/INDEX.md') },
+    { relativePath: kb('plans/README.md'), content: readAsset('plans/README.md') },
+    { relativePath: kb('backlog/README.md'), content: readAsset('backlog/README.md') },
+    { relativePath: kb('docs/README.md'), content: readAsset('docs/README.md') },
+    { relativePath: kb('docs/INDEX.md'), content: readAsset('docs/INDEX.md') },
     {
-      relativePath: 'docs/_template.md',
+      relativePath: kb('docs/_template.md'),
       content: interpolate(readAsset('docs/_template.md'), {
         flowEnumJoined: flowEnum.join(' | '),
         layerEnumJoined: layerEnum.join(' | '),
       }),
     },
-    ...params.seedDocs,
+    ...params.seedDocs.map((f) => ({ ...f, relativePath: kb(f.relativePath) })),
     // AGENTS.md is the canonical project document — emitted for every harness
     // mode (claude/codex/both). CLAUDE.md (claudeOnly, below) is a thin adapter
-    // importing it via `@AGENTS.md`.
+    // importing it via `@AGENTS.md`. AGENTS.md itself is a tool-discovery path
+    // and always stays bare at root, even though it references baseDir-prefixed
+    // knowledge-base paths inside its body.
     {
       relativePath: 'AGENTS.md',
       content: interpolate(readAsset('AGENTS.md'), {
@@ -252,9 +286,11 @@ export const buildHarnessFileMap = (params: HarnessParams): FileMap => {
         projectSections: params.projectSections,
         extraRoutingRows: params.extraRoutingRows,
         adapterNotes,
+        ...kbDirTokens,
       }),
     },
-    // harness-neutral: emitted for claude, codex, and both
+    // harness-neutral: emitted for claude, codex, and both. .agents/ is a
+    // tool-discovery path — always bare, never baseDir-prefixed.
     { relativePath: '.agents/memory/dev/MEMORY.md', content: memorySeed('dev') },
     { relativePath: '.agents/memory/docs-writer/MEMORY.md', content: memorySeed('docs-writer') },
     { relativePath: '.agents/memory/planner/MEMORY.md', content: memorySeed('planner') },
@@ -282,9 +318,18 @@ export const buildHarnessFileMap = (params: HarnessParams): FileMap => {
     { relativePath: `.claude/skills/${slug}-conventions/SKILL.md`, content: conventionsSkillContent },
     { relativePath: `.claude/skills/${slug}-docs/SKILL.md`, content: docsSkillContent },
     { relativePath: `.claude/skills/${slug}-memory-retro/SKILL.md`, content: memoryRetroSkillContent },
-    { relativePath: '.claude/settings.json', content: readAsset('.claude/settings.json') },
-    // Thin adapter — scopes live in scripts/agent-guard-core.mjs, so no tokens.
-    { relativePath: '.claude/scripts/agent-guard.mjs', content: readAsset('.claude/scripts/agent-guard.mjs') },
+    {
+      relativePath: '.claude/settings.json',
+      content: interpolate(readAsset('.claude/settings.json'), { scriptsDir }),
+    },
+    // Thin adapter — scopes live in scripts/agent-guard-core.mjs; scriptsDir
+    // threads the relative import path across the immovable/movable boundary
+    // (.claude/scripts/ always stays at root, but it imports from scripts/,
+    // which moves under baseDir).
+    {
+      relativePath: '.claude/scripts/agent-guard.mjs',
+      content: interpolate(readAsset('.claude/scripts/agent-guard.mjs'), { scriptsDir }),
+    },
     { relativePath: '.claude/agents/dev.md', content: params.devAgent },
     {
       relativePath: '.claude/agents/docs-writer.md',
@@ -295,6 +340,7 @@ export const buildHarnessFileMap = (params: HarnessParams): FileMap => {
         slug,
         model: agentDef('docs-writer').model,
         memoryFrontmatter: agentMemoryFrontmatter(agentDef('docs-writer')),
+        ...kbDirTokens,
       }),
     },
     {
@@ -305,6 +351,7 @@ export const buildHarnessFileMap = (params: HarnessParams): FileMap => {
         model: agentDef('planner').model,
         memoryFrontmatter: agentMemoryFrontmatter(agentDef('planner')),
         tools: agentTools(agentDef('planner')),
+        ...kbDirTokens,
       }),
     },
     {
@@ -316,6 +363,7 @@ export const buildHarnessFileMap = (params: HarnessParams): FileMap => {
         model: agentDef('advisor').model,
         memoryFrontmatter: agentMemoryFrontmatter(agentDef('advisor')),
         tools: agentTools(agentDef('advisor')),
+        ...kbDirTokens,
       }),
     },
     {
@@ -326,6 +374,7 @@ export const buildHarnessFileMap = (params: HarnessParams): FileMap => {
         productDescription: params.productDescription,
         model: agentDef('scout').model,
         tools: agentTools(agentDef('scout')),
+        ...kbDirTokens,
       }),
     },
   ] : [];
@@ -336,41 +385,54 @@ export const buildHarnessFileMap = (params: HarnessParams): FileMap => {
   // hook scripts under .codex/scripts/ (hooks.json references them via git rev-parse).
   // No .claude/ directory is created for codex-only projects.
   const codexOnly: FileMap = wantCodex ? [
-    { relativePath: '.codex/hooks.json', content: readAsset('.codex/hooks.json') },
+    {
+      relativePath: '.codex/hooks.json',
+      content: interpolate(readAsset('.codex/hooks.json'), { scriptsDir }),
+    },
     {
       relativePath: '.codex/agents/dev.toml',
       content: interpolate(readAsset('.codex/agents/dev.toml'), {
         projectName,
         slug,
         productDescription: params.productDescription,
-        scopeList: agentDef('dev').writeScope.join(', '),
+        scopeList: agentDef('dev').writeScope.map(kb).join(', '),
+        ...kbDirTokens,
       }),
     },
     {
       relativePath: '.codex/agents/docs-writer.toml',
-      content: interpolate(readAsset('.codex/agents/docs-writer.toml'), { projectName, slug }),
+      content: interpolate(readAsset('.codex/agents/docs-writer.toml'), { projectName, slug, ...kbDirTokens }),
     },
     {
       relativePath: '.codex/agents/planner.toml',
-      content: interpolate(readAsset('.codex/agents/planner.toml'), { projectName, productDescription: params.productDescription }),
+      content: interpolate(readAsset('.codex/agents/planner.toml'), { projectName, productDescription: params.productDescription, ...kbDirTokens }),
     },
     {
       relativePath: '.codex/agents/advisor.toml',
-      content: interpolate(readAsset('.codex/agents/advisor.toml'), { projectName, slug, productDescription: params.productDescription }),
+      content: interpolate(readAsset('.codex/agents/advisor.toml'), { projectName, slug, productDescription: params.productDescription, ...kbDirTokens }),
     },
     {
       relativePath: '.codex/agents/scout.toml',
-      content: interpolate(readAsset('.codex/agents/scout.toml'), { projectName, slug, productDescription: params.productDescription }),
+      content: interpolate(readAsset('.codex/agents/scout.toml'), { projectName, slug, productDescription: params.productDescription, ...kbDirTokens }),
     },
     // Skills duplicated as real files (no symlinks — symlinks don't survive npm pack / CI).
+    // .agents/skills/ is a tool-discovery path — always bare, never baseDir-prefixed.
     { relativePath: `.agents/skills/${slug}-conventions/SKILL.md`, content: conventionsSkillContent },
     { relativePath: `.agents/skills/${slug}-docs/SKILL.md`, content: docsSkillContent },
     { relativePath: `.agents/skills/${slug}-memory-retro/SKILL.md`, content: memoryRetroSkillContent },
     // Codex hook scripts under .codex/scripts/ — hooks.json references them via git rev-parse.
-    { relativePath: '.codex/scripts/agent-guard-codex.mjs', content: readAsset('.codex/scripts/agent-guard-codex.mjs') },
+    // scriptsDir threads the relative import path to shared scripts/agent-guard-core.mjs
+    // and scripts/audit-log.mjs, which move under baseDir.
+    {
+      relativePath: '.codex/scripts/agent-guard-codex.mjs',
+      content: interpolate(readAsset('.codex/scripts/agent-guard-codex.mjs'), { scriptsDir }),
+    },
     { relativePath: '.codex/scripts/codex-subagent-start.mjs', content: readAsset('.codex/scripts/codex-subagent-start.mjs') },
     { relativePath: '.codex/scripts/codex-subagent-stop.mjs', content: readAsset('.codex/scripts/codex-subagent-stop.mjs') },
-    { relativePath: '.codex/scripts/codex-permission-guard.mjs', content: readAsset('.codex/scripts/codex-permission-guard.mjs') },
+    {
+      relativePath: '.codex/scripts/codex-permission-guard.mjs',
+      content: interpolate(readAsset('.codex/scripts/codex-permission-guard.mjs'), { scriptsDir }),
+    },
   ] : [];
 
   const files: FileMap = [...shared, ...claudeOnly, ...codexOnly];

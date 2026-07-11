@@ -2,7 +2,7 @@
 import { readdirSync, readFileSync } from 'fs';
 import { join, relative } from 'path';
 
-export const DOCS_DIR = 'docs';
+export const DOCS_DIR = '.beaver/docs';
 export const SKIP_FILES = new Set(['INDEX.md', 'README.md', '_template.md']);
 
 export const ENUMS = {

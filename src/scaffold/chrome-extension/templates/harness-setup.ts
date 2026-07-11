@@ -291,6 +291,7 @@ export const getHarnessFileMap = (cart: ChromeExtensionCore): FileMap =>
     slug: projectSlug(cart),
     productDescription: cart.productDescription,
     harness: aiToHarness(cart.ai),
+    baseDir: '',
     flowEnum: flowEnum(cart),
     layerEnum: layerEnum(cart),
     reminderTrigger: reminderTrigger(cart),

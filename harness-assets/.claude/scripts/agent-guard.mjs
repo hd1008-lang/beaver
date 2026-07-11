@@ -5,8 +5,8 @@
 //
 // NOTE: Do not edit WRITE_SCOPES or ACL logic here — they live in agent-guard-core.mjs.
 import { readFileSync } from 'fs';
-import { checkWritePermission } from '../../scripts/agent-guard-core.mjs';
-import { appendAuditLog } from '../../scripts/audit-log.mjs';
+import { checkWritePermission } from '../../{{scriptsDir}}/agent-guard-core.mjs';
+import { appendAuditLog } from '../../{{scriptsDir}}/audit-log.mjs';
 
 let payload;
 try {

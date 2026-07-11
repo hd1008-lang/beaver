@@ -118,6 +118,7 @@ export const getChromeExtensionHarnessFileMap = (cart: HarnessOnlyCore): FileMap
     slug: slug(cart),
     productDescription: cart.productDescription,
     harness: aiToHarness(cart.ai),
+    baseDir: '',
     flowEnum: ['ui', 'data', 'extension', 'infra', '_meta'],
     layerEnum: ['popup', 'components', 'hooks', 'lib', 'utils', '_cross'],
     reminderTrigger: 'popup|manifest',

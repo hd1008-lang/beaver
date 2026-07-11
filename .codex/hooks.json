@@ -53,7 +53,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"$(git rev-parse --show-toplevel)/scripts/docs-first-reminder.sh\"",
+            "command": "bash \"$(git rev-parse --show-toplevel)/.beaver/scripts/docs-first-reminder.sh\"",
             "statusMessage": "Docs-first reminder…",
             "timeout": 10
           }

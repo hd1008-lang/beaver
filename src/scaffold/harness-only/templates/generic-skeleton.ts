@@ -98,6 +98,7 @@ export const getGenericHarnessFileMap = (cart: HarnessOnlyCore): FileMap =>
     slug: slug(cart),
     productDescription: cart.productDescription,
     harness: aiToHarness(cart.ai),
+    baseDir: '',
     flowEnum: ['ui', 'data', 'infra', '_meta'],
     layerEnum: ['src', '_cross'],
     reminderTrigger: 'home',

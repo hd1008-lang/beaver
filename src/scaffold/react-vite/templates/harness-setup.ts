@@ -430,6 +430,7 @@ export const getHarnessFileMap = (cart: ReactViteCore): FileMap => {
     slug: projectSlug(cart),
     productDescription: cart.productDescription,
     harness: aiToHarness(cart.ai),
+    baseDir: '',
     flowEnum: flowEnum(cart),
     layerEnum: layerEnum(cart),
     reminderTrigger: reminderTrigger(cart),

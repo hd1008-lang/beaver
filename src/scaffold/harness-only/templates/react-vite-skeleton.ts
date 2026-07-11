@@ -118,6 +118,7 @@ export const getReactViteHarnessFileMap = (cart: HarnessOnlyCore): FileMap =>
     slug: slug(cart),
     productDescription: cart.productDescription,
     harness: aiToHarness(cart.ai),
+    baseDir: '',
     flowEnum: ['ui', 'data', 'infra', 'architecture', '_meta'],
     layerEnum: ['app', 'pages', 'features', 'entities', 'shared', '_cross'],
     reminderTrigger: 'home|landing',

@@ -16,7 +16,7 @@
 // "unknown" — see scripts/audit-log.mjs for the hard limitation this implies for Claude's
 // native permissions.deny/ask and sandbox.filesystem.denyRead (no hook fires for those).
 import { readFileSync } from 'fs';
-import { appendAuditLog } from '../../scripts/audit-log.mjs';
+import { appendAuditLog } from '../../{{scriptsDir}}/audit-log.mjs';
 
 let payload;
 try {

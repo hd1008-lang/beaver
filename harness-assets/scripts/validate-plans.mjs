@@ -3,8 +3,8 @@
 import { readdirSync, readFileSync, existsSync } from 'fs';
 import { join } from 'path';
 
-const PLANS_DIR = 'plans';
-const BACKLOG_DIR = 'backlog';
+const PLANS_DIR = '{{plansDir}}';
+const BACKLOG_DIR = '{{backlogDir}}';
 
 // Minimal frontmatter parser — same pattern as validate-structure.mjs (no external deps).
 function parseFrontmatter(content) {

@@ -40,11 +40,14 @@ export function prepareGuardDir(): GuardDir {
   const agentGuardCodex = join(root, '.codex', 'scripts', 'agent-guard-codex.mjs');
   const codexPermissionGuard = join(root, '.codex', 'scripts', 'codex-permission-guard.mjs');
 
+  // scriptsDir: 'scripts' — this fixture always mirrors the bare (baseDir='')
+  // scaffolded-project layout, so the adapters' relative imports resolve to
+  // '../../scripts/...' unchanged (see plans/0017-beaver-folder-structure).
   writeFileSync(agentGuardCore, interpolate(readAsset('scripts/agent-guard-core.mjs'), { writeScopesJson: scopesJson }));
   writeFileSync(auditLog, readAsset('scripts/audit-log.mjs'));
-  writeFileSync(agentGuard, readAsset('.claude/scripts/agent-guard.mjs'));
-  writeFileSync(agentGuardCodex, readAsset('.codex/scripts/agent-guard-codex.mjs'));
-  writeFileSync(codexPermissionGuard, readAsset('.codex/scripts/codex-permission-guard.mjs'));
+  writeFileSync(agentGuard, interpolate(readAsset('.claude/scripts/agent-guard.mjs'), { scriptsDir: 'scripts' }));
+  writeFileSync(agentGuardCodex, interpolate(readAsset('.codex/scripts/agent-guard-codex.mjs'), { scriptsDir: 'scripts' }));
+  writeFileSync(codexPermissionGuard, interpolate(readAsset('.codex/scripts/codex-permission-guard.mjs'), { scriptsDir: 'scripts' }));
 
   return { root, agentGuardCore, agentGuard, agentGuardCodex, codexPermissionGuard, auditLog };
 }

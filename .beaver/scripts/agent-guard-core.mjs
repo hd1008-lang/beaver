@@ -13,15 +13,15 @@ export const WRITE_SCOPES = {
     "biome.json",
     "eslint.config.js",
     ".github/",
-    "backlog/",
-    "plans/",
+    ".beaver/backlog/",
+    ".beaver/plans/",
     "harness-assets/"
   ],
   "docs-writer": [
-    "docs/"
+    ".beaver/docs/"
   ],
   "planner": [
-    "plans/"
+    ".beaver/plans/"
   ],
   "advisor": [],
   "scout": []
