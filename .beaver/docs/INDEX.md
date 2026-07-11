@@ -9,7 +9,7 @@
 - [Agent Workflow — planner / dev / backlog](architecture\agent-workflow.en.md) — `feature:_app` `flow:architecture` `layer:_cross` — planner, dev, backlog, plans, park-rule, blocked, resumable, dogfood
 
 ### ai-harness (1)
-- [AI Harness Generation — Feature Spec](features\ai-harness\ai-harness.spec.en.md) — `feature:ai-harness` `flow:templates` `layer:scaffold` — agentsmd, harnesssetup, buildharnessfilemap, adapter, vendorneutral, harness, aiharnesssetup, agents, agentregistry, skills, backlog, parkrule, plans, validator, productdescription, dualharness, harnessscaffold, toml, codexhooks, agentstoml
+- [AI Harness Generation — Feature Spec](features\ai-harness\ai-harness.spec.en.md) — `feature:ai-harness` `flow:templates` `layer:scaffold` — agentsmd, harnesssetup, buildharnessfilemap, adapter, vendorneutral, harness, aiharnesssetup, agents, agentregistry, skills, backlog, parkrule, plans, validator, productdescription, dualharness, harnessscaffold, toml, codexhooks, agentstoml, basedir, rootdiscovery, beaverfolder, knowledgebase
 
 ### cli-update (1)
 - [CLI Self-Update Command — Feature Spec](features\cli-update\cli-update.spec.en.md) — `feature:cli-update` `flow:infra` `layer:_cross` — update, self-update, npm, beaver-build, runupdate, version
@@ -36,7 +36,7 @@
 - [React + Vite Project Scaffolding — Feature Spec](features\react-vite\react-vite.spec.en.md) — `feature:react-vite` `flow:scaffold` `layer:_cross` — projecttype, scaffolding, cartpattern, flowreactvite, tanstackrouter, zustand, tanstackquery, tailwind, biome, eslint, vitest, playwright, claude
 
 ### templates (2)
-- [AI Harness Generation — Feature Spec](features\ai-harness\ai-harness.spec.en.md) — `feature:ai-harness` `flow:templates` `layer:scaffold` — agentsmd, harnesssetup, buildharnessfilemap, adapter, vendorneutral, harness, aiharnesssetup, agents, agentregistry, skills, backlog, parkrule, plans, validator, productdescription, dualharness, harnessscaffold, toml, codexhooks, agentstoml
+- [AI Harness Generation — Feature Spec](features\ai-harness\ai-harness.spec.en.md) — `feature:ai-harness` `flow:templates` `layer:scaffold` — agentsmd, harnesssetup, buildharnessfilemap, adapter, vendorneutral, harness, aiharnesssetup, agents, agentregistry, skills, backlog, parkrule, plans, validator, productdescription, dualharness, harnessscaffold, toml, codexhooks, agentstoml, basedir, rootdiscovery, beaverfolder, knowledgebase
 - [Security Hardening — Feature Spec](features\security-hardening\security-hardening.spec.en.md) — `feature:security-hardening` `flow:templates` `layer:scaffold` — securityhardening, denyread, sensitivefilepatterns, secretreadguard, networkegress, auditlog, gitignore, failclosed, envfiles, credentialspatterns
 
 ## By Layer
@@ -48,7 +48,7 @@
 - [React + Vite Project Scaffolding — Feature Spec](features\react-vite\react-vite.spec.en.md) — `feature:react-vite` `flow:scaffold` `layer:_cross` — projecttype, scaffolding, cartpattern, flowreactvite, tanstackrouter, zustand, tanstackquery, tailwind, biome, eslint, vitest, playwright, claude
 
 ### scaffold (2)
-- [AI Harness Generation — Feature Spec](features\ai-harness\ai-harness.spec.en.md) — `feature:ai-harness` `flow:templates` `layer:scaffold` — agentsmd, harnesssetup, buildharnessfilemap, adapter, vendorneutral, harness, aiharnesssetup, agents, agentregistry, skills, backlog, parkrule, plans, validator, productdescription, dualharness, harnessscaffold, toml, codexhooks, agentstoml
+- [AI Harness Generation — Feature Spec](features\ai-harness\ai-harness.spec.en.md) — `feature:ai-harness` `flow:templates` `layer:scaffold` — agentsmd, harnesssetup, buildharnessfilemap, adapter, vendorneutral, harness, aiharnesssetup, agents, agentregistry, skills, backlog, parkrule, plans, validator, productdescription, dualharness, harnessscaffold, toml, codexhooks, agentstoml, basedir, rootdiscovery, beaverfolder, knowledgebase
 - [Security Hardening — Feature Spec](features\security-hardening\security-hardening.spec.en.md) — `feature:security-hardening` `flow:templates` `layer:scaffold` — securityhardening, denyread, sensitivefilepatterns, secretreadguard, networkegress, auditlog, gitignore, failclosed, envfiles, credentialspatterns
 
 ## Keyword Index
@@ -62,7 +62,9 @@
 - `aiharnesssetup` → [features\ai-harness\ai-harness.spec.en.md](features\ai-harness\ai-harness.spec.en.md)
 - `auditlog` → [features\security-hardening\security-hardening.spec.en.md](features\security-hardening\security-hardening.spec.en.md)
 - `backlog` → [architecture\agent-workflow.en.md](architecture\agent-workflow.en.md), [features\ai-harness\ai-harness.spec.en.md](features\ai-harness\ai-harness.spec.en.md)
+- `basedir` → [features\ai-harness\ai-harness.spec.en.md](features\ai-harness\ai-harness.spec.en.md)
 - `beaver-build` → [features\cli-update\cli-update.spec.en.md](features\cli-update\cli-update.spec.en.md)
+- `beaverfolder` → [features\ai-harness\ai-harness.spec.en.md](features\ai-harness\ai-harness.spec.en.md)
 - `biome` → [features\react-vite\react-vite.spec.en.md](features\react-vite\react-vite.spec.en.md)
 - `blocked` → [architecture\agent-workflow.en.md](architecture\agent-workflow.en.md)
 - `buildharnessfilemap` → [features\ai-harness\ai-harness.spec.en.md](features\ai-harness\ai-harness.spec.en.md)
@@ -84,6 +86,7 @@
 - `harnessonly` → [features\harness-only\harness-only.spec.en.md](features\harness-only\harness-only.spec.en.md)
 - `harnessscaffold` → [features\ai-harness\ai-harness.spec.en.md](features\ai-harness\ai-harness.spec.en.md)
 - `harnesssetup` → [features\ai-harness\ai-harness.spec.en.md](features\ai-harness\ai-harness.spec.en.md)
+- `knowledgebase` → [features\ai-harness\ai-harness.spec.en.md](features\ai-harness\ai-harness.spec.en.md)
 - `networkegress` → [features\security-hardening\security-hardening.spec.en.md](features\security-hardening\security-hardening.spec.en.md)
 - `noscaffold` → [features\harness-only\harness-only.spec.en.md](features\harness-only\harness-only.spec.en.md)
 - `npm` → [features\cli-update\cli-update.spec.en.md](features\cli-update\cli-update.spec.en.md)
@@ -95,6 +98,7 @@
 - `productdescription` → [features\ai-harness\ai-harness.spec.en.md](features\ai-harness\ai-harness.spec.en.md)
 - `projecttype` → [features\react-vite\react-vite.spec.en.md](features\react-vite\react-vite.spec.en.md)
 - `resumable` → [architecture\agent-workflow.en.md](architecture\agent-workflow.en.md)
+- `rootdiscovery` → [features\ai-harness\ai-harness.spec.en.md](features\ai-harness\ai-harness.spec.en.md)
 - `runupdate` → [features\cli-update\cli-update.spec.en.md](features\cli-update\cli-update.spec.en.md)
 - `scaffolding` → [features\react-vite\react-vite.spec.en.md](features\react-vite\react-vite.spec.en.md)
 - `secretreadguard` → [features\security-hardening\security-hardening.spec.en.md](features\security-hardening\security-hardening.spec.en.md)

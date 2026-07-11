@@ -6,7 +6,7 @@ layer: scaffold
 status: active
 lang: en
 related: [architecture/agent-workflow.en.md, features/harness-only/harness-only.spec.en.md]
-keywords: [agentsmd, harnesssetup, buildharnessfilemap, adapter, vendorneutral, harness, aiharnesssetup, agents, agentregistry, skills, backlog, parkrule, plans, validator, productdescription, dualharness, harnessscaffold, toml, codexhooks, agentstoml]
+keywords: [agentsmd, harnesssetup, buildharnessfilemap, adapter, vendorneutral, harness, aiharnesssetup, agents, agentregistry, skills, backlog, parkrule, plans, validator, productdescription, dualharness, harnessscaffold, toml, codexhooks, agentstoml, basedir, rootdiscovery, beaverfolder, knowledgebase]
 updated: 2026-07-11
 ---
 
@@ -17,6 +17,8 @@ Scaffolded projects ship with an optional AI harness (menu "Choose an AI setup")
 
 The harness scaffolds a full agent workflow including docs (long-lived WHAT), plans (HOW/when phases), and backlog (deferred work), plus all supporting tooling and agent definitions wired into provider-specific files (AGENTS.md for all modes, CLAUDE.md adapter for Claude/both).
 
+Tool providers (Claude Code, Codex) auto-discover harness metadata at the repository root only. Certain paths (`.claude/`, `.codex/`, `.agents/`, `AGENTS.md`, `CLAUDE.md`) must remain at root because they are immovable tool-discovery paths. Knowledge-base paths (`plans/`, `docs/`, `backlog/`, `scripts/`) are movable via the `{{baseDir}}` token — beaver's dogfood places them under `.beaver/` for a cleaner root, while scaffolded projects emit them at root.
+
 ## Root Cause / Key Finding
 The harness was originally react-vite-only and leaked unselected options (Zustand in the BPR diagram, an always-present test-writer agent, routing/state docs enums) into generated files — noisy context for the downstream agent.
 
@@ -25,6 +27,33 @@ The scaffolded agent workflow had no story-level planning or blocker-tracking. W
 Prior harness design treated CLAUDE.md as the canonical entry point and required Codex users to read it first via a pointer — a Claude-centric bias at odds with vendor neutrality.
 
 ## Solution / Pattern
+
+### Root-Discovery Constraint (Immovable Paths)
+
+Tool providers (Claude Code, Codex, and agent harnesses in general) auto-discover harness metadata at the **repository root only**. These paths **must always stay at root** and cannot be moved, nested, or prefixed:
+
+- **Claude Code auto-discovery:** reads `CLAUDE.md`, `.claude/settings.json`, `.claude/agents/`, `.claude/skills/`, `.claude/scripts/` from root
+- **Codex auto-discovery:** reads `AGENTS.md` (entry point), `.codex/hooks.json`, `.codex/agents/`, `.codex/scripts/` from root
+- **Agent memory:** `.agents/memory/` and `.agents/skills/` (shared across both providers, read-only for stateless agents)
+
+These discovery paths are **tool-level requirements**, not configurable. Moving them breaks agent initialization and skill resolution. This constraint applies universally — to beaver itself and every scaffolded project that uses the harness.
+
+**Scaffold behavior:** Both beaver (via `baseDir = '.beaver'`) and scaffolded projects (via `baseDir = ''`) emit `.claude/`, `.codex/`, `.agents/`, `AGENTS.md`, and `CLAUDE.md` at the repository root. The `{{baseDir}}` token **never** prefixes these paths.
+
+### Knowledge-Base Folder Structure (Movable via baseDir)
+
+The harness maintains a **knowledge-base layer** of project-internal documentation and workflow artifacts. Unlike tool-discovery paths, these can be relocated:
+
+- **Beaver's dogfood** (this repo): `{{baseDir}} = '.beaver'` → knowledge-base at `.beaver/plans/`, `.beaver/docs/`, `.beaver/backlog/`, `.beaver/scripts/`
+- **Scaffolded projects:** `{{baseDir}} = ''` (empty string) → knowledge-base at root: `plans/`, `docs/`, `backlog/`, `scripts/`
+
+The `{{baseDir}}` token is **selective** — it prefixes only knowledge-base path references in rendered files. Tool-discovery paths remain bare.
+
+**Rationale for baseDir:**
+1. **Cleaner root in dogfood:** beaver's product code (src/, test/, npm scripts) at the top level; internal tooling hidden under `.beaver/`
+2. **Scaffolded projects stay simple:** generated projects emit at root by default (no hidden directories)
+3. **Single harness codebase:** one rendering engine (`buildHarnessFileMap`) emits at different paths via token substitution — no code duplication
+4. **Future flexibility:** other CLI tools can adopt `.beaver/` convention without modifying beaver's rendering logic
 
 ### Harness Architecture (Vendor-Neutral Canonical)
 
@@ -120,26 +149,30 @@ Shared files are emitted for any harness choice: docs tooling, agent-guard-core.
 
 ## Shared Harness Output
 
-**Emitted for any harness choice** (`'claude'`, `'codex'`, or `'both'`).
+**Emitted for any harness choice** (`'claude'`, `'codex'`, or `'both'`). Knowledge-base paths use the `{{baseDir}}` token for selective prefixing; tool-discovery paths stay bare at root.
+
+**Folder layout:**
+- **Beaver's dogfood** (`baseDir = '.beaver'`): `.beaver/plans/`, `.beaver/docs/`, `.beaver/backlog/`, `.beaver/scripts/`
+- **Scaffolded projects** (`baseDir = ''`): `plans/`, `docs/`, `backlog/`, `scripts/` at root
 
 | File / Directory | Purpose |
 |---|---|
-| `AGENTS.md` | Canonical AI harness entry point for all modes; holds behavioral guidelines, project overview, agent routing, PARK RULE, MEMORY LIFECYCLE, DOCS-FIRST rules, and renderer-filled provider-adapter notes |
-| `plans/README.md` | Plan artifact guide and lifecycle documentation |
-| `backlog/README.md` | Backlog artifact guide (append-only log of deferred work) |
-| `docs/README.md` | Docs knowledge-base guide |
-| `docs/INDEX.md` | Auto-generated index of all knowledge-base docs (regenerated by `build-docs-index.mjs`) |
-| `docs/_template.md` | Template for new docs; includes frontmatter schema enums for the project |
-| `docs/<feature-specs>` | Seed docs passed in via `HarnessParams.seedDocs` |
-| `scripts/_docs-shared.mjs` | Shared frontmatter schema helpers for docs tooling |
-| `scripts/build-docs-index.mjs` | Regenerates `docs/INDEX.md` from frontmatter |
-| `scripts/lint-docs-frontmatter.mjs` | Validates doc frontmatter completeness and correctness |
-| `scripts/validate-structure.mjs` | Validator: checks agents' `tools` lists respect `writeScope` constraints + memory budget (warn > 15 bullets/100 lines, fail at 2×) |
-| `scripts/validate-plans.mjs` | Validator: checks plan/backlog consistency (ordered phases, bidirectional links, backlog ID format) |
-| `scripts/docs-first-reminder.sh` | Hook script; logs reminder to read docs before opening source files (triggered by symbol name) |
-| `scripts/agent-guard-core.mjs` | Core ACL implementation; imported by both Claude (`agent-guard.mjs`) and Codex (`agent-guard-codex.mjs`) adapters |
-| `.agents/memory/<agent>/MEMORY.md` | Per-agent short-term memory seeds (`dev`, `docs-writer`, `planner`, `advisor`, and optionally `test-writer`) — see "Agent Memory Lifecycle" |
-| `.claude/skills/<slug>-memory-retro/SKILL.md` | Memory hygiene skill (dedupe / delete stale / promote to docs) |
+| `AGENTS.md` (root) | Canonical AI harness entry point for all modes; holds behavioral guidelines, project overview, agent routing, PARK RULE, MEMORY LIFECYCLE, DOCS-FIRST rules, and renderer-filled provider-adapter notes |
+| `{{baseDir}}/plans/README.md` | Plan artifact guide and lifecycle documentation |
+| `{{baseDir}}/backlog/README.md` | Backlog artifact guide (append-only log of deferred work) |
+| `{{baseDir}}/docs/README.md` | Docs knowledge-base guide |
+| `{{baseDir}}/docs/INDEX.md` | Auto-generated index of all knowledge-base docs (regenerated by `build-docs-index.mjs`) |
+| `{{baseDir}}/docs/_template.md` | Template for new docs; includes frontmatter schema enums for the project |
+| `{{baseDir}}/docs/<feature-specs>` | Seed docs passed in via `HarnessParams.seedDocs` |
+| `{{baseDir}}/scripts/_docs-shared.mjs` | Shared frontmatter schema helpers for docs tooling |
+| `{{baseDir}}/scripts/build-docs-index.mjs` | Regenerates `docs/INDEX.md` from frontmatter |
+| `{{baseDir}}/scripts/lint-docs-frontmatter.mjs` | Validates doc frontmatter completeness and correctness |
+| `{{baseDir}}/scripts/validate-structure.mjs` | Validator: checks agents' `tools` lists respect `writeScope` constraints + memory budget (warn > 15 bullets/100 lines, fail at 2×) |
+| `{{baseDir}}/scripts/validate-plans.mjs` | Validator: checks plan/backlog consistency (ordered phases, bidirectional links, backlog ID format) |
+| `{{baseDir}}/scripts/docs-first-reminder.sh` | Hook script; logs reminder to read docs before opening source files (triggered by symbol name) |
+| `{{baseDir}}/scripts/agent-guard-core.mjs` | Core ACL implementation; imported by both Claude (`agent-guard.mjs`) and Codex (`agent-guard-codex.mjs`) adapters |
+| `.agents/memory/<agent>/MEMORY.md` (root) | Per-agent short-term memory seeds (`dev`, `docs-writer`, `planner`, `advisor`, and optionally `test-writer`) — see "Agent Memory Lifecycle" |
+| `.agents/skills/<slug>-memory-retro/SKILL.md` (root) | Memory hygiene skill (dedupe / delete stale / promote to docs) |
 
 ## Claude Harness Output
 
@@ -207,10 +240,17 @@ interface HarnessParams {
   extraRoutingRows: string;      // rendered extra agent routing table rows (e.g., test-writer if testing is on)
   testing: boolean;              // whether a test framework is selected (controls test-writer emission)
   harness: 'claude' | 'codex' | 'both';  // which harness files to emit
+  baseDir: string;               // prefix for knowledge-base paths ('.beaver' for beaver, '' for scaffolded projects); default ''
   seedDocs?: string;             // optional: seed docs passed from project type
   claudeExtras?: string;         // optional: Claude-only content lines for CLAUDE.md adapter
 }
 ```
+
+**Field notes:**
+- `baseDir`: Selective prefix for knowledge-base paths (`plans/`, `docs/`, `backlog/`, `scripts/`) only. Tool-discovery paths (`.claude/`, `.codex/`, `.agents/`, AGENTS.md, CLAUDE.md) always render at root regardless of baseDir.
+  - Beaver's dogfood: `baseDir = '.beaver'` → `.beaver/plans/`, `.beaver/docs/`, etc.
+  - Scaffolded projects: `baseDir = ''` (empty) → `plans/`, `docs/`, etc. at root
+  - Default: empty string (`''`) for backward compatibility with existing scaffolded projects
 
 Replaces the pre-0016 `claudeMd: string` field with the split `projectSections` + `extraRoutingRows` + optional `claudeExtras`, enabling per-provider rendering while keeping content (AGENTS.md project sections) neutral.
 
@@ -265,6 +305,15 @@ The park rule is mandatory in the harness-emitted AGENTS.md and agent templates 
 The beaver repo itself dogfoods the same harness (this docs/ tree, AGENTS.md, CLAUDE.md, .claude/, plans/, backlog/), with CLI-specific enums.
 
 **Rationale:** Eats its own dog food; discovers UX issues early; harness is battle-tested by the dev team.
+
+### 11. Knowledge-Base Paths Are Movable via {{baseDir}} Token
+The harness uses a selective `{{baseDir}}` token to prefix knowledge-base paths (plans/, docs/, backlog/, scripts/) while keeping tool-discovery paths (`.claude/`, `.codex/`, `.agents/`, AGENTS.md, CLAUDE.md) fixed at root.
+
+**Rationale:** 
+- **Beaver**: `baseDir = '.beaver'` moves knowledge-base to `.beaver/` for a cleaner root, keeping product code (`src/`, `test/`) at the top level.
+- **Scaffolded projects**: `baseDir = ''` (empty string) emits at root, matching user expectations (no hidden directories).
+- **Single codebase, many layouts:** one harness rendering engine serves both beaver and scaffolded projects without duplication or environment-specific branching.
+- **Future-proof:** other CLI tools can adopt `.beaver/` convention (like `.next/`, `.vite/`, `.cache/`) without forking the harness code.
 
 ## Related Files
 - src/scaffold/shared/harness-setup.ts
