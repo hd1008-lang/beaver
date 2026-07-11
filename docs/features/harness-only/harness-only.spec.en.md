@@ -5,9 +5,9 @@ flow: scaffold
 layer: _cross
 status: active
 lang: en
-related: [features/claude-harness/claude-harness.spec.en.md]
+related: [features/ai-harness/ai-harness.spec.en.md]
 keywords: [harnessonly, aiharness, existingproject, skeletontemplate, --ai, noscaffold]
-updated: 2026-06-13
+updated: 2026-07-11
 ---
 
 # Apply AI Harness to Existing Project — Feature Spec
@@ -92,4 +92,4 @@ In `src/index.ts`:
 - src/scaffold/harness-only/templates/react-vite-skeleton.ts — React + Vite harness skeleton
 - src/scaffold/harness-only/templates/chrome-extension-skeleton.ts — Chrome extension harness skeleton
 - src/scaffold/harness-only/templates/generic-skeleton.ts — Generic/minimal harness skeleton
-- docs/features/claude-harness/claude-harness.spec.en.md — shared harness generation patterns
+- docs/features/ai-harness/ai-harness.spec.en.md — shared harness generation patterns (vendor-neutral canonical architecture)

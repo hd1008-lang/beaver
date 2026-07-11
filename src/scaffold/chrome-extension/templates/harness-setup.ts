@@ -1,10 +1,11 @@
 import { ChromeExtensionCore } from '@src/types';
 import { FileMap } from '@src/scaffold/utils';
-import { buildClaudeFileMap, claudeHarnessTableTemplate } from '@src/scaffold/shared/claude-setup';
+import { buildHarnessFileMap } from '@src/scaffold/shared/harness-setup';
 
-// Chrome-extension-specific pieces of the Claude Code harness (CLAUDE.md,
-// conventions skill, dev agent). Project-agnostic pieces (docs tooling,
-// settings, docs skill, docs-writer) live in @src/scaffold/shared/claude-setup.
+// Chrome-extension-specific pieces of the AI harness (AGENTS.md project
+// sections + routing rows, conventions skill, dev agent). Project-agnostic
+// pieces (docs tooling, settings, docs skill, docs-writer, canonical AGENTS.md
+// skeleton, CLAUDE.md adapter) live in @src/scaffold/shared/harness-setup.
 // No test framework option exists for this project type → no test-writer.
 
 const projectSlug = (cart: ChromeExtensionCore): string =>
@@ -36,13 +37,12 @@ const reminderTrigger = (cart: ChromeExtensionCore): string =>
   `popup|manifest${cart.stateManagement === 'ZUSTAND' ? '|store|state' : ''}${cart.query === 'TANSTACK_QUERY' ? '|query|fetch' : ''}`;
 
 // ---------------------------------------------------------------------------
-// CLAUDE.md
+// AGENTS.md project sections + routing rows
 // ---------------------------------------------------------------------------
 
-const claudeMdTemplate = (cart: ChromeExtensionCore): string => {
+const projectSectionsTemplate = (cart: ChromeExtensionCore): string => {
   const hasZustand = cart.stateManagement === 'ZUSTAND';
   const hasQuery = cart.query === 'TANSTACK_QUERY';
-  const slug = projectSlug(cart);
 
   const stack = [
     'React 19, TypeScript 5.8, Vite 6',
@@ -85,20 +85,7 @@ useQuery({ queryKey: todoKeys.detail(id), queryFn: () => fetchTodo(id) });
 \`\`\``);
   }
 
-  return `# ${cart.projectName}
-
-## Behavioral Guidelines
-
-**Think Before Coding** — state assumptions explicitly; if multiple interpretations exist, present them; if something is unclear, stop and ask.
-**Simplicity First** — minimum code that solves the problem; no speculative features, abstractions, or configurability.
-**Surgical Changes** — touch only what the request requires; match existing style; every changed line traces to the request.
-**Goal-Driven Execution** — turn tasks into verifiable success criteria before starting; loop until verified.
-
-## Project Overview
-
-${cart.productDescription}
-
-${stack.map((s) => `- ${s}`).join('\n')}
+  return `${stack.map((s) => `- ${s}`).join('\n')}
 
 This is a **popup-only MV3 extension**: \`index.html\` → \`src/main.tsx\` → \`src/App.tsx\` is the popup root. No background service worker or content scripts are configured — adding one requires registering it in \`manifest.json\` AND adding a Rollup input in \`vite.config.ts\`.
 
@@ -140,31 +127,14 @@ ${keyPatterns.join('\n\n')}
 | \`useEffect\` for derived state | Compute during render or use \`useMemo\` |
 
 > Fill this table from real review feedback over time — it is the highest-leverage section for code quality.
-
-## Agent Routing
-
-| Task / trigger | Agent | Notes |
-|---|---|---|
-${claudeHarnessTableTemplate()}
-| Feature work or bug fix in \`src/\` or \`manifest.json\` | \`dev\` | MUST read relevant \`docs/features/\` spec before coding |
-
-**PARK RULE (anti-loop):** when executing a step/phase, if it fails twice and the cause isn't fixable right now (missing info, needs a user decision, environment, or out-of-scope), STOP — don't retry a third time. Set the phase \`status: blocked\`, file a \`backlog/<id>\` entry (record what was already tried so it isn't repeated), link both ways, tell the user it was parked, and move on to the next workable item. See \`backlog/README.md\`.
-
-Each agent has persistent memory at \`.agents/memory/<agent>/MEMORY.md\` — agents read it on start and append new gotchas. Do NOT use the general assistant for work an agent owns — always delegate.
-
-## Task Documentation Convention
-
-After any non-trivial fix or new pattern: copy \`docs/_template.md\`, fill the frontmatter, save as \`docs/features/<feature>/<topic>.en.md\` (or \`docs/architecture/\` for cross-cutting topics), then run \`node scripts/build-docs-index.mjs\` and commit the doc together with \`INDEX.md\`. Validate with \`node scripts/lint-docs-frontmatter.mjs\`.
-
-## Further Reading + DOCS-FIRST RULE
-
-Skills: \`.claude/skills/${slug}-conventions\` (architecture depth), \`.claude/skills/${slug}-docs\` (how to query the knowledge base).
-
-**DOCS-FIRST RULE:** for any request to describe, explain, or modify a documented feature, you MUST grep \`docs/\` frontmatter and read the relevant docs BEFORE opening source files — and state what the docs already covered. Start at \`docs/INDEX.md\`.
-
-**Operating loop:** finish a non-trivial task → write a doc from \`docs/_template.md\` → rebuild \`INDEX.md\` → commit together; agents update their \`MEMORY.md\` when they learn a gotcha.
 `;
 };
+
+// Agent Routing table row this project type contributes, appended after the
+// shared advisor/scout/planner/docs-writer rows baked into harness-assets/AGENTS.md.
+// No test framework option exists for chrome-extension → no test-writer row.
+const extraRoutingRowsTemplate = (): string =>
+  '\n| Feature work or bug fix in `src/` or `manifest.json` | `dev` | MUST read relevant `docs/features/` spec before coding |';
 
 // ---------------------------------------------------------------------------
 // Seed doc — docs/features/popup/popup.spec.en.md
@@ -221,7 +191,7 @@ description: Coding conventions and architecture rules for ${cart.projectName} (
 
 # ${cart.projectName} Conventions
 
-In-depth companion to CLAUDE.md. CLAUDE.md states the rules; this skill explains how to apply them.
+In-depth companion to AGENTS.md. AGENTS.md states the rules; this skill explains how to apply them.
 
 ## Structure
 
@@ -315,8 +285,8 @@ const aiToHarness = (ai: ChromeExtensionCore['ai']): 'claude' | 'codex' | 'both'
   return 'claude';
 };
 
-export const getClaudeFileMap = (cart: ChromeExtensionCore): FileMap =>
-  buildClaudeFileMap({
+export const getHarnessFileMap = (cart: ChromeExtensionCore): FileMap =>
+  buildHarnessFileMap({
     projectName: cart.projectName,
     slug: projectSlug(cart),
     productDescription: cart.productDescription,
@@ -324,7 +294,8 @@ export const getClaudeFileMap = (cart: ChromeExtensionCore): FileMap =>
     flowEnum: flowEnum(cart),
     layerEnum: layerEnum(cart),
     reminderTrigger: reminderTrigger(cart),
-    claudeMd: claudeMdTemplate(cart),
+    projectSections: projectSectionsTemplate(cart),
+    extraRoutingRows: extraRoutingRowsTemplate(),
     conventionsSkill: conventionsSkillTemplate(cart),
     devAgent: devAgentTemplate(cart),
     seedDocs: [{ relativePath: 'docs/features/popup/popup.spec.en.md', content: docsPopupSpecTemplate(cart) }],

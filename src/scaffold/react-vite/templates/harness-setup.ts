@@ -1,10 +1,11 @@
 import { ReactViteCore } from '@src/types';
 import { FileMap } from '@src/scaffold/utils';
-import { buildClaudeFileMap, claudeHarnessTableTemplate } from '@src/scaffold/shared/claude-setup';
+import { buildHarnessFileMap } from '@src/scaffold/shared/harness-setup';
 
-// React+Vite-specific pieces of the Claude Code harness (CLAUDE.md, conventions
-// skill, dev/test-writer agents). Project-agnostic pieces (docs tooling, settings,
-// docs skill, docs-writer) live in @src/scaffold/shared/claude-setup.
+// React+Vite-specific pieces of the AI harness (AGENTS.md project sections +
+// routing rows, conventions skill, dev/test-writer agents). Project-agnostic
+// pieces (docs tooling, settings, docs skill, docs-writer, canonical AGENTS.md
+// skeleton, CLAUDE.md adapter) live in @src/scaffold/shared/harness-setup.
 
 const projectSlug = (cart: ReactViteCore): string =>
   cart.projectName.toLowerCase().replace(/_/g, '-');
@@ -30,10 +31,10 @@ const reminderTrigger = (cart: ReactViteCore): string =>
   `home|landing${cart.router === 'TANSTACK_ROUTER' ? '|route|routing' : ''}${cart.stateManagement === 'ZUSTAND' ? '|store|state' : ''}${cart.query === 'TANSTACK_QUERY' ? '|query|fetch' : ''}`;
 
 // ---------------------------------------------------------------------------
-// CLAUDE.md
+// AGENTS.md project sections + routing rows
 // ---------------------------------------------------------------------------
 
-const claudeMdTemplate = (cart: ReactViteCore): string => {
+const projectSectionsTemplate = (cart: ReactViteCore): string => {
   const isFsd = cart.layout === 'FSD';
   const hasRouter = cart.router === 'TANSTACK_ROUTER';
   const hasZustand = cart.stateManagement === 'ZUSTAND';
@@ -41,7 +42,6 @@ const claudeMdTemplate = (cart: ReactViteCore): string => {
   const hasVitest = cart.testing === 'VITEST';
   const hasPlaywright = cart.testing === 'PLAYWRIGHT';
   const hasTesting = cart.testing !== 'NOT_USING';
-  const slug = projectSlug(cart);
 
   const stack = [
     'React 19, TypeScript 5.8, Vite 6',
@@ -147,28 +147,9 @@ ${hasVitest ? '├── unit/              # mirrors src/ layer structure; *.te
 └── specs/             # paired human-readable *.spec.md contracts — documentation, never executed
 \`\`\`
 
-Every test file has a paired \`test/specs/.../<name>.spec.md\` describing WHAT it covers. See \`test/README.md\`.
+Every test file has a paired \`test/specs/.../<name>.spec.md\` describing WHAT it covers. See \`test/README.md\`.` : '';
 
-` : '';
-
-  const testWriterRow = hasTesting
-    ? '\n| Writing or updating tests | `test-writer` | writes only under `test/`; requires a feature spec first |'
-    : '';
-
-  return `# ${cart.projectName}
-
-## Behavioral Guidelines
-
-**Think Before Coding** — state assumptions explicitly; if multiple interpretations exist, present them; if something is unclear, stop and ask.
-**Simplicity First** — minimum code that solves the problem; no speculative features, abstractions, or configurability.
-**Surgical Changes** — touch only what the request requires; match existing style; every changed line traces to the request.
-**Goal-Driven Execution** — turn tasks into verifiable success criteria before starting; loop until verified.
-
-## Project Overview
-
-${cart.productDescription}
-
-${stack.map((s) => `- ${s}`).join('\n')}
+  return `${stack.map((s) => `- ${s}`).join('\n')}
 
 Architecture: **${isFsd ? 'Feature Slice Design (FSD)' : 'Bulletproof React (BPR)'}**. Reference implementation: \`src/pages/home${isFsd ? '/' : '.tsx'}\` — consult it before generating new pages. Verify actual directory names with \`ls\` before writing paths.
 
@@ -197,30 +178,18 @@ ${isFsd ? '| Importing a slice\'s internals (`@/pages/home/ui/HomePage`) | Impor
 | Hand-editing generated files${hasRouter ? ' (`routeTree.gen.ts`)' : ''} | Regenerate via the owning tool |
 
 > Fill this table from real review feedback over time — it is the highest-leverage section for code quality.
-
-${testSection}## Agent Routing
-
-| Task / trigger | Agent | Notes |
-|---|---|---|
-${claudeHarnessTableTemplate()}
-| Feature work or bug fix in \`src/\` | \`dev\` | MUST read relevant \`docs/features/\` spec before coding |${testWriterRow}
-
-**PARK RULE (anti-loop):** when executing a step/phase, if it fails twice and the cause isn't fixable right now (missing info, needs a user decision, environment, or out-of-scope), STOP — don't retry a third time. Set the phase \`status: blocked\`, file a \`backlog/<id>\` entry (record what was already tried so it isn't repeated), link both ways, tell the user it was parked, and move on to the next workable item. See \`backlog/README.md\`.
-
-Each agent has persistent memory at \`.agents/memory/<agent>/MEMORY.md\` — agents read it on start and append new gotchas. Do NOT use the general assistant for work an agent owns — always delegate.
-
-## Task Documentation Convention
-
-After any non-trivial fix or new pattern: copy \`docs/_template.md\`, fill the frontmatter, save as \`docs/features/<feature>/<topic>.en.md\` (or \`docs/architecture/\` for cross-cutting topics), then run \`node scripts/build-docs-index.mjs\` and commit the doc together with \`INDEX.md\`. Validate with \`node scripts/lint-docs-frontmatter.mjs\`.
-
-## Further Reading + DOCS-FIRST RULE
-
-Skills: \`.claude/skills/${slug}-conventions\` (architecture depth), \`.claude/skills/${slug}-docs\` (how to query the knowledge base)${hasTesting ? `, \`.claude/skills/${slug}-test-author\` (test conventions)` : ''}.
-
-**DOCS-FIRST RULE:** for any request to describe, explain, or modify a documented feature, you MUST grep \`docs/\` frontmatter and read the relevant docs BEFORE opening source files — and state what the docs already covered. Start at \`docs/INDEX.md\`.
-
-**Operating loop:** finish a non-trivial task → write a doc from \`docs/_template.md\` → rebuild \`INDEX.md\` → commit together; agents update their \`MEMORY.md\` when they learn a gotcha.
+${testSection ? `\n\n${testSection}` : ''}
 `;
+};
+
+// Agent Routing table rows this project type contributes, appended after the
+// shared advisor/scout/planner/docs-writer rows baked into harness-assets/AGENTS.md.
+const extraRoutingRowsTemplate = (cart: ReactViteCore): string => {
+  const hasTesting = cart.testing !== 'NOT_USING';
+  const testWriterRow = hasTesting
+    ? '\n| Writing or updating tests | `test-writer` | writes only under `test/`; requires a feature spec first |'
+    : '';
+  return `\n| Feature work or bug fix in \`src/\` | \`dev\` | MUST read relevant \`docs/features/\` spec before coding |${testWriterRow}`;
 };
 
 // ---------------------------------------------------------------------------
@@ -277,7 +246,7 @@ description: Coding conventions and architecture rules for ${cart.projectName}. 
 
 # ${cart.projectName} Conventions
 
-In-depth companion to CLAUDE.md. CLAUDE.md states the rules; this skill explains how to apply them.
+In-depth companion to AGENTS.md. AGENTS.md states the rules; this skill explains how to apply them.
 
 ## Layer boundaries (${isFsd ? 'FSD' : 'BPR'})
 
@@ -454,9 +423,9 @@ const aiToHarness = (ai: ReactViteCore['ai']): 'claude' | 'codex' | 'both' => {
   return 'claude'; // CLAUDE (and any unrecognized value) → claude
 };
 
-export const getClaudeFileMap = (cart: ReactViteCore): FileMap => {
+export const getHarnessFileMap = (cart: ReactViteCore): FileMap => {
   const hasTesting = cart.testing !== 'NOT_USING';
-  return buildClaudeFileMap({
+  return buildHarnessFileMap({
     projectName: cart.projectName,
     slug: projectSlug(cart),
     productDescription: cart.productDescription,
@@ -464,7 +433,8 @@ export const getClaudeFileMap = (cart: ReactViteCore): FileMap => {
     flowEnum: flowEnum(cart),
     layerEnum: layerEnum(cart),
     reminderTrigger: reminderTrigger(cart),
-    claudeMd: claudeMdTemplate(cart),
+    projectSections: projectSectionsTemplate(cart),
+    extraRoutingRows: extraRoutingRowsTemplate(cart),
     conventionsSkill: conventionsSkillTemplate(cart),
     devAgent: devAgentTemplate(cart),
     seedDocs: [{ relativePath: 'docs/features/home/home.spec.en.md', content: docsHomeSpecTemplate(cart) }],

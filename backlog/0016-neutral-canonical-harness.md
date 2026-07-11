@@ -1,10 +1,12 @@
 ---
 id: "0016"
 title: "Invert harness canonical: vendor-neutral core (.agents/ or AGENTS.md standard), CLAUDE.md/.codex become generated adapters"
-status: open
+status: resolved
 source: advisor-consultation-2026-07-04
 severity: low
 created: 2026-07-04
+resolved: 2026-07-11
+resolution: "AGENTS.md is now the canonical harness document for all harness modes (harness-assets/AGENTS.md skeleton); CLAUDE.md is a generated @AGENTS.md adapter; module renamed to src/scaffold/shared/harness-setup.ts (buildHarnessFileMap/HarnessParams); spec moved to docs/features/ai-harness/; dogfood inverted (CLAUDE.md joined the regen set, bespoke input = test/helpers/beaver-sections.md). See plans/.archive/neutral-canonical-harness/."
 ---
 
 ## Symptom
@@ -35,3 +37,4 @@ End of session 2026-07-04. Deliberately sequenced LAST of the four advisory item
   ([[plans/.archive/assets-and-tests/00-overview.md]]) — assets are now real files
   under `harness-assets/`, so this item is unblocked.
 - backlog/0005 (resolved?) — earlier spec-gap about Codex scaffold output; the spec restructure here should absorb any remainder
+- plans/.archive/neutral-canonical-harness/00-overview.md — implementation plan (created 2026-07-05; all 6 phases done, archived 2026-07-11)

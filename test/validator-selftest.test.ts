@@ -3,27 +3,25 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { dirname, join } from 'path';
 import { afterAll, describe, expect, it } from 'vitest';
-import { buildClaudeFileMap } from '@src/scaffold/shared/claude-setup';
+import { buildHarnessFileMap } from '@src/scaffold/shared/harness-setup';
 import { FileMap } from '@src/scaffold/utils';
 import { beaverParams } from './helpers/beaver-params';
 
 // Emitted-validator self-test (backlog/0012 regression): the validate-plans.mjs
 // / validate-structure.mjs / lint-docs-frontmatter.mjs scripts THIS repo emits
-// via buildClaudeFileMap must pass against their own scaffolded output — both
+// via buildHarnessFileMap must pass against their own scaffolded output — both
 // with LF (as rendered) and with CRLF line endings (Windows checkouts,
 // core.autocrlf=true, per backlog/0012).
 //
-// Uses harness: 'both' WITHOUT `testing` — the emitted validate-structure.mjs
-// bakes a primary-owned-directory uniqueness check over its WRITE_SCOPES, and
-// the test-writer agent def (src/scaffold/shared/claude-setup.ts TEST_WRITER_DEF)
-// shares 'src/' as its first writeScope entry with 'dev', which trips that
-// check and makes the emitted validate-structure.mjs fail on itself whenever
-// `testing` is set. That collision is a pre-existing bug in claude-setup.ts,
-// out of scope for this phase (filed as backlog/0018) — this self-test
-// deliberately renders without `testing` to avoid it and cover the scripts
-// under test with valid, non-colliding input.
+// Uses harness: 'both' WITHOUT `testing` — historically this avoided a
+// collision (backlog/0018) where the test-writer agent def shared 'src/' as
+// its first writeScope entry with 'dev', tripping validate-structure.mjs's
+// primary-owned-directory uniqueness check. backlog/0018 fixed this by
+// reordering TEST_WRITER_DEF.writeScope so 'test/' is first (src/scaffold/shared/harness-setup.ts).
+// See the `harness: 'both'` + `testing` enabled describe block below for the
+// regression test asserting that combination now passes too.
 
-const rendered: FileMap = buildClaudeFileMap({ ...beaverParams, harness: 'both' });
+const rendered: FileMap = buildHarnessFileMap({ ...beaverParams, harness: 'both' });
 
 const tmpDirs: string[] = [];
 
@@ -82,4 +80,40 @@ describe('emitted validators self-test (CRLF .md fixtures, backlog/0012 regressi
       expect(status, `${script} failed:\nstdout: ${stdout}\nstderr: ${stderr}`).toBe(0);
     });
   }
+});
+
+// backlog/0018 regression: harness: 'both' + testing enabled used to bake a
+// test-writer writeScope starting with 'src/' (same primary dir as dev) into
+// the emitted scripts/validate-structure.mjs, making it fail against its own
+// render with "agents \"dev\" and \"test-writer\" share the same primary
+// owned directory \"src/\"". Fixed by reordering TEST_WRITER_DEF.writeScope
+// (src/scaffold/shared/harness-setup.ts) so 'test/' is first. This describe
+// block is the regression coverage the LF/CRLF blocks above deliberately
+// avoided (see the file-level comment).
+describe('emitted validators self-test (harness: both + testing enabled, backlog/0018 regression)', () => {
+  const renderedWithTesting: FileMap = buildHarnessFileMap({
+    ...beaverParams,
+    harness: 'both',
+    testing: {
+      testWriterAgent: `---
+name: test-writer
+description: "Test authoring agent — writes tests under test/ only."
+model: haiku
+memory: project
+---
+
+You are the test-writing agent. You write ONLY under \`test/\`.
+`,
+      testAuthorSkill: `# test-author skill\n\nMinimal fixture skill content for the backlog/0018 regression test.\n`,
+    },
+  });
+
+  const root = mkdtempSync(join(tmpdir(), 'beaver-validator-selftest-testing-'));
+  tmpDirs.push(root);
+  writeFileMap(renderedWithTesting, root);
+
+  it('scripts/validate-structure.mjs exits 0', () => {
+    const { status, stdout, stderr } = runValidator(root, 'scripts/validate-structure.mjs');
+    expect(status, `scripts/validate-structure.mjs failed:\nstdout: ${stdout}\nstderr: ${stderr}`).toBe(0);
+  });
 });

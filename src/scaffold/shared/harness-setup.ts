@@ -1,10 +1,14 @@
 import { interpolate, readAsset } from '@src/scaffold/shared/assets';
 import { FileMap } from '@src/scaffold/utils';
 
-// Project-type-agnostic pieces of the Claude Code harness (docs knowledge base,
-// docs tooling, settings, docs skill, docs-writer agent, memory seeds).
-// Project-specific pieces (CLAUDE.md, conventions skill, dev agent, test-writer)
-// are rendered by each project type and passed in via ClaudeHarnessParams.
+// Project-type-agnostic pieces of the AI harness (docs knowledge base, docs
+// tooling, settings, docs skill, docs-writer agent, memory seeds).
+// Canonical project content now lives in AGENTS.md (harness-assets/AGENTS.md) —
+// emitted for every harness mode. CLAUDE.md (claude/both modes only) is a thin
+// adapter asset (harness-assets/CLAUDE.md) importing it via `@AGENTS.md`.
+// Project-specific pieces (projectSections/extraRoutingRows body, conventions
+// skill, dev agent, test-writer) are rendered by each project type and passed
+// in via HarnessParams.
 
 // ---------------------------------------------------------------------------
 // Agent Registry — single source of truth for the five core agents.
@@ -31,7 +35,9 @@ export const AGENTS: readonly AgentDef[] = [
     // plans/ (decided 2026-07-05, backlog/0014): dev updates phase status/
     // checkboxes/Resolution while executing; planner remains the primary owner
     // (keep 'src/' first — validate-structure's primary-dir check uses writeScope[0]).
-    writeScope: ['src/', 'test/', 'package.json', 'tsconfig.json', 'vite.config.ts', 'biome.json', 'eslint.config.js', '.github/', 'backlog/', 'plans/'],
+    // harness-assets/ (2026-07-05, 0014 principle applied during 0016 phase 01):
+    // dev owns the harness template content post-0013 — same duty as src/ templates.
+    writeScope: ['src/', 'test/', 'package.json', 'tsconfig.json', 'vite.config.ts', 'biome.json', 'eslint.config.js', '.github/', 'backlog/', 'plans/', 'harness-assets/'],
     memory: true,
   },
   {
@@ -94,23 +100,10 @@ const writeScopesJson = (agents: AgentDef[]): string => {
   return JSON.stringify(scopesObj, null, 2);
 };
 
-// Generates the shared agent-routing table rows for use in CLAUDE.md templates.
-// Includes advisor, scout, planner, and docs-writer (identical across project types).
-// The caller appends its own project-type-specific dev row (and optional
-// test-writer row) after this block.
-// ROW ORDER NOTE (phase 02): dev row now appears AFTER docs-writer in the
-// generated table. Previously it sat between planner and docs-writer. The spec
-// does not mandate order — shared agents first, project-specific last is cleaner.
-export const claudeHarnessTableTemplate = (): string =>
-  `| Brainstorming / trade-off analysis / "what's the best approach?" before any change | \`advisor\` | read-only; deepest source mental model; recommends, never edits |
-| Quick factual lookup about the code/docs (answer + \`path:line\`) | \`scout\` | read-only; cheap; for facts, not design reasoning |
-| Decomposing a story into a resumable plan | \`planner\` | owns \`plans/\`; writes phase files only, never code |
-| Analyzing requirements, writing/updating feature docs | \`docs-writer\` | owns \`docs/\`; rebuilds INDEX.md after every change |`;
-
 export const STATUS_ENUM = ['active', 'draft', 'deprecated'];
 export const LANG_ENUM = ['en', 'vi'];
 
-export interface ClaudeHarnessParams {
+export interface HarnessParams {
   projectName: string;
   slug: string;
   productDescription: string;
@@ -120,7 +113,12 @@ export interface ClaudeHarnessParams {
   flowEnum: string[];
   layerEnum: string[];
   reminderTrigger: string;
-  claudeMd: string;
+  /** Per-type AGENTS.md body: stack/commands/architecture/patterns/naming/anti-patterns/test section. */
+  projectSections: string;
+  /** Per-type Agent Routing table rows (dev row + optional test-writer row), each prefixed with `\n`. */
+  extraRoutingRows: string;
+  /** Extra Claude-only content appended at the end of the CLAUDE.md adapter. Defaults to ''. */
+  claudeExtras?: string;
   conventionsSkill: string;
   devAgent: string;
   seedDocs: FileMap;
@@ -132,11 +130,18 @@ export interface ClaudeHarnessParams {
 
 // TEST_WRITER_DEF is kept out of AGENTS (it is optional, not always emitted).
 // agentGuardMjsTemplate/agentGuardCoreMjsTemplate/validateStructureMjsTemplate's
-// consumers (buildClaudeFileMap) fold it into allAgents when params.testing is set.
+// consumers (buildHarnessFileMap) fold it into allAgents when params.testing is set.
 const TEST_WRITER_DEF: AgentDef = {
   name: 'test-writer',
   model: 'haiku',
-  writeScope: ['src/', 'test/', 'tests/', 'e2e/', 'playwright/'],
+  // 'test/' kept first (backlog/0018): validate-structure's primary-owned-dir
+  // uniqueness check derives an agent's primary dir from writeScope[0]. dev's
+  // writeScope also starts with 'src/', so test-writer starting with 'src/' too
+  // collided with dev's primary dir even though both legitimately write under
+  // src/. Reordering only affects that heuristic — agent-guard-core.mjs's
+  // checkWritePermission() does a full array membership check (`.some(...)`),
+  // not an index-0 check, so actual write permissions are unchanged.
+  writeScope: ['test/', 'tests/', 'e2e/', 'playwright/', 'src/'],
   memory: true,
 };
 
@@ -144,7 +149,7 @@ const TEST_WRITER_DEF: AgentDef = {
 // File map
 // ---------------------------------------------------------------------------
 
-export const buildClaudeFileMap = (params: ClaudeHarnessParams): FileMap => {
+export const buildHarnessFileMap = (params: HarnessParams): FileMap => {
   const { projectName, slug, flowEnum, layerEnum, harness } = params;
 
   const wantClaude = harness === 'claude' || harness === 'both';
@@ -173,6 +178,22 @@ export const buildClaudeFileMap = (params: ClaudeHarnessParams): FileMap => {
     projectName,
     slug,
   });
+
+  // Provider-adapter notes: per-provider capability asymmetries are stated here
+  // (renderer layer), never baked into the AGENTS.md content layer (decision 3,
+  // plans/neutral-canonical-harness/00-overview.md).
+  const adapterNotesParts: string[] = [];
+  if (wantClaude) {
+    adapterNotesParts.push(
+      `**Claude Code**: entry point \`CLAUDE.md\` (thin \`@AGENTS.md\` adapter). Subagents: \`.claude/agents/*.md\`. Skills: \`.claude/skills/\`. Workspace config: \`.claude/settings.json\` (env vars, tool permissions — \`allow\`/\`ask\`/\`deny\` — and hooks). Write-scope enforcement: \`.claude/scripts/agent-guard.mjs\` (\`PreToolUse\` hook).`
+    );
+  }
+  if (wantCodex) {
+    adapterNotesParts.push(
+      `**Codex**: this file (AGENTS.md) is the entry point directly. Subagents: \`.codex/agents/*.toml\`. Skills (real files, not symlinks): \`.agents/skills/\`. Hook configuration: \`.codex/hooks.json\`; write-scope enforcement: \`.codex/scripts/agent-guard-codex.mjs\`. No \`permissions.ask\` tier — allow/deny only.`
+    );
+  }
+  const adapterNotes = adapterNotesParts.join('\n\n');
 
   // ── SHARED — emitted for either claude, codex, or both ─────────────────────
   // Includes: docs tooling, agent-guard-core (imported by both adapters),
@@ -220,6 +241,19 @@ export const buildClaudeFileMap = (params: ClaudeHarnessParams): FileMap => {
       }),
     },
     ...params.seedDocs,
+    // AGENTS.md is the canonical project document — emitted for every harness
+    // mode (claude/codex/both). CLAUDE.md (claudeOnly, below) is a thin adapter
+    // importing it via `@AGENTS.md`.
+    {
+      relativePath: 'AGENTS.md',
+      content: interpolate(readAsset('AGENTS.md'), {
+        projectName,
+        productDescription: params.productDescription,
+        projectSections: params.projectSections,
+        extraRoutingRows: params.extraRoutingRows,
+        adapterNotes,
+      }),
+    },
     // harness-neutral: emitted for claude, codex, and both
     { relativePath: '.agents/memory/dev/MEMORY.md', content: memorySeed('dev') },
     { relativePath: '.agents/memory/docs-writer/MEMORY.md', content: memorySeed('docs-writer') },
@@ -231,8 +265,18 @@ export const buildClaudeFileMap = (params: ClaudeHarnessParams): FileMap => {
   // Includes: CLAUDE.md, .claude/settings.json, .claude/scripts/agent-guard.mjs
   // (the Claude adapter — the only script that stays in .claude/scripts/),
   // .claude/agents/*.md, .claude/skills/.
+  const testAuthorSkillRef = params.testing ? `, \`.claude/skills/${slug}-test-author\`` : '';
+
   const claudeOnly: FileMap = wantClaude ? [
-    { relativePath: 'CLAUDE.md', content: params.claudeMd },
+    {
+      relativePath: 'CLAUDE.md',
+      content: interpolate(readAsset('CLAUDE.md'), {
+        projectName,
+        slug,
+        testAuthorSkillRef,
+        claudeExtras: params.claudeExtras ?? '',
+      }),
+    },
     // Skills under .claude/skills/ — Claude loads them natively from here.
     // (Codex twins live in .agents/skills/ under codexOnly.)
     { relativePath: `.claude/skills/${slug}-conventions/SKILL.md`, content: conventionsSkillContent },
@@ -287,12 +331,11 @@ export const buildClaudeFileMap = (params: ClaudeHarnessParams): FileMap => {
   ] : [];
 
   // ── CODEX-ONLY — emitted only when harness includes codex ──────────────────
-  // Includes: AGENTS.md, .codex/hooks.json, .codex/agents/*.toml,
+  // Includes: .codex/hooks.json, .codex/agents/*.toml,
   // .agents/skills/ twins (real files — no symlinks), and the Codex-specific
   // hook scripts under .codex/scripts/ (hooks.json references them via git rev-parse).
   // No .claude/ directory is created for codex-only projects.
   const codexOnly: FileMap = wantCodex ? [
-    { relativePath: 'AGENTS.md', content: interpolate(readAsset('AGENTS.md'), { projectName }) },
     { relativePath: '.codex/hooks.json', content: readAsset('.codex/hooks.json') },
     {
       relativePath: '.codex/agents/dev.toml',

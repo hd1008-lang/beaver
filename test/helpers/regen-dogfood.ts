@@ -1,10 +1,10 @@
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'fs';
 import { dirname, join } from 'path';
-import { buildClaudeFileMap } from '@src/scaffold/shared/claude-setup';
+import { buildHarnessFileMap } from '@src/scaffold/shared/harness-setup';
 import { beaverParams, inRegenSet, regenFilesOnDisk, REPO_ROOT } from './beaver-params';
 
 // The sanctioned way to update this repo's dogfood harness copies after any
-// harness-assets/ or claude-setup.ts change:
+// harness-assets/ or harness-setup.ts change:
 //
 //   npx tsx test/helpers/regen-dogfood.ts          # write the rendered files
 //   npx tsx test/helpers/regen-dogfood.ts --check  # report-only diff, exit 1 on drift
@@ -17,7 +17,7 @@ const check = process.argv.includes('--check');
 
 const normalize = (s: string): string => s.replace(/\r\n/g, '\n');
 
-const rendered = buildClaudeFileMap(beaverParams).filter((f) => inRegenSet(f.relativePath));
+const rendered = buildHarnessFileMap(beaverParams).filter((f) => inRegenSet(f.relativePath));
 const renderedPaths = new Set(rendered.map((f) => f.relativePath));
 
 // Orphans: files on disk inside the regen set that the render does not emit.

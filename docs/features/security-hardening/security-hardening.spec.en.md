@@ -5,9 +5,9 @@ flow: templates
 layer: scaffold
 status: active
 lang: en
-related: [features/claude-harness/claude-harness.spec.en.md]
+related: [features/ai-harness/ai-harness.spec.en.md]
 keywords: [securityhardening, denyread, sensitivefilepatterns, secretreadguard, networkegress, auditlog, gitignore, failclosed, envfiles, credentialspatterns]
-updated: 2026-07-04
+updated: 2026-07-11
 ---
 
 # Security Hardening — Feature Spec
@@ -44,7 +44,7 @@ This ensures:
 
 ### Claude: Expanded sandbox.filesystem.denyRead
 
-Claude's sandboxed file-read protection is configured via `sandbox.filesystem.denyRead` in `.claude/settings.json` (both scaffolded and dogfood instances). The 8-entry deny list is derived from a single source, `SENSITIVE_FILE_PATTERNS`, in `src/scaffold/shared/claude-setup.ts`:
+Claude's sandboxed file-read protection is configured via `sandbox.filesystem.denyRead` in `.claude/settings.json` (both scaffolded and dogfood instances). The 8-entry deny list is derived from a single source, `SENSITIVE_FILE_PATTERNS`, in `src/scaffold/shared/harness-setup.ts`:
 
 ```javascript
 const SENSITIVE_FILE_PATTERNS = [
@@ -87,9 +87,45 @@ These globs block Claude from reading:
 
 The `~/` prefix is [officially supported](https://code.claude.com/docs/en/sandboxing) by Claude Code's sandbox glob matcher and expands to the user's home directory at enforcement time.
 
+### Claude: sandbox.credentials (dedicated credential protection)
+
+Claude Code v2.1.187+ supports a `credentials` block (alongside `denyRead`) for stronger, more targeted credential protection. While `denyRead` globs alone only block file reads, `credentials` entries with `mode: "deny"` both deny the file read AND automatically unset named environment variables before every sandboxed Bash command executes.
+
+**Why this matters:** A credential sitting in the process environment (e.g., `AWS_SECRET_ACCESS_KEY` injected by a developer's shell rc file) can still be leaked by agents even if the file is blocked by `denyRead`. The `credentials` block closes this gap — it unsets the variable so accidental reads or exfiltration attempts via the environment fail predictably.
+
+**In `.claude/settings.json` (both scaffolded and dogfood instances):**
+```json
+{
+  "sandbox": {
+    "filesystem": { "denyRead": [ /* 8 existing globs */ ] },
+    "credentials": {
+      "files": [
+        { "path": "~/.aws/credentials", "mode": "deny" },
+        { "path": "~/.ssh", "mode": "deny" }
+      ],
+      "envVars": [
+        { "name": "AWS_ACCESS_KEY_ID", "mode": "deny" },
+        { "name": "AWS_SECRET_ACCESS_KEY", "mode": "deny" },
+        { "name": "AWS_SESSION_TOKEN", "mode": "deny" },
+        { "name": "GITHUB_TOKEN", "mode": "deny" },
+        { "name": "NPM_TOKEN", "mode": "deny" }
+      ]
+    }
+  }
+}
+```
+
+**The two mechanisms are complementary, not a replacement:**
+- `denyRead` stays in place as defense-in-depth for a broader glob set (`.pem`, `.key`, `credentials*`, `secrets*`, etc.). It blocks any file matching those patterns, regardless of whether the `credentials` block knows about it.
+- `credentials` explicitly lists files and environment variables that pose the highest risk, combining both file-read denial and variable unset into one targeted block.
+
+**Mode options:** File entries only support `mode: "deny"` (environment variables also accept `mode: "mask"` — substitutes a per-session sentinel so tools like `gh`/`npm` keep working — but mask is only honored in user/managed settings, not project-level `.claude/settings.json` or `.claude/settings.local.json`). We use `"deny"` here for clarity: the credential is not available, period.
+
+**Single source of truth:** Because `harness-assets/.claude/settings.json` is the asset read by both the dogfood regen script and `buildHarnessFileMap()` (which generates scaffolded projects), editing the asset once keeps both harness instances in sync automatically — the same single-source-of-truth pattern already applied to `SENSITIVE_FILE_PATTERNS` and the gitignore template.
+
 ### Codex: Shared SECRET_READ_PATTERNS Guard
 
-Codex lacks a native sandbox, so secret-read protection is enforced by a guard script hook (`codex-permission-guard.mjs`). To prevent the Claude and Codex secret-file lists from drifting independently, both harnesses derive their patterns from the same `SENSITIVE_FILE_PATTERNS` source via a helper function in `src/scaffold/shared/claude-setup.ts`, `buildCodexSecretFileTargetSource()`, which converts glob syntax (e.g., `**/.env`, `~/.aws/**`) to regex metacharacter-escaped fragments (e.g., `\.env`, `\.aws/`).
+Codex lacks a native sandbox, so secret-read protection is enforced by a guard script hook (`codex-permission-guard.mjs`). To prevent the Claude and Codex secret-file lists from drifting independently, both harnesses derive their patterns from the same `SENSITIVE_FILE_PATTERNS` source via a helper function in `src/scaffold/shared/harness-setup.ts`, `buildCodexSecretFileTargetSource()`, which converts glob syntax (e.g., `**/.env`, `~/.aws/**`) to regex metacharacter-escaped fragments (e.g., `\.env`, `\.aws/`).
 
 **Codex SECRET_READ_PATTERNS group** (in `.codex/scripts/codex-permission-guard.mjs` and its scaffold-template twin):
 
@@ -176,7 +212,7 @@ The helper creates `.agents/` on first write (via `mkdirSync(..., { recursive: t
 
 ### Single Source of Truth: SENSITIVE_FILE_PATTERNS
 
-To prevent the Claude and Codex secret-file lists from drifting, both are derived from `SENSITIVE_FILE_PATTERNS`, a TS-level array in `src/scaffold/shared/claude-setup.ts`. This is the single source of truth; changes to sensitive-path coverage must edit this one array, and both `claudeSettingsTemplate()` (which renders `denyRead`) and `buildCodexSecretFileTargetSource()` (which generates Codex regex fragments) automatically stay in sync.
+To prevent the Claude and Codex secret-file lists from drifting, both are derived from `SENSITIVE_FILE_PATTERNS`, a TS-level array in `src/scaffold/shared/harness-setup.ts`. This is the single source of truth; changes to sensitive-path coverage must edit this one array. For Claude, the `denyRead` glob list is embedded directly in `harness-assets/.claude/settings.json` (the asset file read at build time). For Codex, `buildCodexSecretFileTargetSource()` automatically generates matching regex fragments, so both harnesses stay in sync when `SENSITIVE_FILE_PATTERNS` changes.
 
 **Why this matters:** If `.claude/settings.json` and `.codex/scripts/codex-permission-guard.mjs` were edited separately, they would inevitably drift over time — one would add `.pem` files and the other wouldn't, or one would forget `~/.aws/` — leaving blind spots in the less-frequently-reviewed harness.
 
@@ -204,9 +240,10 @@ Rotation and retention are speculative requirements (not in the original plan) a
 
 ## Related Files
 
-- `src/scaffold/shared/claude-setup.ts` — `SENSITIVE_FILE_PATTERNS` single source, `claudeSettingsTemplate()`, `codexPermissionGuardMjsTemplate()`, `buildCodexSecretFileTargetSource()`
+- `harness-assets/.claude/settings.json` — Single source-of-truth asset (read by both dogfood regen and scaffolded projects via `readAsset()`)
+- `src/scaffold/shared/harness-setup.ts` — `SENSITIVE_FILE_PATTERNS` single source, `buildCodexSecretFileTargetSource()`, `readAsset()` asset loader
 - `src/scaffold/react-vite/templates/gitignore.ts` — `.gitignore` template (shared by react-vite and chrome-extension)
-- `.claude/settings.json` — Dogfood Claude harness config (mirrors scaffold template, same `denyRead` and `ask` arrays)
+- `.claude/settings.json` — Dogfood Claude harness config (regenerated via `regen-dogfood.ts` from `harness-assets/.claude/settings.json`)
 - `.codex/scripts/codex-permission-guard.mjs` — Dogfood Codex guard (mirrors scaffold template, same pattern groups)
 - `scripts/audit-log.mjs` — Shared audit-log helper (imported by both Claude and Codex guard adapters)
 - `.claude/scripts/agent-guard.mjs` — Claude write-scope ACL guard (calls `appendAuditLog`)

@@ -7,7 +7,7 @@ status: active
 lang: en
 related: []
 keywords: [projecttype, scaffolding, cartpattern, flowreactvite, tanstackrouter, zustand, tanstackquery, tailwind, biome, eslint, vitest, playwright, claude]
-updated: 2026-06-10
+updated: 2026-07-11
 ---
 
 # React + Vite Project Scaffolding — Feature Spec
@@ -89,9 +89,9 @@ After selecting "React + Vite" from the project type selection menu, users proce
 - **Prompt**: "Choose an AI setup"
 - **Options**:
   - Not Using (no AI setup)
-  - Claude (Claude Code) — includes CLAUDE.md, `.claude/` agents directory, and feature docs structure
+  - Claude (Claude Code) — includes AGENTS.md (canonical harness doc), CLAUDE.md (Claude adapter), `.claude/` agents directory, and feature docs structure
 - **Result field**: `cart.ai`
-- **Impact**: Conditionally includes Claude-specific files (CLAUDE.md, agents, docs scripts)
+- **Impact**: Conditionally includes harness files (AGENTS.md canonical + CLAUDE.md adapter, agents, docs scripts) for Claude/both modes
 
 ## Cart Structure (ReactViteCore)
 
@@ -186,7 +186,7 @@ src/
 #### If `router === "TANSTACK_ROUTER"`
 - `src/routes/__root.tsx` — root route layout
 - `src/routes/index.tsx` — home route (FSD or BPR variant)
-- `src/routes/routeTree.gen.ts` — auto-generated route tree (initially a placeholder; regenerated on `npm run dev`)
+- `src/routes/routeTree.gen.ts` — auto-generated route tree (initially a placeholder; regenerated on `npm run dev` or `npm run build`)
 
 #### If `stateManagement === "ZUSTAND"`
 - `src/shared/lib/store.ts` (FSD) or `src/stores/appStore.ts` (BPR) — example Zustand store
@@ -209,11 +209,16 @@ src/
 - `tests/` — directory for e2e tests
 
 #### If `ai === "CLAUDE"`
-- `CLAUDE.md` — codebase documentation and behavioral guidelines
-- `.claude/agents/` — subdirectory with dev and docs-writer agents
-- `.claude/skills/` — subdirectory with beaver-conventions and beaver-docs skills
-- `scripts/` — build-docs-index.mjs and lint-docs-frontmatter.mjs (harness-neutral shared scripts)
+- `AGENTS.md` — canonical harness document (behavioral guidelines, project overview, agent routing, PARK RULE, rules)
+- `CLAUDE.md` — Claude Code adapter importing AGENTS.md and adding Claude-specific content
+- `.claude/agents/` — subdirectory with dev, docs-writer, planner, advisor, scout agents (and optional test-writer)
+- `.claude/scripts/` — agent-guard.mjs and other Claude adapter scripts
+- `.claude/skills/` — subdirectory with beaver-conventions, beaver-docs, and memory-retro skills
+- `.agents/memory/` — memory seeds for dev, docs-writer, planner, advisor (and optional test-writer)
+- `scripts/` — build-docs-index.mjs, lint-docs-frontmatter.mjs, validate-structure.mjs, validate-plans.mjs (shared scripts)
 - `docs/` — directory structure with _template.md, INDEX.md, features/, architecture/
+- `plans/` — plan artifact template and README
+- `backlog/` — backlog artifact template and README
 
 ## Pinned Library Versions
 
@@ -257,7 +262,8 @@ The scaffolded `package.json` includes these npm scripts (conditionally):
 | Script | Command | When Included |
 |--------|---------|---------------|
 | dev | `vite` | always |
-| build | `tsc && vite build` | always |
+| build | `vite build && tsc --noEmit` | router === "TANSTACK_ROUTER" |
+| build | `tsc && vite build` | router !== "TANSTACK_ROUTER" |
 | preview | `vite preview` | always |
 | lint | `biome check .` | linter === "BIOME" |
 | format | `biome format --write .` | linter === "BIOME" |
@@ -268,6 +274,10 @@ The scaffolded `package.json` includes these npm scripts (conditionally):
 | test:e2e | `playwright test` | testing === "PLAYWRIGHT" |
 | docs:index | `node scripts/build-docs-index.mjs` | ai === "CLAUDE" |
 | docs:lint | `node scripts/lint-docs-frontmatter.mjs` | ai === "CLAUDE" |
+
+### Build Script Conditioning (TanStack Router)
+
+When TanStack Router is selected (`router === "TANSTACK_ROUTER"`), the `build` script runs `vite build && tsc --noEmit` instead of the default `tsc && vite build`. This avoids a failure on the very first build (before any `npm run dev`) where TypeScript would type-check against the untyped `routeTree.gen.ts` placeholder. TanStack Router's Vite plugin regenerates this file with full type information during `vite build`'s own hooks, so running Vite first allows the plugin to populate the types before `tsc --noEmit` validates. Non-router projects retain the original order (`tsc && vite build`) to preserve type-checking as a fail-fast gate before bundling.
 
 ## User Interactions After Scaffolding
 
@@ -300,7 +310,7 @@ When multiple optional libraries are selected (e.g., TanStack Query + TanStack R
 If scaffolding fails partway through file creation, the partial project directory is removed. This prevents leaving corrupted or incomplete projects on disk, but the cleanup is best-effort (suppresses errors) to avoid masking the original failure.
 
 ### AI Setup Integration
-When AI setup is selected during scaffolding, the project includes the Claude Code harness (CLAUDE.md, agents, skills, and docs structure). This enables Claude Code to assist with development tasks within the project's chosen architecture.
+When AI setup is selected during scaffolding, the project includes a vendor-neutral AI harness (AGENTS.md canonical + optional CLAUDE.md adapter for Claude/both modes, agents, skills, docs structure, plans, backlog). This enables Claude Code and other AI tooling to assist with development tasks within the project's chosen architecture.
 
 ## Related Files
 

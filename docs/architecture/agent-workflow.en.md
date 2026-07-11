@@ -5,9 +5,9 @@ flow: architecture
 layer: _cross
 status: active
 lang: en
-related: [features/claude-harness/claude-harness.spec.en.md]
+related: [features/ai-harness/ai-harness.spec.en.md]
 keywords: [planner, dev, backlog, plans, park-rule, blocked, resumable, dogfood]
-updated: 2026-06-20
+updated: 2026-07-11
 ---
 
 # Agent Workflow — planner / dev / backlog
@@ -27,7 +27,7 @@ Roles stay distinct:
 - `docs/` = WHAT (long-lived specs). `plans/` = HOW/when (consumable phases). `backlog/` = deferred work / blockers (append-only, lives until `resolved`).
 - A backlog item is not a plan. When revived, `planner` reads it for context and folds its **Suggested direction** into new phases under `plans/`.
 
-The park rule is wired into `CLAUDE.md` (harness table), `plans/README.md` (blocked phases → backlog), and the `dev` and `planner` agent definitions.
+The park rule is wired into `AGENTS.md` (agent routing table), `plans/README.md` (blocked phases → backlog), and the `dev` and `planner` agent definitions.
 
 ## Key Decisions
 - File-based backlog over GitHub Issues — agents read/write it directly, it travels with git, and it needs no network round-trip. Trade-off: keep it the single source of truth to avoid drift with Issues.
@@ -39,4 +39,5 @@ The park rule is wired into `CLAUDE.md` (harness table), `plans/README.md` (bloc
 - plans/README.md
 - .claude/agents/dev.md
 - .claude/agents/planner.md
-- CLAUDE.md
+- AGENTS.md
+- CLAUDE.md (adapter)

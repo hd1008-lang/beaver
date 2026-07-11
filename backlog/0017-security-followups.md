@@ -1,10 +1,23 @@
 ---
 id: "0017"
 title: "Security follow-ups from the shipped security-hardening plan: sandbox.credentials block + fail-mode review"
-status: open
+status: resolved
 source: plans/.archive/security-hardening/00-overview.md
 severity: low
 created: 2026-07-04
+resolution: >
+  Part 1 (sandbox.credentials): adopted. Added a `sandbox.credentials` block
+  (files: ~/.aws/credentials, ~/.ssh; envVars: AWS_ACCESS_KEY_ID,
+  AWS_SECRET_ACCESS_KEY, AWS_SESSION_TOKEN, GITHUB_TOKEN, NPM_TOKEN — all
+  mode "deny") alongside the existing sandbox.filesystem.denyRead (kept as
+  defense-in-depth) in harness-assets/.claude/settings.json (single source
+  for both scaffolded projects and the dogfood copy). Dogfood
+  .claude/settings.json regenerated via
+  `npx tsx test/helpers/regen-dogfood.ts`. docs/features/security-hardening
+  spec updated by docs-writer to document the new block.
+  Part 2 (fail-mode question): RESOLVED as wontfix/no-op with user sign-off —
+  keep fail-open on the Codex guard's JSON-parse-failure path. No code
+  change. See "Why parked" below for the original rationale, now confirmed.
 ---
 
 ## Symptom

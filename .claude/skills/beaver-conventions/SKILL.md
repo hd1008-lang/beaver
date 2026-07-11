@@ -5,9 +5,9 @@ description: Coding conventions and architecture rules for beaver, the CLI scaff
 
 # beaver Conventions
 
-In-depth companion to CLAUDE.md. CLAUDE.md states the rules; this skill explains how to apply them. The authoritative checklists live in CLAUDE.md — read the referenced sections, do not work from memory.
+In-depth companion to AGENTS.md. AGENTS.md states the rules; this skill explains how to apply them. The authoritative checklists live in AGENTS.md — read the referenced sections, do not work from memory.
 
-## Core architecture (see CLAUDE.md "Architecture")
+## Core architecture (see AGENTS.md "Architecture")
 
 - Entry: `src/index.ts` → menu system `src/options/` → cart accumulates selections → `src/scaffold/<project-type>/` generates files.
 - Path aliases: `@src/*` → `src/*`, `@utils/*` → `src/utils/*`.
@@ -16,21 +16,21 @@ In-depth companion to CLAUDE.md. CLAUDE.md states the rules; this skill explains
 ## Templates
 
 - Templates are pure functions returning strings — no side effects, no fs access.
-- Pinned versions only: when adding a dependency to a generated project, pin the exact version and add it to the CLAUDE.md versions table.
-- Generated content is strictly cart-driven: never mention a library the user did not select (this includes docs enums, agent files, and skill descriptions emitted by claude-setup templates).
-- Shared Claude-harness pieces live in `src/scaffold/shared/claude-setup.ts` (`buildClaudeFileMap`); each project type renders its own CLAUDE.md / conventions skill / dev agent and passes them in via `ClaudeHarnessParams`.
+- Pinned versions only: when adding a dependency to a generated project, pin the exact version and add it to the AGENTS.md versions table.
+- Generated content is strictly cart-driven: never mention a library the user did not select (this includes docs enums, agent files, and skill descriptions emitted by harness-setup templates).
+- Shared Claude-harness pieces live in `src/scaffold/shared/harness-setup.ts` (`buildHarnessFileMap`); each project type renders its own project sections / conventions skill / dev agent and passes them in via `HarnessParams`.
 
-## Checklists (follow CLAUDE.md verbatim)
+## Checklists (follow AGENTS.md verbatim)
 
-- New project type → CLAUDE.md section "Adding New Project Types".
-- New react-vite menu option → CLAUDE.md section "Adding New Options to React + Vite".
-- New option that affects the Claude harness → also thread it through the relevant `claude-setup.ts` conditionals (CLAUDE.md content, conventions skill, flow/layer enums, reminder trigger).
+- New project type → AGENTS.md section "Adding New Project Types".
+- New react-vite menu option → AGENTS.md section "Adding New Options to React + Vite".
+- New option that affects the Claude harness → also thread it through the relevant `harness-setup.ts` conditionals (AGENTS.md project sections, conventions skill, flow/layer enums, reminder trigger).
 
 ## Verification pattern
 
 Render templates with a throwaway script instead of running the interactive CLI:
 ```bash
-npx tsx -e "import { getClaudeFileMap } from '@src/scaffold/react-vite/templates/claude-setup'; console.log(getClaudeFileMap({...} as any).map(f => f.relativePath).join('\n'))"
+npx tsx -e "import { getHarnessFileMap } from '@src/scaffold/react-vite/templates/harness-setup'; console.log(getHarnessFileMap({...} as any).map(f => f.relativePath).join('\n'))"
 ```
 
 ## Plans & backlog commands
@@ -44,4 +44,4 @@ Run after updating any phase frontmatter or creating/closing backlog entries.
 
 ## When unsure
 
-Check CLAUDE.md first, then the docs (`docs/INDEX.md`), then ask.
+Check AGENTS.md first, then the docs (`docs/INDEX.md`), then ask.

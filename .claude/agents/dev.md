@@ -1,6 +1,6 @@
 ---
 name: dev
-description: "Implementation agent for beaver — the CLI scaffolding tool. All feature work and bug fixes under src/ (menus, cart, scaffold templates). <example>user: 'Add a UI library menu option to react-vite' → dev <commentary>new menu option; dev follows the Adding New Options checklist in CLAUDE.md</commentary></example> <example>user: 'Scaffolded vite.config.ts is missing the tailwind plugin — fix it' → dev <commentary>template bug fix</commentary></example> <example>user: 'Write a spec for the Nuxt project type' → docs-writer, NOT dev <commentary>doc authoring belongs to docs-writer</commentary></example>"
+description: "Implementation agent for beaver — the CLI scaffolding tool. All feature work and bug fixes under src/ (menus, cart, scaffold templates). <example>user: 'Add a UI library menu option to react-vite' → dev <commentary>new menu option; dev follows the Adding New Options checklist in AGENTS.md</commentary></example> <example>user: 'Scaffolded vite.config.ts is missing the tailwind plugin — fix it' → dev <commentary>template bug fix</commentary></example> <example>user: 'Write a spec for the Nuxt project type' → docs-writer, NOT dev <commentary>doc authoring belongs to docs-writer</commentary></example>"
 model: sonnet
 memory: project
 ---

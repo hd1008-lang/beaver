@@ -42,7 +42,7 @@ export const scaffoldHarnessOnly = async (cart: Cart): Promise<void> => {
     console.log('');
     console.log(chalk.whiteBright('Next steps:'));
     console.log(chalk.cyan(`  cd ${path.relative(process.cwd(), targetDirectory) || '.'}`));
-    console.log(chalk.cyan('  claude /init') + chalk.gray('  ← let Claude generate a detailed CLAUDE.md for your codebase'));
+    console.log(chalk.cyan('  claude /init') + chalk.gray('  ← generate project details, then merge them into AGENTS.md (CLAUDE.md stays a thin @AGENTS.md adapter)'));
     console.log('');
   } catch (err) {
     spinner.error({ text: chalk.red('Harness setup failed.') });

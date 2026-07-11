@@ -1,10 +1,22 @@
 ---
 id: "0018"
 title: "validate-structure.mjs fails on itself when testing:true — test-writer and dev share 'src/' as primary writeScope dir"
-status: open
+status: resolved
 source: plans/assets-and-tests/07-filemap-and-validator-tests.md
 severity: medium
 created: 2026-07-05
+resolution: >
+  Reordered TEST_WRITER_DEF.writeScope (src/scaffold/shared/harness-setup.ts)
+  to ['test/', 'tests/', 'e2e/', 'playwright/', 'src/'] so its primary dir
+  (writeScope[0]) is uniquely 'test/' — no other agent's writeScope starts
+  with 'test/'. Verified agent-guard-core.mjs's checkWritePermission() does a
+  full array membership check (`.some(...)`), not an index-0 check, so
+  reordering does not change actual write-permission semantics. Added a
+  regression test in test/validator-selftest.test.ts ("harness: both +
+  testing enabled, backlog/0018 regression") asserting the emitted
+  scripts/validate-structure.mjs exits 0 against its own render with
+  testing enabled — the exact combination the phase 07 self-test previously
+  avoided. All 7 tests in that file pass; tsc --noEmit clean.
 ---
 
 ## Symptom

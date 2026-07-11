@@ -1,7 +1,7 @@
 ---
 phase: 05
 title: Spec restructure handoff — claude-harness → ai-harness (docs-writer)
-status: pending
+status: done
 depends_on: [04]
 ---
 
@@ -11,16 +11,16 @@ depends_on: [04]
 
 ## Steps
 
-- [ ] Collect the handoff inputs: the `docs/` grep hit-lists parked by phases 03 and 04 (stale "CLAUDE.md is canonical" claims, old module paths in `Related Files`).
-- [ ] Invoke the **docs-writer** agent with these exact instructions:
+- [x] Collect the handoff inputs: the `docs/` grep hit-lists parked by phases 03 and 04 (stale "CLAUDE.md is canonical" claims, old module paths in `Related Files`).
+- [x] Invoke the **docs-writer** agent with these exact instructions:
   1. Move `docs/features/claude-harness/claude-harness.spec.en.md` → `docs/features/ai-harness/ai-harness.spec.en.md`; frontmatter: `feature: ai-harness`, title "AI Harness Generation — Feature Spec", refresh `keywords` (add `agentsmd`, `harnesssetup`, `buildharnessfilemap`, `adapter`, `vendorneutral`; drop `claudesetup`, `buildclaudefilemap`), `updated: <today>`.
   2. Rewrite for the inversion: AGENTS.md is the canonical document emitted for ALL harness modes (list its sections: behavioral guidelines, project overview/productDescription, projectSections, agent routing, PARK RULE, MEMORY LIFECYCLE, DOCS-FIRST, renderer-filled adapter notes); CLAUDE.md is a thin adapter (`@AGENTS.md` import + Claude-only skills/settings notes) emitted only for claude/both; move the AGENTS.md row out of "Codex Harness Output" into "Shared Harness Output" and delete the "pointer to CLAUDE.md" description (this is the backlog/0005 remainder — its Suggested-direction bullet describing AGENTS.md as a pointer is now obsolete); document `HarnessParams` (`projectSections`, `extraRoutingRows`, `claudeExtras`) replacing `claudeMd`; state decision 3 (capability asymmetries live in the renderer layer) and the Claude-Code-does-not-read-AGENTS.md-natively rationale (issue anthropics/claude-code#34235, decided 2026-07-05).
   3. Update `Related Files` to the phase-04 names (`src/scaffold/shared/harness-setup.ts`, per-type `templates/harness-setup.ts`).
   4. Sweep other docs for the retired axis: `docs/architecture/agent-workflow.en.md` and any `related:` frontmatter pointing at `features/claude-harness/...` → repoint to `features/ai-harness/...`; fix the phase-03/04 hit-list items.
   5. Rebuild + validate: `node scripts/build-docs-index.mjs`, `node scripts/lint-docs-frontmatter.mjs`.
-- [ ] Review docs-writer's output against this checklist (dev reads, does not edit docs).
-- [ ] If docs-writer surfaces spec questions it cannot answer (e.g. undocumented Codex behavior), apply the PARK RULE: file a backlog entry and continue — do not block the plan on spec completeness.
-- [ ] Confirm `docs/INDEX.md` shows `ai-harness` and no `claude-harness` entries.
+- [x] Review docs-writer's output against this checklist (dev reads, does not edit docs).
+- [x] If docs-writer surfaces spec questions it cannot answer (e.g. undocumented Codex behavior), apply the PARK RULE: file a backlog entry and continue — do not block the plan on spec completeness.
+- [x] Confirm `docs/INDEX.md` shows `ai-harness` and no `claude-harness` entries.
 
 ## Verify
 
@@ -33,3 +33,11 @@ depends_on: [04]
 - docs-writer owns `docs/` exclusively — if the executor is tempted to hand-edit the spec, stop and delegate.
 - backlog/0005 is already `status: resolved`; no backlog edit needed for it — the "absorption" is purely making the spec stop describing AGENTS.md as a pointer.
 - `docs/INDEX.md` is generated — never hand-edit; frontmatter drives it.
+
+## Resolution (2026-07-11)
+
+All 5 steps done. docs-writer executed the restructure: `docs/features/claude-harness/claude-harness.spec.en.md` → `docs/features/ai-harness/ai-harness.spec.en.md`, rewritten for the inversion (AGENTS.md canonical for all modes with full section list; CLAUDE.md thin `@AGENTS.md` adapter, claude/both only; AGENTS.md row moved to "Shared Harness Output" with the pointer-to-CLAUDE.md description deleted — backlog/0005 remainder absorbed; `HarnessParams`/`projectSections`/`extraRoutingRows`/`claudeExtras` documented; decision 3 renderer-layer asymmetries + anthropics/claude-code#34235 rationale stated). Hit-lists from phases 03/04 fixed in `agent-workflow.en.md`, `react-vite.spec.en.md`, `harness-only.spec.en.md`, `security-hardening.spec.en.md`; `related:` frontmatter repointed; INDEX.md rebuilt with `ai-harness`, zero `claude-harness` entries. No parked questions — no backlog entry needed.
+
+Follow-up applied by main session (outside docs-writer's scope): the moved spec path was referenced by `test/helpers/beaver-sections.md` (dogfood render input, added in phase 03) — updated to the ai-harness path and regenerated (`AGENTS.md` re-rendered; 1 snapshot updated, 4-line diff = the path change); `.agents/memory/**` references to `claude-harness.spec.en.md`/`[[claude-harness.spec.en.md]]` repointed to ai-harness (memory-lifecycle rule), plus "per CLAUDE.md §2" → AGENTS.md "Simplicity First" in advisor memory.
+
+Verify: `grep -ri "claude-harness" docs/` → zero hits; `lint-docs-frontmatter` + `build-docs-index` exit 0; `regen-dogfood --check` clean (32 rendered, 0 drift); `npx vitest run` 96/96 green; `validate-structure` + `validate-plans` pass.

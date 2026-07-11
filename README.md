@@ -304,7 +304,7 @@ src/
     errors.ts                       ScaffoldError, isNodeError
     utils.ts                        FileMap, dirExists(), writeProjectFile()
     shared/
-      claude-setup.ts               Shared Claude Code setup templates
+      harness-setup.ts              Shared AI harness setup (buildHarnessFileMap)
     react-vite/
       index.ts                      Scaffold orchestrator
       templates/
@@ -321,7 +321,7 @@ src/
         testing-setup.ts            vitestConfigTemplate(), testingSetupTemplate()
         styles.ts                   stylesCssTemplate()
         gitignore.ts                gitignoreTemplate()
-        claude-setup.ts             claudeSetupTemplate()
+        harness-setup.ts            getHarnessFileMap(cart)
         home-page.ts                homePageTemplate()
         vite-env-d-ts.ts            viteEnvDtsTemplate()
         fsd-layout.ts               getFsdFileMap(cart)
@@ -339,7 +339,7 @@ src/
         linter.ts                   biomeConfigTemplate(), eslintConfigTemplate()
         query.ts                    queryProviderTemplate()
         gitignore.ts                gitignoreTemplate()
-        claude-setup.ts             claudeSetupTemplate()
+        harness-setup.ts            getHarnessFileMap(cart)
         build-extension-script.ts   buildExtensionScriptTemplate()
     harness-only/
       index.ts                      Scaffold orchestrator for AI harness setup

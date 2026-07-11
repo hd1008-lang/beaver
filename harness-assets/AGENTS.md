@@ -1,46 +1,41 @@
-# AGENTS.md
+# {{projectName}}
 
-> This file is the Codex entry point for {{projectName}}.
-> All project context, behavioral guidelines, architecture details, and agent routing
-> live in **CLAUDE.md** (repo root). Read that file first and in full.
+## Behavioral Guidelines
 
-<!-- CLAUDE.md is the canonical source of truth. Keep the routing table and PARK RULE
-     below in sync with CLAUDE.md whenever that file is edited. -->
+**Think Before Coding** — state assumptions explicitly; if multiple interpretations exist, present them; if something is unclear, stop and ask.
+**Simplicity First** — minimum code that solves the problem; no speculative features, abstractions, or configurability.
+**Surgical Changes** — touch only what the request requires; match existing style; every changed line traces to the request.
+**Goal-Driven Execution** — turn tasks into verifiable success criteria before starting; loop until verified.
+
+## Project Overview
+
+{{productDescription}}
+
+{{projectSections}}
 
 ## Agent Routing
 
-The following agents are available. Route tasks to the correct agent — do not do another
-agent's job.
-
 | Task / trigger | Agent | Notes |
 |---|---|---|
-| Brainstorming / trade-off analysis / "what's the best approach?" before any change | `advisor` | read-only; deepest source mental model; recommends, never edits — hands off to dev/planner/docs-writer |
-| Decomposing a story into a resumable, multi-phase implementation plan | `planner` | owns `plans/`; writes phase files only, never code (see `plans/README.md`) |
-| Feature work or bug fix | `dev` | MUST read the relevant `docs/features/` spec before coding |
-| Analyzing requirements, writing/updating feature docs | `docs-writer` | owns `docs/`; rebuilds INDEX.md after every change |
-| Fast read-only lookups, file/symbol searches, factual Q&A | `scout` | never edits; cites path:line |
+| Brainstorming / trade-off analysis / "what's the best approach?" before any change | `advisor` | read-only; deepest source mental model; recommends, never edits |
+| Quick factual lookup about the code/docs (answer + `path:line`) | `scout` | read-only; cheap; for facts, not design reasoning |
+| Decomposing a story into a resumable plan | `planner` | owns `plans/`; writes phase files only, never code |
+| Analyzing requirements, writing/updating feature docs | `docs-writer` | owns `docs/`; rebuilds INDEX.md after every change |{{extraRoutingRows}}
 
-## PARK RULE (anti-loop)
+**PARK RULE (anti-loop):** when executing a step/phase, if it fails twice and the cause isn't fixable right now (missing info, needs a user decision, environment, or out-of-scope), STOP — don't retry a third time. Set the phase `status: blocked`, file a `backlog/<id>` entry (record what was already tried so it isn't repeated), link both ways, tell the user it was parked, and move on to the next workable item. See `backlog/README.md`.
 
-When executing a step or phase, if it fails **twice** and the cause is not fixable right now
-(missing info, needs a user decision, environment issue, or out-of-scope), **STOP** — do not
-retry a third time.
+Each agent has persistent memory at `.agents/memory/<agent>/MEMORY.md` — agents read it on start and append new gotchas. Do NOT use the general assistant for work an agent owns — always delegate.
 
-- Set the phase `status: blocked`
-- File a `backlog/<id>` entry (record what was already tried so it is not repeated)
-- Link both ways (phase → backlog, backlog → phase)
-- Tell the user it was parked
-- Move on to the next workable item
+**MEMORY LIFECYCLE:** agent memory is short-term, not an append-only log — budget ≤ 15 bullets / ≤ 100 lines per file (`node scripts/validate-structure.mjs` warns over budget, fails at 2×). Durable, architecture-level truth gets promoted into `docs/` and deleted from memory; one-off fix notes already recorded in plans/backlog don't belong there. Any change that renames a path/scope/convention must update or delete memory bullets referencing the old state in the same change. Over budget, or when archiving a plan, run the project's memory-retro skill.
 
-See `backlog/README.md` for the entry format.
+## Task Documentation Convention
 
-## Subagent Definitions
+After any non-trivial fix or new pattern: copy `docs/_template.md`, fill the frontmatter, save as `docs/features/<feature>/<topic>.en.md` (or `docs/architecture/` for cross-cutting topics), then run `node scripts/build-docs-index.mjs` and commit the doc together with `INDEX.md`. Validate with `node scripts/lint-docs-frontmatter.mjs`.
 
-Subagent TOML files live under `.codex/agents/`. Each file declares the agent's name,
-description, and developer instructions. These mirror the Claude agent definitions under
-`.claude/agents/`.
+**DOCS-FIRST RULE:** for any request to describe, explain, or modify a documented feature, you MUST grep `docs/` frontmatter and read the relevant docs BEFORE opening source files — and state what the docs already covered. Start at `docs/INDEX.md`.
 
-## For full context
+**Operating loop:** finish a non-trivial task → write a doc from `docs/_template.md` → rebuild `INDEX.md` → commit together; agents update their `MEMORY.md` when they learn a gotcha.
 
-Read **CLAUDE.md** — it contains the complete behavioral guidelines, architecture overview,
-and agent-routing notes.
+## Provider Adapters
+
+{{adapterNotes}}

@@ -14,7 +14,8 @@ export const WRITE_SCOPES = {
     "eslint.config.js",
     ".github/",
     "backlog/",
-    "plans/"
+    "plans/",
+    "harness-assets/"
   ],
   "docs-writer": [
     "docs/"

@@ -1,10 +1,27 @@
 ---
 id: "0019"
 title: "Scaffolded react-vite + TanStack Router project fails `npm run build` before first `npm run dev` (routeTree.gen.ts placeholder lacks type registration)"
-status: open
+status: resolved
 source: plans/assets-and-tests/08-ci-workflows-and-close.md
 severity: low
 created: 2026-07-05
+resolution: >
+  Applied the simpler of the two suggested fixes, scoped to only the router
+  case: src/scaffold/react-vite/templates/package-json.ts now emits
+  `"build": "vite build && tsc --noEmit"` when `cart.router ===
+  'TANSTACK_ROUTER'`, and keeps the original `"tsc && vite build"` otherwise
+  (no reason to give up tsc's fail-fast-before-bundling guarantee for
+  non-router projects). Did not add @tanstack/router-cli as a new pinned
+  dependency — reordering fully resolves the issue since the router Vite
+  plugin regenerates src/routes/routeTree.gen.ts with full type info during
+  `vite build`'s own hooks, before `tsc --noEmit` runs.
+  Verified via the actual CI fixture flow (test/helpers/scaffold-fixture.ts,
+  router + zustand + query + tailwind + biome, harness both, testing on):
+  scaffolded a fresh fixture, ran `npm install && npm run build` with no prior
+  `npm run dev`, confirmed exit code 0 and that routeTree.gen.ts on disk was
+  overwritten with the real type-registered version (FileRoutesByFullPath
+  etc.) before tsc checked it. Full repo test suite (97 tests) and
+  scripts/validate-plans.mjs / scripts/validate-structure.mjs pass.
 ---
 
 ## Symptom

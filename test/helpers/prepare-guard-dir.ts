@@ -2,14 +2,14 @@ import { mkdirSync, mkdtempSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { interpolate, readAsset } from '@src/scaffold/shared/assets';
-import { AGENTS } from '@src/scaffold/shared/claude-setup';
+import { AGENTS } from '@src/scaffold/shared/harness-setup';
 
 // Builds a runnable, harness-assets-sourced copy of the write-scope guard trio
 // (agent-guard-core.mjs + its two adapters + audit-log.mjs) under a throwaway
 // temp directory, preserving the same relative import layout the real
 // scaffold output uses (scripts/ + .claude/scripts/ + .codex/scripts/). This
 // lets tests import/spawn the REAL asset content (via readAsset/interpolate,
-// the same functions buildClaudeFileMap uses) instead of the dogfood copies,
+// the same functions buildHarnessFileMap uses) instead of the dogfood copies,
 // while still producing valid, executable JS — the raw harness-assets copy of
 // agent-guard-core.mjs contains an unresolved `{{writeScopesJson}}` token and
 // is not valid JS on its own (see MEMORY.md note on tokenized assets).
@@ -29,7 +29,7 @@ export function prepareGuardDir(): GuardDir {
   mkdirSync(join(root, '.claude', 'scripts'), { recursive: true });
   mkdirSync(join(root, '.codex', 'scripts'), { recursive: true });
 
-  // Mirrors writeScopesJson() in src/scaffold/shared/claude-setup.ts.
+  // Mirrors writeScopesJson() in src/scaffold/shared/harness-setup.ts.
   const scopesObj: Record<string, string[]> = {};
   for (const agent of AGENTS) scopesObj[agent.name] = agent.writeScope;
   const scopesJson = JSON.stringify(scopesObj, null, 2);

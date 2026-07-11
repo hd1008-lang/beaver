@@ -1,19 +1,17 @@
 import { HarnessOnlyCore } from '@src/types';
 import { FileMap } from '@src/scaffold/utils';
-import { buildClaudeFileMap, claudeHarnessTableTemplate } from '@src/scaffold/shared/claude-setup';
+import { buildHarnessFileMap } from '@src/scaffold/shared/harness-setup';
 
 const slug = (cart: HarnessOnlyCore): string =>
   cart.projectName.toLowerCase().replace(/_/g, '-');
 
-const claudeMdTemplate = (cart: HarnessOnlyCore): string =>
-  `# ${cart.projectName}
-
-> This project uses a Claude Code harness for AI-assisted development.
-> Run \`claude /init\` to auto-generate a detailed CLAUDE.md tailored to this codebase.
-
-## Project Overview
-
-${cart.productDescription}
+// Minimal AGENTS.md project-sections stub — conventions/stack only. Agent
+// workflow (routing table, PARK RULE, DOCS-FIRST) is guaranteed by the
+// canonical harness-assets/AGENTS.md skeleton, never thinned here.
+const projectSectionsTemplate = (): string =>
+  `Run \`claude /init\` (or your provider's equivalent) to auto-generate detailed
+project sections tailored to this codebase — merge the output into this file's
+\`## Project Overview\` area. \`CLAUDE.md\` stays a thin \`@AGENTS.md\` adapter.
 
 ## Quick start
 
@@ -26,19 +24,10 @@ npm run build-extension   # loads dist/ as unpacked extension at chrome://extens
 
 - \`docs/INDEX.md\` — knowledge base index (auto-generated)
 - \`node scripts/build-docs-index.mjs\` — regenerate index after adding a doc
-- \`node scripts/lint-docs-frontmatter.mjs\` — validate docs frontmatter
+- \`node scripts/lint-docs-frontmatter.mjs\` — validate docs frontmatter`;
 
-## Agent Routing
-
-| Task / trigger | Agent | Notes |
-|---|---|---|
-${claudeHarnessTableTemplate()}
-| Feature work or bug fix | \`dev\` | MUST read \`docs/INDEX.md\` before modifying a documented feature |
-
-**PARK RULE (anti-loop):** when executing a step/phase, if it fails twice and the cause isn't fixable right now (missing info, needs a user decision, environment, or out-of-scope), STOP — don't retry a third time. Set the phase \`status: blocked\`, file a \`backlog/<id>\` entry (record what was already tried so it isn't repeated), link both ways, tell the user it was parked, and move on to the next workable item. See \`backlog/README.md\`.
-
-Each agent has persistent memory at \`.agents/memory/<agent>/MEMORY.md\` — agents read it on start and append new gotchas. Do NOT use the general assistant for work an agent owns — always delegate.
-`;
+const extraRoutingRowsTemplate = (): string =>
+  '\n| Feature work or bug fix | `dev` | MUST read `docs/INDEX.md` before modifying a documented feature |';
 
 const conventionsSkillTemplate = (cart: HarnessOnlyCore): string =>
   `---
@@ -75,7 +64,7 @@ You are the implementation agent for ${cart.projectName} (Chrome Extension proje
 ## Onboarding
 
 1. Read \`.agents/memory/dev/MEMORY.md\`.
-2. Read \`CLAUDE.md\` for project overview and commands.
+2. Read \`AGENTS.md\` for project overview and commands.
 3. Load the \`${slug(cart)}-conventions\` skill.
 
 ## Park rule (anti-loop)
@@ -124,7 +113,7 @@ const aiToHarness = (ai: HarnessOnlyCore['ai']): 'claude' | 'codex' | 'both' => 
 };
 
 export const getChromeExtensionHarnessFileMap = (cart: HarnessOnlyCore): FileMap =>
-  buildClaudeFileMap({
+  buildHarnessFileMap({
     projectName: cart.projectName,
     slug: slug(cart),
     productDescription: cart.productDescription,
@@ -132,7 +121,8 @@ export const getChromeExtensionHarnessFileMap = (cart: HarnessOnlyCore): FileMap
     flowEnum: ['ui', 'data', 'extension', 'infra', '_meta'],
     layerEnum: ['popup', 'components', 'hooks', 'lib', 'utils', '_cross'],
     reminderTrigger: 'popup|manifest',
-    claudeMd: claudeMdTemplate(cart),
+    projectSections: projectSectionsTemplate(),
+    extraRoutingRows: extraRoutingRowsTemplate(),
     conventionsSkill: conventionsSkillTemplate(cart),
     devAgent: devAgentTemplate(cart),
     seedDocs: seedDocsTemplate(cart),

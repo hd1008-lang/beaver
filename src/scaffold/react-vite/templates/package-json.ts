@@ -60,7 +60,16 @@ export const packageJsonTemplate = (cart: ReactViteCore): string => {
 
   const scripts: Record<string, string> = {
     dev: 'vite',
-    build: 'tsc && vite build',
+    // TanStack Router's Vite plugin regenerates src/routes/routeTree.gen.ts
+    // (scaffolded as a type-unchecked placeholder, see router.ts) during its
+    // Vite build hooks, before Rollup processes source files. `tsc` runs
+    // before `vite build` ever gets a chance to do that, so the placeholder's
+    // untyped createFileRoute('/') calls fail tsc on the very first build
+    // (backlog/0019). Reordering so vite build runs first lets the plugin
+    // regenerate the tree with full type info before tsc checks it — the
+    // trade-off is losing tsc's fail-fast-before-bundling guarantee for this
+    // case, which only the router path needs to accept.
+    build: cart.router === 'TANSTACK_ROUTER' ? 'vite build && tsc --noEmit' : 'tsc && vite build',
     preview: 'vite preview',
   };
 

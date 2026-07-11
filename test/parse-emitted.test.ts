@@ -1,13 +1,13 @@
 import { parse as parseToml } from 'smol-toml';
 import { describe, expect, it } from 'vitest';
-import { buildClaudeFileMap } from '@src/scaffold/shared/claude-setup';
+import { buildHarnessFileMap } from '@src/scaffold/shared/harness-setup';
 import { beaverParams } from './helpers/beaver-params';
 
 // Every emitted .json/.toml file must be syntactically valid — catches broken
 // interpolation (e.g. an unescaped value producing invalid JSON/TOML) that a
 // pure string-content test wouldn't notice.
 
-const files = buildClaudeFileMap({
+const files = buildHarnessFileMap({
   ...beaverParams,
   harness: 'both',
   testing: {

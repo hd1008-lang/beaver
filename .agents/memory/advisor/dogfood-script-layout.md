@@ -7,11 +7,11 @@ metadata:
 
 The Claude/Codex harness scripts follow a 3-way OWNERSHIP split (classify by ownership, not path prefix):
 
-- **Shared → top-level `scripts/`** (harness-neutral, no `.claude/` prefix): `_docs-shared.mjs`, `build-docs-index.mjs`, `lint-docs-frontmatter.mjs`, `validate-structure.mjs`, `validate-plans.mjs`, `docs-first-reminder.sh`, `agent-guard-core.mjs`. Emitted by `src/scaffold/shared/claude-setup.ts:1897-1904`.
+- **Shared → top-level `scripts/`** (harness-neutral, no `.claude/` prefix): `_docs-shared.mjs`, `build-docs-index.mjs`, `lint-docs-frontmatter.mjs`, `validate-structure.mjs`, `validate-plans.mjs`, `docs-first-reminder.sh`, `agent-guard-core.mjs`. Emitted by `src/scaffold/shared/harness-setup.ts`.
 - **Claude adapter only → `.claude/scripts/agent-guard.mjs`** — the ONLY file that stays under `.claude/scripts/` (line 1925). Imports core via `../../scripts/agent-guard-core.mjs`.
 - **Codex → `.codex/scripts/`**: `agent-guard-codex.mjs`, `codex-subagent-start/stop.mjs`, `codex-permission-guard.mjs` (lines 1954-1957). `hooks.json` references them via `git rev-parse --show-toplevel`.
 
-**`.agents/` is NOT a scripts directory** — it holds Codex SKILL twins only (`.agents/skills/<slug>-{conventions,docs}/SKILL.md`, real files not symlinks). Spec `docs/features/claude-harness/claude-harness.spec.en.md:131-138`. Do not propose moving scripts into `.agents/`.
+**`.agents/` is NOT a scripts directory** — it holds Codex SKILL twins only (`.agents/skills/<slug>-{conventions,docs}/SKILL.md`, real files not symlinks). Spec `docs/features/ai-harness/ai-harness.spec.en.md:131-138`. Do not propose moving scripts into `.agents/`.
 
 **Dogfood migrated (2026-06-22):** backlog/0006 resolved. Beaver's own committed files now match the scaffold output. `.claude/scripts/` contains ONLY `agent-guard.mjs`. Spec output tables updated to match.
 

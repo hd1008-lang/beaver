@@ -55,7 +55,7 @@ export const CHROME_MENU_AI: MenuOptions = {
   claude: {
     display: 'Claude (Claude Code)',
     value: 'CLAUDE',
-    description: 'CLAUDE.md + .claude/ agents + feature docs structure',
+    description: 'AGENTS.md + provider adapters (.claude/, .codex/) + feature docs structure',
     disabled: false,
   },
   codex: {

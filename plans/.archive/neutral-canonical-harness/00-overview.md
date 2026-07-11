@@ -69,9 +69,9 @@ Each phase's Verify includes the relevant subset of: `npm run build`, `npx vites
 
 | # | Phase | Status | Steps | Updated |
 |---|---|---|---|---|
-| 01 | baseline-and-adapter-asset | pending | 0/5 | 2026-07-05 |
-| 02 | canonical-inversion | pending | 0/11 | 2026-07-05 |
-| 03 | dogfood-claude-adapter | pending | 0/7 | 2026-07-05 |
-| 04 | neutral-rename | pending | 0/8 | 2026-07-05 |
-| 05 | spec-restructure-handoff | pending | 0/5 | 2026-07-05 |
-| 06 | close-out | pending | 0/7 | 2026-07-05 |
+| 01 | baseline-and-adapter-asset | done | 5/5 | 2026-07-05 |
+| 02 | canonical-inversion | done | 11/11 | 2026-07-05 |
+| 03 | dogfood-claude-adapter | done | 7/7 | 2026-07-11 |
+| 04 | neutral-rename | done | 8/8 | 2026-07-11 |
+| 05 | spec-restructure-handoff | done | 5/5 | 2026-07-11 |
+| 06 | close-out | done | 7/7 | 2026-07-11 |
