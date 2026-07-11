@@ -1,7 +1,7 @@
 ---
 id: "0020"
 title: "Plan archiving is discretionary, not a checklist step — completed plans get left in plans/ root"
-status: open
+status: resolved
 source: plan 0017-beaver-folder-structure execution
 severity: low
 created: 2026-07-11
@@ -50,3 +50,12 @@ Add an explicit "last phase done → archive" checklist item to one of:
 
 Either fix removes the "discretionary" framing and makes archiving the
 default outcome instead of something that has to be remembered.
+
+## Resolution (2026-07-11)
+
+Fixed via `.beaver/plans/README.md`'s new **Completion handoff** convention:
+every plan's final phase now carries a human-addressed handoff block (stage →
+commit → `git mv plans/<slug>/ plans/.archive/<slug>/` → commit the archive
+move) instead of archiving being a discretionary afterthought. See
+`.beaver/plans/README.md` sections "Completion handoff" and "Plan lifecycle
+and archival".
