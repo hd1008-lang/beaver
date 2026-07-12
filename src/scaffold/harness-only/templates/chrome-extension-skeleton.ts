@@ -5,6 +5,13 @@ import { buildHarnessFileMap } from '@src/scaffold/shared/harness-setup';
 const slug = (cart: HarnessOnlyCore): string =>
   cart.projectName.toLowerCase().replace(/_/g, '-');
 
+// Knowledge-base paths move under baseDir (see ai-harness spec, "Knowledge-Base
+// Folder Structure"); tool-discovery paths stay bare. scriptsDir feeds the
+// `node scripts/...` command hints below so they match buildHarnessFileMap's
+// own kb()-prefixed script paths.
+const baseDir = '.beaver';
+const scriptsDir = `${baseDir}/scripts`;
+
 // Minimal AGENTS.md project-sections stub — conventions/stack only. Agent
 // workflow (routing table, PARK RULE, DOCS-FIRST) is guaranteed by the
 // canonical harness-assets/AGENTS.md skeleton, never thinned here.
@@ -23,8 +30,8 @@ npm run build-extension   # loads dist/ as unpacked extension at chrome://extens
 ## Docs
 
 - \`docs/INDEX.md\` — knowledge base index (auto-generated)
-- \`node scripts/build-docs-index.mjs\` — regenerate index after adding a doc
-- \`node scripts/lint-docs-frontmatter.mjs\` — validate docs frontmatter`;
+- \`node ${scriptsDir}/build-docs-index.mjs\` — regenerate index after adding a doc
+- \`node ${scriptsDir}/lint-docs-frontmatter.mjs\` — validate docs frontmatter`;
 
 const extraRoutingRowsTemplate = (): string =>
   '\n| Feature work or bug fix | `dev` | MUST read `docs/INDEX.md` before modifying a documented feature |';
@@ -118,7 +125,7 @@ export const getChromeExtensionHarnessFileMap = (cart: HarnessOnlyCore): FileMap
     slug: slug(cart),
     productDescription: cart.productDescription,
     harness: aiToHarness(cart.ai),
-    baseDir: '',
+    baseDir,
     flowEnum: ['ui', 'data', 'extension', 'infra', '_meta'],
     layerEnum: ['popup', 'components', 'hooks', 'lib', 'utils', '_cross'],
     reminderTrigger: 'popup|manifest',

@@ -4,7 +4,7 @@
 
 An interactive CLI tool for scaffolding modern web projects and applying AI development harness. Select your project type, configure your stack through a guided menu, and get a production-ready project generated on disk with pinned library versions.
 
-**Current Version:** 2.0.2
+**Current Version:** 2.0.4
 
 ## Getting Started
 
@@ -61,7 +61,7 @@ The CLI will guide you through:
 After answering all prompts, your production-ready project will be generated in the specified directory with:
 
 - All dependencies pinned to stable versions
-- Claude Code harness (CLAUDE.md, agents, docs) when Claude AI setup is selected
+- Claude Code harness (CLAUDE.md, agents) at the project root, with the knowledge base (docs, plans, backlog, scripts) centralized under `.beaver/` when Claude AI setup is selected
 - Ready to run with `npm install && npm run dev`
 
 ---
@@ -78,9 +78,10 @@ npm run dev           # Run CLI directly in development mode (using tsx)
 npm run dev:build     # Compile TypeScript, resolve aliases, then run
 npm run build         # Compile TypeScript for distribution (outputs to dist/)
 
-# Documentation
-node scripts/build-docs-index.mjs    # Regenerate docs/INDEX.md
-node scripts/lint-docs-frontmatter.mjs     # Validate frontmatter in docs/
+# Documentation & plans
+node .beaver/scripts/build-docs-index.mjs        # Regenerate .beaver/docs/INDEX.md
+node .beaver/scripts/lint-docs-frontmatter.mjs   # Validate frontmatter in .beaver/docs/
+node .beaver/scripts/validate-plans.mjs          # Check plan/backlog consistency
 ```
 
 **Publishing:**
@@ -246,6 +247,28 @@ The CLI guides you through:
 | Generic Project | For any other project type |
 
 This generates appropriate skeleton files and agent setup based on your project type.
+
+---
+
+## AI Harness — Generated Structure
+
+When Claude AI setup is selected (for any project type, or via **Apply AI Harness**), the generated project gets an agent development harness. Discovery files stay at the project root so tools can find them automatically, while the knowledge base is centralized under `.beaver/` to keep the root clean:
+
+```
+<project>/
+  AGENTS.md            Canonical agent guide (entry point)
+  CLAUDE.md            Claude Code adapter (thin @AGENTS.md include)
+  .claude/             Claude Code: agents, skills, settings, hooks
+  .codex/              Codex: agents, hooks, scripts
+  .agents/             Shared agent memory + skills
+  .beaver/
+    docs/              Feature/architecture docs + INDEX.md
+    plans/             Resumable multi-phase implementation plans
+    backlog/           Parked/blocked work items
+    scripts/           Knowledge-base tooling (build-docs-index, validate-plans, …)
+```
+
+Knowledge-base commands in the generated `AGENTS.md` point at `.beaver/scripts/` (e.g. `node .beaver/scripts/validate-plans.mjs`). Without AI setup, none of these are generated — the project is a plain React + Vite / Chrome Extension scaffold.
 
 ---
 

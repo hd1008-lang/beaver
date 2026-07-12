@@ -10,6 +10,13 @@ import { buildHarnessFileMap } from '@src/scaffold/shared/harness-setup';
 const projectSlug = (cart: ReactViteCore): string =>
   cart.projectName.toLowerCase().replace(/_/g, '-');
 
+// Knowledge-base paths move under baseDir (see ai-harness spec, "Knowledge-Base
+// Folder Structure"); tool-discovery paths stay bare. scriptsDir feeds the
+// `node scripts/...` command hints below so they match buildHarnessFileMap's
+// own kb()-prefixed script paths.
+const baseDir = '.beaver';
+const scriptsDir = `${baseDir}/scripts`;
+
 const fsdLayers = ['app', 'pages', 'widgets', 'features', 'entities', 'shared'];
 const bprLayers = ['app', 'pages', 'components', 'features', 'hooks', 'stores', 'lib', 'utils'];
 
@@ -60,9 +67,9 @@ const projectSectionsTemplate = (cart: ReactViteCore): string => {
     cart.linter !== 'NOT_USING' ? '- `npm run lint` — lint code' : null,
     hasVitest ? '- `npm run test:run` — run unit/component tests once (`npm test` for watch)' : null,
     hasPlaywright ? '- `npm run test:e2e` — run Playwright E2E tests' : null,
-    '- `node scripts/build-docs-index.mjs` — regenerate docs/INDEX.md (run after any doc change)',
-    '- `node scripts/lint-docs-frontmatter.mjs` — validate docs frontmatter (CI-ready, exits non-zero on violation)',
-    '- `node scripts/validate-plans.mjs` — check plan/backlog consistency (table↔frontmatter, archived, ID gaps, two-way links)',
+    `- \`node ${scriptsDir}/build-docs-index.mjs\` — regenerate docs/INDEX.md (run after any doc change)`,
+    `- \`node ${scriptsDir}/lint-docs-frontmatter.mjs\` — validate docs frontmatter (CI-ready, exits non-zero on violation)`,
+    `- \`node ${scriptsDir}/validate-plans.mjs\` — check plan/backlog consistency (table↔frontmatter, archived, ID gaps, two-way links)`,
   ].filter(Boolean);
 
   const fsdArchitecture = `\`\`\`
@@ -430,7 +437,7 @@ export const getHarnessFileMap = (cart: ReactViteCore): FileMap => {
     slug: projectSlug(cart),
     productDescription: cart.productDescription,
     harness: aiToHarness(cart.ai),
-    baseDir: '',
+    baseDir,
     flowEnum: flowEnum(cart),
     layerEnum: layerEnum(cart),
     reminderTrigger: reminderTrigger(cart),

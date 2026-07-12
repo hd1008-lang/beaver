@@ -11,6 +11,13 @@ import { buildHarnessFileMap } from '@src/scaffold/shared/harness-setup';
 const projectSlug = (cart: ChromeExtensionCore): string =>
   cart.projectName.toLowerCase().replace(/_/g, '-');
 
+// Knowledge-base paths move under baseDir (see ai-harness spec, "Knowledge-Base
+// Folder Structure"); tool-discovery paths stay bare. scriptsDir feeds the
+// `node scripts/...` command hints below so they match buildHarnessFileMap's
+// own kb()-prefixed script paths.
+const baseDir = '.beaver';
+const scriptsDir = `${baseDir}/scripts`;
+
 const layerEnum = (cart: ChromeExtensionCore): string[] => [
   'popup',
   'components',
@@ -58,9 +65,9 @@ const projectSectionsTemplate = (cart: ChromeExtensionCore): string => {
     '- `npm run build` — type-check + production build into `dist/`',
     '- `npm run build-extension` — build + copy `manifest.json` into `dist/`; load `dist/` as an unpacked extension at chrome://extensions',
     cart.linter !== 'NOT_USING' ? '- `npm run lint` — lint code' : null,
-    '- `node scripts/build-docs-index.mjs` — regenerate docs/INDEX.md (run after any doc change)',
-    '- `node scripts/lint-docs-frontmatter.mjs` — validate docs frontmatter (CI-ready, exits non-zero on violation)',
-    '- `node scripts/validate-plans.mjs` — check plan/backlog consistency (table↔frontmatter, archived, ID gaps, two-way links)',
+    `- \`node ${scriptsDir}/build-docs-index.mjs\` — regenerate docs/INDEX.md (run after any doc change)`,
+    `- \`node ${scriptsDir}/lint-docs-frontmatter.mjs\` — validate docs frontmatter (CI-ready, exits non-zero on violation)`,
+    `- \`node ${scriptsDir}/validate-plans.mjs\` — check plan/backlog consistency (table↔frontmatter, archived, ID gaps, two-way links)`,
   ].filter(Boolean);
 
   const keyPatterns: string[] = [
@@ -291,7 +298,7 @@ export const getHarnessFileMap = (cart: ChromeExtensionCore): FileMap =>
     slug: projectSlug(cart),
     productDescription: cart.productDescription,
     harness: aiToHarness(cart.ai),
-    baseDir: '',
+    baseDir,
     flowEnum: flowEnum(cart),
     layerEnum: layerEnum(cart),
     reminderTrigger: reminderTrigger(cart),
